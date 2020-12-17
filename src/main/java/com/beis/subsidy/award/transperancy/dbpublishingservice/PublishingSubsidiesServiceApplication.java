@@ -12,10 +12,10 @@ import io.swagger.v3.oas.models.info.License;
 
 @SpringBootApplication
 @EnableFeignClients("com.beis.subsidy.award.transperancy.dbpublishingservice.service")
-public class DbPublishingSubsidiesServiceApplication {
+public class PublishingSubsidiesServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(DbPublishingSubsidiesServiceApplication.class, args);
+		SpringApplication.run(PublishingSubsidiesServiceApplication.class, args);
 	}
 	
 	@Bean
