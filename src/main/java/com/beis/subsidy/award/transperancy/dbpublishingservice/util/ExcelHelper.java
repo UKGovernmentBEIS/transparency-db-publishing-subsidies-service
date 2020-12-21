@@ -21,27 +21,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.BulkUploadAwards;
 
+import lombok.extern.slf4j.Slf4j;
+@Slf4j
 public class ExcelHelper {
 	
 	public static String TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-	
-	/*
-	public  static String[] HEADERs = { 
-			"Subsidy Measure Title",
-			"Subsidy Control Number",
-			"National ID Type",
-			"National ID",
-			"Name of the beneficiary",
-			"Size of Organisation",
-			"Subsidy instrument",
-			"Subsidy Objective",
-			"Subsidy Element Full amount Range",
-			"Subsidy Element Full amount Exact (£)",
-			"Legal Granting Date",
-			"Granting Authority Name",
-			"Goods or Services",
-			"Spending Region",
-	};*/
 	
 	
 	public  static String[] HEADERs = { 
@@ -76,145 +60,11 @@ public class ExcelHelper {
 		if(!TYPE.equals(file.getContentType())) {
 			return false;
 		}
-		System.out.println("hasExcelFormat true BulkUploadAwardsController");
+		log.info("hasExcelFormat true BulkUploadAwardsController");
 		return true;
 	}
 
-	/*
-	public static List<BulkUploadAwards> excelToAwards(InputStream is) {
-	    try {
-	       // List<Test> tempStudentList = new ArrayList<Test>();
-	        //XSSFWorkbook workbook = new XSSFWorkbook(reapExcelDataFile.getInputStream());
-	        //XSSFSheet worksheet = workbook.getSheetAt(0);
-	        
-	        Workbook workbook = new XSSFWorkbook(is);
-
-	      Sheet sheet = workbook.getSheet(SHEET);
-	      Iterator<Row> rows = sheet.iterator();
-
-	      List<BulkUploadAwards> bulkUploadAwardsList = new ArrayList<BulkUploadAwards>();
-
-	      int rowNumber = 0;
-	      while (rows.hasNext()) {
-	        Row currentRow = rows.next();
-
-	        // skip header
-	        if (rowNumber == 0) {
-	          rowNumber++;
-	          continue;
-	        }
-
-	        Iterator<Cell> cellsInRow = currentRow.iterator();
-
-	        BulkUploadAwards bulkUploadAwards = new BulkUploadAwards();
-	        bulkUploadAwards.setRow(currentRow.getRowNum() + 1);
-
-	        int cellIdx = 0;
-	        while (cellsInRow.hasNext()) {
-	          Cell currentCell = cellsInRow.next();
-
-	          System.out.println("Going Inside switch block");
-	          switch (cellIdx) {
-	          
-	          case 0:
-	        	  bulkUploadAwards.setSubsidyControlTitle(currentCell.getStringCellValue());
-	        	  System.out.println(bulkUploadAwards);
-	            break;
-
-	          case 1:
-	        	  bulkUploadAwards.setSubsidyControlNumber(currentCell.getStringCellValue());
-	        	  System.out.println(bulkUploadAwards);
-	            break;
-
-	          case 2:
-	        	  bulkUploadAwards.setNationalIdType(currentCell.getStringCellValue());
-	        	  System.out.println(bulkUploadAwards);
-	            break;
-
-	          case 3:
-	        	  bulkUploadAwards.setNationalId(currentCell.getStringCellValue());
-	        	  System.out.println("Naional id = " + currentCell.getStringCellValue());
-	        	  break;
-	            
-	          case 4:
-	        	  bulkUploadAwards.setBeneficiaryName(currentCell.getStringCellValue());
-	        	  System.out.println(bulkUploadAwards);
-	        	  break;
-	            
-	          case 5:
-	        	  bulkUploadAwards.setOrgSize(currentCell.getStringCellValue());
-	        	  System.out.println(bulkUploadAwards);
-	            break;
-	            
-	          case 6:
-	        	  bulkUploadAwards.setSubsidyInstrument(currentCell.getStringCellValue());
-	        	  System.out.println("Subsidy instrument = " + currentCell.getStringCellValue());
-	        	  System.out.println(bulkUploadAwards);
-	            break;
-	            
-	          case 7:
-	        	  bulkUploadAwards.setSubsidyObjective(currentCell.getStringCellValue());
-	        	  System.out.println(bulkUploadAwards);
-	            break;
-	            
-	          case 8:
-	        	  bulkUploadAwards.setSubsidyAmountRange(currentCell.getStringCellValue());
-	        	  System.out.println("currentCell.getStringCellValue() = " + currentCell.getStringCellValue());
-	        	  System.out.println(bulkUploadAwards);
-
-	            break;
-	            
-	          case 9:
-	        	  bulkUploadAwards.setSubsidyAmountExact(currentCell.getStringCellValue());	        	  
-	        	  System.out.println("currentCell.getStringCellValue() = " + currentCell.getStringCellValue());
-	        	  System.out.println(bulkUploadAwards);
-	            break;
-	            
-	          case 10:
-	        	  bulkUploadAwards.setLegalGrantingDate(convertDateToString(currentCell.getDateCellValue()));
-	        	  System.out.println("getNumericCellValue - setLegalGrantingDate = " + currentCell.getNumericCellValue());
-	        	  System.out.println("getDateCellValue - setLegalGrantingDate = " + currentCell.getDateCellValue());
-
-	        	  System.out.println(bulkUploadAwards);
-	            break;
-	            
-	          case 11:
-	        	  bulkUploadAwards.setGrantingAuthorityName(currentCell.getStringCellValue());
-	        	  System.out.println("currentCell.getStringCellValue() = " + currentCell.getStringCellValue());
-	        	  System.out.println(bulkUploadAwards);
-	            break;
-	            
-	          case 12:
-	        	  bulkUploadAwards.setGoodsOrServices(currentCell.getStringCellValue());
-	        	  System.out.println("currentCell.getStringCellValue() = " + currentCell.getStringCellValue());
-	        	  System.out.println(bulkUploadAwards);
-	            break;
-	            
-	          case 13:
-	        	  bulkUploadAwards.setSpendingRegion(currentCell.getStringCellValue());
-	        	  System.out.println("currentCell.getStringCellValue() = " + currentCell.getStringCellValue());
-	        	  System.out.println(bulkUploadAwards);
-	            break;
-	            
-	          default:
-	            break;
-	          }
-
-	          cellIdx++;
-	        }
-
-	        System.out.println(bulkUploadAwards);
-	        bulkUploadAwardsList.add(bulkUploadAwards);
-	      }
-
-	      workbook.close();
-
-	      System.out.println("Excel - List - size = " + bulkUploadAwardsList.size());
-	      return bulkUploadAwardsList;
-	    } catch (IOException e) {
-	      throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
-	    }
-	  }*/
+	
 	
 	public static List<BulkUploadAwards> excelToAwards(InputStream is) {
 	    try {
@@ -222,21 +72,21 @@ public class ExcelHelper {
 	        //XSSFWorkbook workbook = new XSSFWorkbook(reapExcelDataFile.getInputStream());
 	        //XSSFSheet worksheet = workbook.getSheetAt(0);
 	    	
-	    	System.out.println("ïnside excelToAwards::DBPublishingSubsideies Service" );
+	    	log.info("ïnside excelToAwards::DBPublishingSubsideies Service" );
 	        
 	        Workbook workbook = new XSSFWorkbook(is);
 
 	      Sheet sheet = workbook.getSheet(SHEET);
 	      Iterator<Row> rows = sheet.iterator();
 
-	      System.out.println("first row "+sheet.getFirstRowNum());
+	      log.info("first row "+sheet.getFirstRowNum());
 	      List<BulkUploadAwards> bulkUploadAwardsList = new ArrayList<BulkUploadAwards>();
-	      System.out.println("last row "+sheet.getLastRowNum());
+	      log.info("last row "+sheet.getLastRowNum());
 	      int rowNumber = 0;
 	      while (rows.hasNext()) {
 	        Row currentRow = rows.next();
 
-	        System.out.println("BulkUploadAwardsController Going Inside switch block");
+	        log.info("BulkUploadAwardsController Going Inside switch block");
 	        // skip header
 	        if (rowNumber == 0) {
 	          rowNumber++;
@@ -245,7 +95,7 @@ public class ExcelHelper {
 	        int fcell = currentRow.getFirstCellNum();// first cell number of excel
 	        int lcell = currentRow.getLastCellNum();
 	        if(containsValue(currentRow,fcell,lcell)) {
-	        	System.out.println("am inside contains");
+	        	log.info("am inside contains");
 	        	
 	        
 	        Iterator<Cell> cellsInRow = currentRow.iterator();
@@ -261,7 +111,7 @@ public class ExcelHelper {
 	          
 	          case 0:
 	        	  bulkUploadAwards.setSubsidyControlNumber(currentCell.getStringCellValue());
-	        	  System.out.println(bulkUploadAwards);
+	        	 
 	            break;
 
 	          case 1:
@@ -270,9 +120,12 @@ public class ExcelHelper {
 	            break;
 
 	          case 2:
-	        	 
+	        	 if(currentCell.getCellType()==CellType.BLANK) {
+	        		 bulkUploadAwards.setSubsidyObjective(null);
+	        	 }else {
 	        	  bulkUploadAwards.setSubsidyObjective(currentCell.getStringCellValue());
-	        	  System.out.println(bulkUploadAwards);
+	        	 }
+	        	  //log.info(bulkUploadAwards);
 	            break;
 	            
 	          case 3:
@@ -282,14 +135,17 @@ public class ExcelHelper {
 	            break;
 
 	          case 4:
-	        	  
+	        	  if(currentCell.getCellType()==CellType.BLANK) {
+	        		  bulkUploadAwards.setSubsidyInstrument(null);
+	        	  }else {
 	        	  bulkUploadAwards.setSubsidyInstrument(currentCell.getStringCellValue());
+	        	  }
 	        	  break;
 	            
 	          case 5:
 	        	  	
 	        	  bulkUploadAwards.setSubsidyInstrumentOther(currentCell.getStringCellValue());	
-	        	  System.out.println(bulkUploadAwards);
+	        	 // log.info(bulkUploadAwards);
 	        	  break;
 	        	            
 	          case 6:
@@ -308,8 +164,12 @@ public class ExcelHelper {
 	        	  break;
 	           
 	          case 8:
+	        	  if(currentCell.getCellType()==CellType.BLANK) {
+	        		  bulkUploadAwards.setNationalIdType(null);
+	        	  }else {
+	        		  bulkUploadAwards.setNationalIdType(currentCell.getStringCellValue());
+	        	  }
 	        	 
-	        	  bulkUploadAwards.setNationalIdType(currentCell.getStringCellValue());
 	        	 // System.out.println(bulkUploadAwards);
 	            break;
 	            
@@ -320,48 +180,64 @@ public class ExcelHelper {
 	            break;
 	            
 	          case 10:
+	        	  if(currentCell.getCellType()==CellType.BLANK) {
+	        		  bulkUploadAwards.setBeneficiaryName(null);
+	        	  }else {
+	        		  bulkUploadAwards.setBeneficiaryName(currentCell.getStringCellValue());
+	        	  }
 	        	  
-	        	  bulkUploadAwards.setBeneficiaryName(currentCell.getStringCellValue());
 	        	 // System.out.println(bulkUploadAwards);
 	            break;
 
 	          case 11:
-	        	 
+	        	  if(currentCell.getCellType()==CellType.BLANK) {
+	        		  bulkUploadAwards.setOrgSize(null);
+	        	  }else {
 	        	  bulkUploadAwards.setOrgSize(currentCell.getStringCellValue());
+	        	  }
 	        	 // System.out.println(bulkUploadAwards);
 	            break;
 	            
 	          case 12:
-	        	 
+	        	  if(currentCell.getCellType()==CellType.BLANK) {
+	        		  bulkUploadAwards.setGrantingAuthorityName(null);
+	        	  }else {
 	        	  bulkUploadAwards.setGrantingAuthorityName(currentCell.getStringCellValue());
+	        	  }
 	        	  //System.out.println(bulkUploadAwards);
 	            break;
 	            
 	          case 13:
-	        	  //bulkUploadAwards.setGrantingAuthorityName(currentCell.getStringCellValue());
-	        	  //System.out.println("currentCell.getStringCellValue() = " + currentCell.getStringCellValue());
+	        	  
 	        	  bulkUploadAwards.setLegalGrantingDate(convertDateToString(currentCell.getDateCellValue()));
-	        	 // System.out.println("getNumericCellValue - setLegalGrantingDate = " + currentCell.getNumericCellValue());
-	        	 // System.out.println("getDateCellValue - setLegalGrantingDate = " + currentCell.getDateCellValue());
-	        	 // System.out.println(bulkUploadAwards);
+	        	
 	            break;
 	            
 	          case 14:
+	        	  if(currentCell.getCellType()==CellType.BLANK) {
+	        		  bulkUploadAwards.setGoodsOrServices(null);
+	        	  }else {
 	        	  bulkUploadAwards.setGoodsOrServices(currentCell.getStringCellValue());
-	        	  //System.out.println("currentCell.getStringCellValue() = " + currentCell.getStringCellValue());
-	        	 // System.out.println(bulkUploadAwards);
+	        	  }
+	        	  
 	            break;
 	            
 	          case 15:
+	        	  if(currentCell.getCellType()==CellType.BLANK) {
+	        		  bulkUploadAwards.setSpendingRegion(null);
+	        	  }else {
 	        	  bulkUploadAwards.setSpendingRegion(currentCell.getStringCellValue());
-	        	 // System.out.println("currentCell.getStringCellValue() = " + currentCell.getStringCellValue());
-	        	 // System.out.println(bulkUploadAwards);
+	        	  }
+	        	
 	            break;
 	            
 	          case 16:
+	        	  if(currentCell.getCellType()==CellType.BLANK) {
+	        		  bulkUploadAwards.setSpendingSector(null);
+	        	  }else {
 	        	  bulkUploadAwards.setSpendingSector(currentCell.getStringCellValue());
-	        	  //System.out.println("currentCell.getStringCellValue() = " + currentCell.getStringCellValue());
-	        	 // System.out.println(bulkUploadAwards);
+	        	  }
+	        	 
 	            break;
 	            
 	          default:
@@ -371,7 +247,7 @@ public class ExcelHelper {
 	          cellIdx++;
 	        }
 
-	        //System.out.println("Row overrrrr "+bulkUploadAwards);
+	        
 	        bulkUploadAwardsList.add(bulkUploadAwards);
 	        }else {
 	        	break;
@@ -380,15 +256,15 @@ public class ExcelHelper {
 
 	      workbook.close();
 
-	      System.out.println("Excel - List - size = " + bulkUploadAwardsList.size());
+	      log.info("Excel - List - size = " + bulkUploadAwardsList.size());
 	      return bulkUploadAwardsList;
 	    } catch (IOException e) {
-	    	System.out.println("fail to parse Excel file: " + e.getMessage());
+	    	log.info("fail to parse Excel file: " + e.getMessage());
 	      throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
 	    }
 	    catch (Exception e) {
 	    	e.printStackTrace();
-	    	System.out.println("fail to read Excel file: " + e);
+	    	log.info("fail to read Excel file: " + e);
 		      throw new RuntimeException("fail to read Excel file: " + e.getMessage());
 		    }
 	  }
@@ -406,6 +282,20 @@ public class ExcelHelper {
 		
 		return date;
 	}
+	
+	/*private static String convertDateToString(String incomingDate) {
+		SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy", Locale.ENGLISH);
+		String date = null ;
+		if(incomingDate!=null) {
+		try {
+			date = formatter.format(incomingDate).toString();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		}
+		
+		return date;
+	}*/
 	
 	public static boolean containsValue(Row row, int fcell, int lcell) 
 	{

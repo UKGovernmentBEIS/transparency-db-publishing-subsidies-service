@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,8 @@ import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.Benefi
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.GrantingAuthorityRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.SubsidyMeasureRepository;
 
+import lombok.extern.slf4j.Slf4j;
+@Slf4j
 @Service
 public class AwardService {
 
@@ -105,7 +108,12 @@ public class AwardService {
 	@Transactional
 	public List<Award> processBulkAwards(List<BulkUploadAwards> bulkAwards) {
 		try {
-		System.out.println("inside process Bulk Awards db");
+		log.info("inside process Bulk Awards db");
+		List<SubsidyMeasure> smList = getAllSubsidyMeasures();
+		Map<String, String> smMap= smList.stream().collect(Collectors.toMap(SubsidyMeasure::getSubsidyMeasureTitle,SubsidyMeasure::getScNumber));
+		System.out.println("smMap "+smMap);
+		//log.info(smMap);
+		
 		List<Beneficiary> beneficiaries = bulkAwards.stream()
 			.map( award -> new Beneficiary(	
 								null, 
@@ -129,51 +137,35 @@ public class AwardService {
 			.collect(Collectors.toList());
 		
 		beneficiaryRepository.saveAll(beneficiaries);
+		//
+		
+		
+		//
 			
 		
 		List<Award> awards = bulkAwards.stream()
 				.map( bulkaward -> new Award(null, getBeneficiaryDetails(bulkaward, beneficiaries), getGrantingAuthority(bulkaward), getSubsidyMeasure(bulkaward), bulkaward.getSubsidyAmountRange(), 
 						( (bulkaward.getSubsidyAmountExact() != null) ? new BigDecimal(bulkaward.getSubsidyAmountExact()) : BigDecimal.ZERO),  
-						bulkaward.getSubsidyObjective(), bulkaward.getGoodsOrServices(),
+						((bulkaward.getSubsidyObjective().equalsIgnoreCase("Other"))? bulkaward.getSubsidyObjectiveOther():bulkaward.getSubsidyObjective()), bulkaward.getGoodsOrServices(),
 						convertToDate(bulkaward.getLegalGrantingDate()),
 						convertToDate(bulkaward.getLegalGrantingDate()),
 						bulkaward.getSpendingRegion(), 
-						bulkaward.getSubsidyInstrument(),
+						((bulkaward.getSubsidyInstrument().equalsIgnoreCase("Other"))? bulkaward.getSubsidyInstrumentOther():bulkaward.getSubsidyInstrument()),
 						bulkaward.getSpendingSector(),
 						"SYSTEM", 
 						"SYSTEM", 
 						"DRAFT",null, null)
 				
-				/*new Award(
-										null, ( (bulkaward.getSubsidyAmountExact() != null) ? new BigDecimal(bulkaward.getSubsidyAmountExact()) : BigDecimal.ZERO), 
-										getBeneficiaryDetails(bulkaward, beneficiaries),
-										getGrantingAuthorityId(bulkaward),
-										getSubsidyControlId(bulkaward),
-										bulkaward.getSubsidyAmountRange(), 
-										( (bulkaward.getSubsidyAmountExact() != null) ? new BigDecimal(bulkaward.getSubsidyAmountExact()) : BigDecimal.ZERO), 
-										bulkaward.getSubsidyObjective(), 
-										bulkaward.getGoodsOrServices(), 
-										convertToDate(( (bulkaward.getSubsidyAmountExact() != null) ? new BigDecimal(bulkaward.getSubsidyAmountExact()) : BigDecimal.ZERO),bulkaward.getLegalGrantingDate()),
-										convertToDate(bulkaward.getLegalGrantingDate()),
-										bulkaward.getSpendingRegion(), 
-										bulkaward.getSubsidInstrument(),
-										bulkaward.getSpendingSector(),
-										"SYSTEM", 
-										"SYSTEM", 
-										"DRAFT", 
-										null, 
-										null
-						)*/
 					)
 				.collect(Collectors.toList());
 				
 		
 		List<Award> savedAwards = awardRepository.saveAll(awards);
-		System.out.println("End process Bulk Awards db");
+		log.info("End process Bulk Awards db");
 				
 		return savedAwards;
 		}catch(Exception serviceException) {
-			System.out.println("serviceException occured::"+serviceException.getMessage());
+			log.info("serviceException occured::"+serviceException.getMessage());
 			return null;
 		}
 	}
@@ -194,7 +186,7 @@ private Long getBeneficiaryId(BulkUploadAwards bulkaward, List<Beneficiary> bene
 
 	private String getSubsidyControlId(BulkUploadAwards award) {
 		
-		System.out.println("Inside getSubsidyControlId...");
+		log.info("Inside getSubsidyControlId...");
 		List<SubsidyMeasure> smList = smRepository.findAll();
 		
 		Optional<SubsidyMeasure> smOptional = smList.stream().filter( sm -> sm.getSubsidyMeasureTitle().equals(award.getSubsidyControlTitle())).findAny();
@@ -204,7 +196,7 @@ private Long getBeneficiaryId(BulkUploadAwards bulkaward, List<Beneficiary> bene
 	
 private SubsidyMeasure getSubsidyMeasure(BulkUploadAwards award) {
 		
-		System.out.println("Inside getSubsidyControlId...");
+		log.info("Inside getSubsidyControlId...");
 		List<SubsidyMeasure> smList = smRepository.findAll();
 		
 		Optional<SubsidyMeasure> smOptional = smList.stream().filter( sm -> sm.getSubsidyMeasureTitle().equals(award.getSubsidyControlTitle())).findAny();
@@ -214,29 +206,29 @@ private SubsidyMeasure getSubsidyMeasure(BulkUploadAwards award) {
 
 	private Long getGrantingAuthorityId(BulkUploadAwards award) {
 		
-		System.out.println("Inside getGrantingAuthorityId...");
+		log.info("Inside getGrantingAuthorityId...");
 
 		List<GrantingAuthority> gaList = gaRepository.findAll();
 		
-		System.out.println("All granting authority = " + gaList);
+		log.info("All granting authority = " + gaList);
 		
 		Optional<GrantingAuthority> gaOptional = gaList.stream().filter(ga -> ga.getGrantingAuthorityName().equals(award.getGrantingAuthorityName())).findAny();
 		
-		System.out.println("Returning from getGrantingAuthorityId.. = " + gaOptional.get().getGaId());
+		log.info("Returning from getGrantingAuthorityId.. = " + gaOptional.get().getGaId());
 		return ((gaOptional != null) ? gaOptional.get().getGaId() : null);
 	}
 	
 	private GrantingAuthority getGrantingAuthority(BulkUploadAwards award) {
 		
-		System.out.println("Inside getGrantingAuthorityId...");
+		log.info("Inside getGrantingAuthorityId...");
 
 		List<GrantingAuthority> gaList = gaRepository.findAll();
 		
-		System.out.println("All granting authority = " + gaList);
+		log.info("All granting authority = " + gaList);
 		
 		Optional<GrantingAuthority> gaOptional = gaList.stream().filter(ga -> ga.getGrantingAuthorityName().equals(award.getGrantingAuthorityName())).findAny();
 		
-		System.out.println("Returning from getGrantingAuthorityId.. = " + gaOptional.get().getGaId());
+		log.info("Returning from getGrantingAuthorityId.. = " + gaOptional.get().getGaId());
 		return ((gaOptional != null) ? gaOptional.get() : null);
 	}
 

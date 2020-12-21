@@ -16,6 +16,9 @@ import com.beis.subsidy.award.transperancy.dbpublishingservice.model.ValidationR
 import com.beis.subsidy.award.transperancy.dbpublishingservice.service.BulkUploadAwardsService;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.util.ExcelHelper;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 public class BulkUploadAwardsController {
 
@@ -35,17 +38,9 @@ public class BulkUploadAwardsController {
 			
 		
 			try {
-				
+				log.info("Beofre calling validateFile::::");
 				//TODO - check if we can result list of errors here it self
 				ValidationResult validationResult = bulkUploadAwardsService.validateFile(file);
-				
-				/*List<ValidationResult> validationResultList = new ArrayList<>();	
-				ValidationResult validationResult = new ValidationResult();
-				validationResult.setRow("All");
-				validationResult.setColumns(Arrays.asList("All"));
-				validationResult.setErrorMessages(Arrays.asList("Uploaded File successfully: " + file.getOriginalFilename()));
-				validationResultList.add(validationResult);
-				*/
 				
 				return ResponseEntity.status(HttpStatus.OK).body(validationResult);
 			
