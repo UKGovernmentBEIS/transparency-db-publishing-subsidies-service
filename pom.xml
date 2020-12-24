@@ -102,7 +102,7 @@
         <configuration> 
           <schemaVersion>V2</schemaVersion>  
           <resourceGroup>BEIS</resourceGroup>  
-		  <appName>experience-micro-service</appName>
+		  <appName>publishing-subsidy-service</appName>
 		  
 		  <appServicePlanResourceGroup>BEIS</appServicePlanResourceGroup>
           <appServicePlanName>transparency-app-svc-plan</appServicePlanName>
@@ -116,7 +116,7 @@
           <appSettings> 
             <property>
 			  <name>PORT</name> 
-			  <value>8181</value>
+			  <value>8182</value>
             </property>
           </appSettings>  
           <deployment> 

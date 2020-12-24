@@ -68,10 +68,7 @@ public class ExcelHelper {
 	
 	public static List<BulkUploadAwards> excelToAwards(InputStream is) {
 	    try {
-	       // List<Test> tempStudentList = new ArrayList<Test>();
-	        //XSSFWorkbook workbook = new XSSFWorkbook(reapExcelDataFile.getInputStream());
-	        //XSSFSheet worksheet = workbook.getSheetAt(0);
-	    	
+	       	    	
 	    	log.info("ïnside excelToAwards::DBPublishingSubsideies Service" );
 	        
 	        Workbook workbook = new XSSFWorkbook(is);
@@ -116,7 +113,7 @@ public class ExcelHelper {
 
 	          case 1:
 	        	  bulkUploadAwards.setSubsidyControlTitle(currentCell.getStringCellValue());
-	        	  //System.out.println(bulkUploadAwards);
+	        	 
 	            break;
 
 	          case 2:
@@ -125,13 +122,13 @@ public class ExcelHelper {
 	        	 }else {
 	        	  bulkUploadAwards.setSubsidyObjective(currentCell.getStringCellValue());
 	        	 }
-	        	  //log.info(bulkUploadAwards);
+	        	 
 	            break;
 	            
 	          case 3:
 		        	 
 	        	  bulkUploadAwards.setSubsidyObjectiveOther(currentCell.getStringCellValue());
-	        	  //System.out.println(bulkUploadAwards);
+	        	  
 	            break;
 
 	          case 4:
@@ -145,13 +142,13 @@ public class ExcelHelper {
 	          case 5:
 	        	  	
 	        	  bulkUploadAwards.setSubsidyInstrumentOther(currentCell.getStringCellValue());	
-	        	 // log.info(bulkUploadAwards);
+	        	 
 	        	  break;
 	        	            
 	          case 6:
 	        	  //bulkUploadAwards.setOrgSize(currentCell.getStringCellValue());
 	        	  bulkUploadAwards.setSubsidyAmountRange( (currentCell == null || currentCell.getCellType() == CellType.BLANK || (currentCell.getCellType().equals(CellType.STRING) && currentCell.getStringCellValue().trim().isEmpty())) ? null : currentCell.getStringCellValue() );
-	        	 // System.out.println(bulkUploadAwards);
+	        	 
 	            break;
 	            
 	          case 7:
@@ -160,7 +157,7 @@ public class ExcelHelper {
 	        	  }else if (currentCell.getCellTypeEnum() == CellType.NUMERIC) {
 	        		 bulkUploadAwards.setSubsidyAmountExact((String.valueOf(currentCell.getNumericCellValue())));
 	        	  }
-	        	  //System.out.println(bulkUploadAwards);
+	        	
 	        	  break;
 	           
 	          case 8:
@@ -169,14 +166,13 @@ public class ExcelHelper {
 	        	  }else {
 	        		  bulkUploadAwards.setNationalIdType(currentCell.getStringCellValue());
 	        	  }
-	        	 
-	        	 // System.out.println(bulkUploadAwards);
+	        	
 	            break;
 	            
 	          case 9:
 	        	
 	        	  bulkUploadAwards.setNationalId( ((currentCell.getCellType().getCode() == CellType.NUMERIC.getCode()) ?  String.valueOf(Double.valueOf( currentCell.getNumericCellValue()).longValue()) : currentCell.getStringCellValue()));
-	        	 // System.out.println(bulkUploadAwards);
+	        	
 	            break;
 	            
 	          case 10:
@@ -185,8 +181,7 @@ public class ExcelHelper {
 	        	  }else {
 	        		  bulkUploadAwards.setBeneficiaryName(currentCell.getStringCellValue());
 	        	  }
-	        	  
-	        	 // System.out.println(bulkUploadAwards);
+	        	 
 	            break;
 
 	          case 11:
@@ -195,7 +190,7 @@ public class ExcelHelper {
 	        	  }else {
 	        	  bulkUploadAwards.setOrgSize(currentCell.getStringCellValue());
 	        	  }
-	        	 // System.out.println(bulkUploadAwards);
+	        	
 	            break;
 	            
 	          case 12:
@@ -204,7 +199,7 @@ public class ExcelHelper {
 	        	  }else {
 	        	  bulkUploadAwards.setGrantingAuthorityName(currentCell.getStringCellValue());
 	        	  }
-	        	  //System.out.println(bulkUploadAwards);
+	        	 
 	            break;
 	            
 	          case 13:
@@ -306,17 +301,7 @@ public class ExcelHelper {
 	    {
 	    	return false;
 	    }
-	    /*for (int i = fcell; i < 16; i++) {
-	    if (StringUtils.isEmpty(String.valueOf(row.getCell(i))) == true || 
-	        StringUtils.isWhitespace(String.valueOf(row.getCell(i))) == true || 
-	        StringUtils.isBlank(String.valueOf(row.getCell(i))) == true || 
-	        String.valueOf(row.getCell(i)).length() == 0 || 
-	        row.getCell(i) == null) {flag= false;} 
-	    else {
-	    			System.out.println("it is not empty row ");
-	                flag = true;
-	        }
-	    }*/
+	    
 	    return flag;    
 	   
 	}
