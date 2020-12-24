@@ -16,6 +16,8 @@ import com.beis.subsidy.award.transperancy.dbpublishingservice.model.ValidationR
 import com.beis.subsidy.award.transperancy.dbpublishingservice.service.BulkUploadAwardsService;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.util.ExcelHelper;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -30,7 +32,9 @@ public class BulkUploadAwardsController {
 		return new ResponseEntity<>("Successful health check - DB publishing Subsidies Service API", HttpStatus.OK);
 	}
 	
-	@PostMapping("uploadBulkAwards")
+	
+	@PostMapping(value = "/uploadBulkAwards", consumes = { "multipart/form-data" })
+	
 	public ResponseEntity<ValidationResult> uploadAwardsFile(@RequestParam("file") MultipartFile file ){
 		
 		//1.0 - Check uploaded file format to be xlsx
