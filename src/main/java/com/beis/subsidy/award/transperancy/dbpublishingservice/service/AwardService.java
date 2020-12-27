@@ -43,40 +43,6 @@ public class AwardService {
 	@Autowired
 	private SubsidyMeasureRepository smRepository;
 	
-	public List<Award> getallAwards() {
-		return awardRepository.findAll();
-	}
-
-	public Optional<Award> getAward(int id) {
-		return awardRepository.findById(Long.valueOf(id));
-	}
-
-	/*
-	public Award createAward(int subsidyControlId, String subdidyControlNumber, String subsidyInstrument,
-			int gratingAuthorityId, int beneficiaryId, float subsidyFullAmount, float subsidyNotionalAmount,
-			String susidyObjective, String gaSubsidyWeblink, String goodsServicesFilter, String legalBasis,
-			String grantingLegalDate, String publishedAwardDate) {
-		
-		
-		
-		Award award = new Award();
-		award.setAwardNumber(Long.valueOf(1111111));
-		award.setSubdidyControlNumber(subdidyControlNumber);
-		award.setSubsidyInstrument(subsidyInstrument);
-		award.setGratingAuthorityId(Long.valueOf(gratingAuthorityId));
-		award.setSubsidyFullAmountRange("10000 - 20000");
-		award.setSubsidyFullAmountExact(BigDecimal.valueOf(subsidyNotionalAmount));
-		award.setSusidyObjective(susidyObjective);
-		award.setGoodsServicesFilter(goodsServicesFilter);
-		award.setLegalGrantingDate(convertToDate(grantingLegalDate));
-		award.setPublishedAwardDate(convertToDate(publishedAwardDate));		
-		award.setCreatedBy(CONSTANT_SYSTEM);
-		award.setApprovedBy(CONSTANT_SYSTEM);
-		award.setStatus("DRAFT");
-		return awardRepository.save(award);
-		
-	}*/
-
 	private Date convertToDate(String incomingDate) {
 		SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
 		Date date = null ;
@@ -164,7 +130,7 @@ public class AwardService {
 		log.info("End process Bulk Awards db");
 				
 		return savedAwards;
-		}catch(Exception serviceException) {
+		} catch(Exception serviceException) {
 			log.info("serviceException occured::"+serviceException.getMessage());
 			return null;
 		}

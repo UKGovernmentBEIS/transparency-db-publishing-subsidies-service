@@ -43,9 +43,7 @@ public class BulkUploadAwardsController {
 		
 			try {
 				log.info("Beofre calling validateFile::::");
-				//TODO - check if we can result list of errors here it self
 				ValidationResult validationResult = bulkUploadAwardsService.validateFile(file);
-				
 				return ResponseEntity.status(HttpStatus.OK).body(validationResult);
 			
 			} catch (Exception e) {

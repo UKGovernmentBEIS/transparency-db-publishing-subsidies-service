@@ -11,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.BulkUploadAwardsController;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.Award;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.BulkUploadAwards;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.GrantingAuthority;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SubsidyMeasure;
@@ -763,11 +761,4 @@ public class BulkUploadAwardsService {
 		return validationNationalIdResultList;
 
 	}
-
-	public List<Award> getallAwards() {
-
-		return awardService.getallAwards();
-
-	}
-
 }
