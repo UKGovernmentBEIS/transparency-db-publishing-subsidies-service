@@ -28,26 +28,6 @@ public class ExcelHelper {
 	
 	public static String TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 	
-	public final static String[] HEADERs = {
-			"Subsidy Control Number",
-			"Subsidy Measure Title",
-			"Subsidy Objective",
-			"Subsidy Objective \"Other\" - Text",
-			"Subsidy instrument",
-			"Subsidy Instrument \"Other\" - Text",
-			"Subsidy Element Full amount (£)",
-			"Subsidy Element Full amount Range",
-			"National ID Type",
-			"National ID Number",
-			"Beneficiary Name",
-			"Size of the Organisation",
-			"Granting Authority Name",
-			"Legal Granting Date",
-			"Goods or Services",
-			"Spending Region",
-			"Spending Sector",
-	};
-	
 	public  final static String SHEET = "Upload Template";
 
 	/**
@@ -89,9 +69,7 @@ public class ExcelHelper {
 				  rowNumber++;
 				  continue;
 				}
-				int fcell = currentRow.getFirstCellNum();// first cell number of excel
-				int lcell = currentRow.getLastCellNum();
-				if (containsValue(currentRow,fcell,lcell)) {
+				if (containsValue(currentRow)) {
 
 				Iterator<Cell> cellsInRow = currentRow.iterator();
 
@@ -274,7 +252,7 @@ public class ExcelHelper {
 	return date;
 	}
 	
-	public static boolean containsValue(Row row, int fcell, int lcell)
+	public static boolean containsValue(Row row)
 	{
 	    boolean flag = true;
 	    if ((StringUtils.isEmpty(String.valueOf(row.getCell(0))) == true && 
