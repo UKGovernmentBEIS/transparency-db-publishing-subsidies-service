@@ -37,7 +37,6 @@ public class BulkUploadAwardsService {
 			// Read Excel file
 			List<BulkUploadAwards> bulkUploadAwards = ExcelHelper.excelToAwards(file.getInputStream());
 
-			bulkUploadAwards.stream().forEach(System.out::println);
 			log.info("Back from Excel to awards...printed list of awards - end");
 
 			// Validation National Id length check
@@ -706,7 +705,6 @@ public class BulkUploadAwardsService {
 
 		log.info(
 				"Back validation-1 - national ID length check...printing list of awards with nation id length error - start");
-		nationsIdErrorRecordsList.stream().forEach(System.out::println);
 		log.info(
 				"Back validation-1 - national ID length check...printing list of awards with nation id length error - end");
 
