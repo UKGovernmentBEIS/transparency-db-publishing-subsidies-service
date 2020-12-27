@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -22,8 +21,6 @@ import com.beis.subsidy.award.transperancy.dbpublishingservice.model.GrantingAut
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SubsidyMeasure;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AwardRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.BeneficiaryRepository;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.GrantingAuthorityRepository;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.SubsidyMeasureRepository;
 
 import lombok.extern.slf4j.Slf4j;
 @Slf4j
@@ -76,9 +73,6 @@ public class AwardService {
 	public List<Award> processBulkAwards(List<BulkUploadAwards> bulkAwards) {
 		try {
 		log.info("inside process Bulk Awards db");
-		List<SubsidyMeasure> smList = getAllSubsidyMeasures();
-		Map<String, String> smMap= smList.stream().collect(Collectors.toMap(SubsidyMeasure::getSubsidyMeasureTitle,SubsidyMeasure::getScNumber));
-
 		List<Beneficiary> beneficiaries = bulkAwards.stream()
 			.map( award -> {
 				Beneficiary beneficiary = new Beneficiary();
@@ -110,12 +104,11 @@ public class AwardService {
 						bulkaward.getSpendingSector(),
 						"SYSTEM", 
 						"SYSTEM", 
-						"DRAFT",null, null)
+						"DRAFT",LocalDate.now(), LocalDate.now())
 				
 					)
 				.collect(Collectors.toList());
 				
-		
 		List<Award> savedAwards = awardRepository.saveAll(awards);
 		log.info("End process Bulk Awards db");
 				
@@ -179,8 +172,6 @@ private SubsidyMeasure getSubsidyMeasure(BulkUploadAwards award) {
 		log.info("Inside getGrantingAuthorityId...");
 
 		List<GrantingAuthority> gaList = gaRepository.findAll();
-		
-		log.info("All granting authority = " + gaList);
 		
 		Optional<GrantingAuthority> gaOptional = gaList.stream().filter(ga -> ga.getGrantingAuthorityName().equals(award.getGrantingAuthorityName())).findAny();
 		

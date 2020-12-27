@@ -1,7 +1,6 @@
 package com.beis.subsidy.award.transperancy.dbpublishingservice.model;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -55,9 +54,6 @@ public class GrantingAuthority {
 	@Column(name = "GA_NAME")
 	private String grantingAuthorityName;
 	
-	@Column(name = "LEGAL_BASIS")
-	private String legalBasis;
-			
 	@Column(name = "CREATED_BY")
 	private String createdBy;
 	

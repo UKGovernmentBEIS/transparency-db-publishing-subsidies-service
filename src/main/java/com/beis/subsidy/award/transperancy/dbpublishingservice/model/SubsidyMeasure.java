@@ -1,6 +1,7 @@
 package com.beis.subsidy.award.transperancy.dbpublishingservice.model;
 
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -8,14 +9,10 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -36,12 +33,9 @@ import lombok.ToString;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@SequenceGenerator(name = "subsidy_control_read_seq", sequenceName = "subsidy_control_read_seq",
-		allocationSize = 10000)
 public class SubsidyMeasure {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "subsidy_control_read_seq")
 	@Column(name="SC_NUMBER")
 	private String scNumber;
 	
@@ -94,10 +88,10 @@ public class SubsidyMeasure {
 	
 	@CreationTimestamp
 	@Column(name = "CREATED_TIMESTAMP")
-	private Date createdTimestamp;
+	private LocalDate createdTimestamp;
 	
 	@UpdateTimestamp
 	@Column(name = "LAST_MODIFIED_TIMESTAMP")
-	private Date lastModifiedTimestamp;
+	private LocalDate lastModifiedTimestamp;
 
 }

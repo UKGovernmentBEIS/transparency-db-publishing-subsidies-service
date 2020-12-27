@@ -136,11 +136,7 @@ public class BulkUploadAwardsService {
 							spendingRegionErrorList, spendingSectorErrorList, goodsOrServiceErrorList,SubsidyInstrumentErrorList,legalGrantingDateErrorList,SubsidyElementFullAmountErrorList)
 					.flatMap(x -> x.stream()).collect(Collectors.toList());
 
-			log.info("Final bulk awards list ...printed list of awards - ****");
-			bulkUploadAwards.stream().forEach(System.out::println);
-
 			log.info("Final validation errors list ...printing list of errors - start");
-			validationErrorResultList.stream().forEach(System.out::println);
 
 			ValidationResult validationResult = new ValidationResult();
 			validationResult.setValidationErrorResult(validationErrorResultList);
@@ -477,11 +473,6 @@ public class BulkUploadAwardsService {
 						&& !subsidyControlNumberTitleList.contains(award.getSubsidyControlNumber()))
 				.collect(Collectors.toList());
 
-		
-		subsidyControlNumberErrorRecordsList.stream().forEach(System.out::println);
-		log.info(
-				"Back validation-3 - subsidy measure title mismatch check...printing list of awards with subsidy measure number error - end");
-
 		// validation scnumber with sctitle.
 
 		List<BulkUploadAwards> subsidyControlNumberExistsList = bulkUploadAwards.stream()
@@ -489,7 +480,6 @@ public class BulkUploadAwardsService {
 						&& !StringUtils.isEmpty(requestAward.getSubsidyControlTitle()))
 				.collect(Collectors.toList());
 
-		subsidyControlNumberExistsList.stream().forEach(System.out::println);
 		List<BulkUploadAwards> subsidyControlNumberWithNameErrorRecordsList = subsidyControlNumberExistsList.stream()
 				.filter(requestAward -> smList.stream().noneMatch(
 						bulkAward -> ((bulkAward.getScNumber().equals(requestAward.getSubsidyControlNumber()))

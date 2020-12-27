@@ -32,14 +32,12 @@ public class BulkUploadAwardsController {
 	
 	
 	@PostMapping(value = "/uploadBulkAwards", consumes = { "multipart/form-data" })
-	
 	public ResponseEntity<ValidationResult> uploadAwardsFile(@RequestParam("file") MultipartFile file ){
 		
 		//1.0 - Check uploaded file format to be xlsx
 		if(ExcelHelper.hasExcelFormat(file)) {
 			
-		
-			try {
+		   try {
 				log.info("Beofre calling validateFile::::");
 				ValidationResult validationResult = bulkUploadAwardsService.validateFile(file);
 				return ResponseEntity.status(HttpStatus.OK).body(validationResult);
@@ -64,9 +62,7 @@ public class BulkUploadAwardsController {
 			validationResult.setTotalRows(0);
 			validationResult.setErrorRows(0);
 			validationResult.setValidationErrorResult(Arrays.asList(validationErrorResult));
-			
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validationResult);
-			
 		}
 	}
 	
