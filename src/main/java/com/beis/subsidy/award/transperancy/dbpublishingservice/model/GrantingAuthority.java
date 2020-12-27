@@ -1,19 +1,20 @@
 package com.beis.subsidy.award.transperancy.dbpublishingservice.model;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.SequenceGenerator;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
@@ -32,9 +33,12 @@ import lombok.ToString;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@SequenceGenerator(name = "granting_authority_read_seq", sequenceName = "granting_authority_read_seq",
+		allocationSize = 1)
 public class GrantingAuthority {
 	
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "granting_authority_read_seq")
 	@Column(name="GA_ID")
 	private Long gaId;
 	
@@ -64,16 +68,12 @@ public class GrantingAuthority {
 	private String status;
 	
 	@CreationTimestamp
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")  
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED_TIMESTAMP")
-	private Date createdTimestamp;
+	private LocalDate createdTimestamp;
 	
 	@UpdateTimestamp
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")  
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "LAST_MODIFIED_TIMESTAMP")
-	private Date lastModifiedTimestamp;
+	private LocalDate lastModifiedTimestamp;
 	
 
 }

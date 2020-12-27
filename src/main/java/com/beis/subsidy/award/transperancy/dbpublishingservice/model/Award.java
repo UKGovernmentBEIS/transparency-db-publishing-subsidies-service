@@ -1,28 +1,18 @@
 package com.beis.subsidy.award.transperancy.dbpublishingservice.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
+import javax.persistence.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 /**
  * 
@@ -33,11 +23,13 @@ import lombok.ToString;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@SequenceGenerator(name = "award_read_seq", sequenceName = "award_read_seq",
+		allocationSize = 1)
 public class Award {
 
 	
-	@Id 
-	@SequenceGenerator(name = "award_read_seq",sequenceName="award_read_seq",allocationSize=1)
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "award_read_seq")
 	@Column(name="AWARD_NUMBER")
 	private Long awardNumber;
 	
@@ -93,14 +85,10 @@ public class Award {
 	private String status;
 	
 	@CreationTimestamp
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")  
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED_TIMESTAMP")
-	private Date createdTimestamp;
+	private LocalDate createdTimestamp;
 	
 	@UpdateTimestamp
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")  
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "LAST_MODIFIED_TIMESTAMP")
-	private Date lastModifiedTimestamp;
+	private LocalDate lastModifiedTimestamp;
 }

@@ -3,6 +3,7 @@ package com.beis.subsidy.award.transperancy.dbpublishingservice.service;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -77,38 +78,27 @@ public class AwardService {
 		log.info("inside process Bulk Awards db");
 		List<SubsidyMeasure> smList = getAllSubsidyMeasures();
 		Map<String, String> smMap= smList.stream().collect(Collectors.toMap(SubsidyMeasure::getSubsidyMeasureTitle,SubsidyMeasure::getScNumber));
-		System.out.println("smMap "+smMap);
-		//log.info(smMap);
-		
+
 		List<Beneficiary> beneficiaries = bulkAwards.stream()
-			.map( award -> new Beneficiary(	
-								null, 
-								null, 
-								award.getBeneficiaryName(), 
-								"Individual", 
-								award.getNationalId(), 
-								award.getNationalIdType(), 
-								"14455", 
-								award.getOrgSize(), 
-								"E14 5AQ", 
-								"Midlands", 
-								"England", 
-								"SYSTEM", 
-								"SYSTEM", 
-								"DRAFT", 
-								null, 
-								null
-					)
-				)
+			.map( award -> {
+				Beneficiary beneficiary = new Beneficiary();
+				beneficiary.setBeneficiaryName(award.getBeneficiaryName());
+				beneficiary.setBeneficiaryType("Individual");
+				beneficiary.setNationalId(award.getNationalId());
+				beneficiary.setNationalIdType(award.getNationalIdType());
+				beneficiary.setOrgSize(award.getOrgSize());
+				beneficiary.setCreatedBy("SYSTEM");
+				beneficiary.setApprovedBy("SYSTEM");
+				beneficiary.setStatus("DRAFT");
+				beneficiary.setSicCode("14455");
+				beneficiary.setCreatedTimestamp(LocalDate.now());
+				beneficiary.setLastModifiedTimestamp(LocalDate.now());
+				return beneficiary;
+				})
 			.collect(Collectors.toList());
 		
 		beneficiaryRepository.saveAll(beneficiaries);
-		//
-		
-		
-		//
-			
-		
+
 		List<Award> awards = bulkAwards.stream()
 				.map( bulkaward -> new Award(null, getBeneficiaryDetails(bulkaward, beneficiaries), getGrantingAuthority(bulkaward), getSubsidyMeasure(bulkaward), bulkaward.getSubsidyAmountRange(), 
 						( (bulkaward.getSubsidyAmountExact() != null) ? new BigDecimal(bulkaward.getSubsidyAmountExact()) : BigDecimal.ZERO),  
@@ -136,11 +126,11 @@ public class AwardService {
 		}
 	}
 
-	private Beneficiary getBeneficiaryDetails(BulkUploadAwards bulkaward, List<Beneficiary> beneficiaries) {
+	private Beneficiary getBeneficiaryDetails(BulkUploadAwards bulkAward, List<Beneficiary> beneficiaries) {
 		
-		Optional<Beneficiary> beneOptional = beneficiaries.stream().filter(bene -> bene.getBeneficiaryName().equals(bulkaward.getBeneficiaryName())).findAny();
+		Optional<Beneficiary> benfOptional = beneficiaries.stream().filter(bene -> bene.getBeneficiaryName().equals(bulkAward.getBeneficiaryName())).findAny();
 		
-		return ( (beneOptional != null) ? beneOptional.get() : null );
+		return ( (benfOptional != null) ? benfOptional.get() : null );
 	}
 
 private Long getBeneficiaryId(BulkUploadAwards bulkaward, List<Beneficiary> beneficiaries) {

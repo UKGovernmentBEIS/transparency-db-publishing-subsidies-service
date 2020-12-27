@@ -28,7 +28,4 @@ public class BulkUploadAwards {
 	private String spendingSector;
 	private String subsidyObjectiveOther;
 	private String subsidyInstrumentOther;
-	
-	
-
 }

@@ -7,17 +7,17 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
@@ -36,9 +36,12 @@ import lombok.ToString;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@SequenceGenerator(name = "subsidy_control_read_seq", sequenceName = "subsidy_control_read_seq",
+		allocationSize = 10000)
 public class SubsidyMeasure {
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "subsidy_control_read_seq")
 	@Column(name="SC_NUMBER")
 	private String scNumber;
 	
@@ -61,6 +64,9 @@ public class SubsidyMeasure {
 	
 	@Column(name = "END_DATE")
 	private Date endDate;
+
+	@OneToOne(mappedBy="subsidyMeasure")
+	LegalBasis legalBases;
 	
 	@Column(name = "DURATION")
 	private BigInteger duration;
@@ -72,10 +78,7 @@ public class SubsidyMeasure {
 	private boolean adhoc;
 			
 	@Column(name = "GA_SUBSIDY_WEBLINK")
-	private String gaSubsidyWeblink;
-	
-	@Column(name = "LEGAL_BASIS")
-	private String legalBasis;
+	private String gaSubsidyWebLink;
 	
 	@Column(name = "PUBLISHED_MEASURE_DATE")
 	private Date publishedMeasureDate;
@@ -90,16 +93,11 @@ public class SubsidyMeasure {
 	private String status;
 	
 	@CreationTimestamp
-	@Temporal(TemporalType.TIMESTAMP)
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")  
 	@Column(name = "CREATED_TIMESTAMP")
 	private Date createdTimestamp;
 	
 	@UpdateTimestamp
-	@Temporal(TemporalType.TIMESTAMP)
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")  
 	@Column(name = "LAST_MODIFIED_TIMESTAMP")
 	private Date lastModifiedTimestamp;
 
-	
 }
