@@ -11,13 +11,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.ValidationErrorResult;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.ValidationResult;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.ValidationErrorResult;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.ValidationResult;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.service.BulkUploadAwardsService;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.util.ExcelHelper;
 
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

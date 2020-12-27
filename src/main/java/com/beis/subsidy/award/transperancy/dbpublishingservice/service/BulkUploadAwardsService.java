@@ -14,8 +14,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.BulkUploadAwards;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.GrantingAuthority;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SubsidyMeasure;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.ValidationErrorResult;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.ValidationResult;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.ValidationErrorResult;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.ValidationResult;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.util.ExcelHelper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -155,7 +155,6 @@ public class BulkUploadAwardsService {
 			if (validationResult.getValidationErrorResult().size() == 0) {
 				// if(true) {
 				
-				System.out.println("No validation error in bulk excel template");
 				log.info("No validation error in bulk excel template");
 
 				awardService.processBulkAwards(bulkUploadAwards);
@@ -171,9 +170,7 @@ public class BulkUploadAwardsService {
 			return validationResult;
 
 		} catch (IOException e) {
-			e.printStackTrace();
-			
-			log.error(" Error in validationResult **** "+e);
+			log.error(" Error in validationResult **** " + e);
 			throw new RuntimeException("Fail to store data : " + e.getMessage());
 		}
 
@@ -258,7 +255,7 @@ public class BulkUploadAwardsService {
 		List<BulkUploadAwards> subsidyPurposeOtherErrorRecordsList = bulkUploadAwards.stream().filter(
 				award -> ((award.getSubsidyObjectiveOther() .length() > 255)))
 				.collect(Collectors.toList());
-		if(subsidyPurposeOtherErrorRecordsList.size()>0) {
+		if (subsidyPurposeOtherErrorRecordsList.size()>0) {
 		
 		validationSubsidyObjectiveErrorListResultList = subsidyPurposeOtherErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "D",

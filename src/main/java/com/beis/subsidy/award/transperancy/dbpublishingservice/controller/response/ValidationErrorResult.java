@@ -1,6 +1,4 @@
-package com.beis.subsidy.award.transperancy.dbpublishingservice.model;
-
-import java.util.List;
+package com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

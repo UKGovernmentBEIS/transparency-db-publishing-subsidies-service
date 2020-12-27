@@ -6,8 +6,6 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -39,7 +37,6 @@ public class Award {
 
 	
 	@Id 
-	@GeneratedValue(strategy = GenerationType.AUTO,generator="award_read_seq")
 	@SequenceGenerator(name = "award_read_seq",sequenceName="award_read_seq",allocationSize=1)
 	@Column(name="AWARD_NUMBER")
 	private Long awardNumber;
@@ -106,6 +103,4 @@ public class Award {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "LAST_MODIFIED_TIMESTAMP")
 	private Date lastModifiedTimestamp;
-
-		
 }

@@ -38,7 +38,6 @@ import lombok.ToString;
 @NoArgsConstructor
 public class SubsidyMeasure {
 
-	//TODO - Implement Custom sequence generator
 	@Id
 	@Column(name="SC_NUMBER")
 	private String scNumber;

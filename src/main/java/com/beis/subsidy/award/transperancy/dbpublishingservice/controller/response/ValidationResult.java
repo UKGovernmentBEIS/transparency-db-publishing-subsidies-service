@@ -1,4 +1,4 @@
-package com.beis.subsidy.award.transperancy.dbpublishingservice.model;
+package com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response;
 
 import java.util.List;
 
