@@ -12,4 +12,9 @@ public class ValidationErrorResult {
 	public String row;
 	public String columns;
 	public String errorMessages;
+	
+	public ValidationErrorResult(String errorMessages) {
+		this.errorMessages=errorMessages;
+		
+	}
 }

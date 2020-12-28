@@ -2,7 +2,10 @@ package com.beis.subsidy.award.transperancy.dbpublishingservice.controller;
 
 import java.util.Arrays;
 
+import javax.servlet.MultipartConfigElement;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartResolver;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.ValidationErrorResult;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.ValidationResult;
@@ -30,6 +34,16 @@ public class BulkUploadAwardsController {
 		return new ResponseEntity<>("Successful health check - DB publishing Subsidies Service API", HttpStatus.OK);
 	}
 	
+	@Bean
+	public MultipartConfigElement multipartConfigElement() {
+	   return new MultipartConfigElement("");
+	}
+	@Bean
+	public MultipartResolver multipartResolver() {
+	   org.springframework.web.multipart.commons.CommonsMultipartResolver multipartResolver = new org.springframework.web.multipart.commons.CommonsMultipartResolver();
+	   multipartResolver.setMaxUploadSize(10000000);
+	   return multipartResolver;
+	}
 	
 	@PostMapping(value = "/uploadBulkAwards", consumes = { "multipart/form-data" })
 	public ResponseEntity<ValidationResult> uploadAwardsFile(@RequestParam("file") MultipartFile file ){

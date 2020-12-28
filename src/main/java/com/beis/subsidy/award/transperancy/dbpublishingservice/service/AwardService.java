@@ -20,6 +20,7 @@ import com.beis.subsidy.award.transperancy.dbpublishingservice.model.Award;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.Beneficiary;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.BulkUploadAwards;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.GrantingAuthority;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SingleAward;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SubsidyMeasure;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AwardRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.BeneficiaryRepository;
@@ -117,6 +118,52 @@ public class AwardService {
 		return savedAwards;
 		} catch(Exception serviceException) {
 			log.info("serviceException occured::"+serviceException.getMessage());
+			return null;
+		}
+	}
+	
+	@Transactional
+	public Award createAward(SingleAward award) {
+		try {
+			log.info("inside process Bulk Awards db");
+
+			Beneficiary beneficiary = new Beneficiary();
+			beneficiary.setBeneficiaryName(award.getBeneficiaryName());
+			beneficiary.setBeneficiaryType("Individual");
+			beneficiary.setNationalId(award.getNationalId());
+			beneficiary.setNationalIdType(award.getNationalIdType());
+			beneficiary.setOrgSize(award.getOrgSize());
+			beneficiary.setCreatedBy("SYSTEM");
+			beneficiary.setApprovedBy("SYSTEM");
+			beneficiary.setStatus("DRAFT");
+			beneficiary.setSicCode("14455");
+			beneficiary.setCreatedTimestamp(LocalDate.now());
+			beneficiary.setLastModifiedTimestamp(LocalDate.now());
+
+			beneficiaryRepository.save(beneficiary);
+
+			BulkUploadAwards tempAward = new BulkUploadAwards();
+			tempAward.setGrantingAuthorityName(award.getGrantingAuthorityName());
+			tempAward.setSubsidyControlTitle(tempAward.getSubsidyControlTitle());
+
+			Award saveAward = new Award(null, beneficiary, getGrantingAuthority(tempAward),
+					getSubsidyMeasure(tempAward), award.getSubsidyAmountRange(),
+					((award.getSubsidyAmountExact() != null) ? new BigDecimal(award.getSubsidyAmountExact())
+							: BigDecimal.ZERO),
+					((award.getSubsidyObjective().equalsIgnoreCase("Other")) ? award.getSubsidyObjectiveOther()
+							: award.getSubsidyObjective()),
+					award.getGoodsOrServices(), convertToDate(award.getLegalGrantingDate()),
+					convertToDate(award.getLegalGrantingDate()), award.getSpendingRegion(),
+					((award.getSubsidyInstrument().equalsIgnoreCase("Other")) ? award.getSubsidyInstrumentOther()
+							: award.getSubsidyInstrument()),
+					award.getSpendingSector(), "SYSTEM", "SYSTEM", "DRAFT", LocalDate.now(), LocalDate.now());
+
+			Award savedAwards = awardRepository.save(saveAward);
+			log.info("End process Bulk Awards db");
+
+			return savedAwards;
+		} catch (Exception serviceException) {
+			log.info("serviceException occured::" + serviceException.getMessage());
 			return null;
 		}
 	}
