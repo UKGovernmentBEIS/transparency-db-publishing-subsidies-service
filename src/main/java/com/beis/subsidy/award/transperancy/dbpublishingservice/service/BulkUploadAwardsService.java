@@ -540,7 +540,7 @@ public class BulkUploadAwardsService {
 
 		List<ValidationErrorResult> validationBeneficiaryIdResultList = new ArrayList<>();
 		validationBeneficiaryIdResultList = beneficiaryMissingErrorRecordsList.stream().map(
-				award -> new ValidationErrorResult(String.valueOf(award.getRow()), "E", "Enter the Beneficiary Name."))
+				award -> new ValidationErrorResult(String.valueOf(award.getRow()), "K", "Enter the Beneficiary Name."))
 				.collect(Collectors.toList());
 
 		log.info(

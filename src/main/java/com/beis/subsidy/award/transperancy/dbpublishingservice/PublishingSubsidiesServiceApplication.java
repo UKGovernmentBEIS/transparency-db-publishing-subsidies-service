@@ -22,7 +22,7 @@ public class PublishingSubsidiesServiceApplication {
     public OpenAPI customOpenAPI(@Value("${application-description}") String appDesciption, @Value("${application-version}") String appVersion) {
      return new OpenAPI()
           .info(new Info()
-          .title("BEIS Subsidy Control - Experience APIs")
+          .title("BEIS Subsidy Control - Publishing Subsidy Awards")
           .version("1.0")
           .description("BEIS Subsidy Control - Experience APIs for transparency database")
           .termsOfService("http://swagger.io/terms/")
