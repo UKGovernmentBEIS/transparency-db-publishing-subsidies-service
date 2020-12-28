@@ -24,7 +24,7 @@ public class PublishingSubsidiesServiceApplication {
           .info(new Info()
           .title("BEIS Subsidy Control - Publishing Subsidy Awards")
           .version("1.0")
-          .description("BEIS Subsidy Control - Experience APIs for transparency database")
+          .description("BEIS Subsidy Control - Publishing Subsidy Awards APIs for transparency database")
           .termsOfService("http://swagger.io/terms/")
           .license(new License().name("Apache 2.0").url("http://springdoc.org")));
     }
