@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.SingleAwardValidationResult;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.ValidationErrorResult;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.ValidationResult;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.GrantingAuthority;
@@ -27,7 +28,7 @@ public class AddAwardService {
 	/*
 	 * the below method validate the Award given in  request.
 	 */
-	public ValidationResult validateAward(SingleAward award) {
+	public SingleAwardValidationResult validateAward(SingleAward award) {
 
 		try {
 
@@ -134,7 +135,7 @@ public class AddAwardService {
 
 			log.info("Final validation errors list ...printing list of errors - start");
 
-			ValidationResult validationResult = new ValidationResult();
+			SingleAwardValidationResult validationResult = new SingleAwardValidationResult();
 			validationResult.setValidationErrorResult(validationErrorResultList);
 			//validationResult.setTotalRows(bulkUploadAwards.size());
 			/*validationResult.setErrorRows(validationErrorResultList.size());
@@ -153,7 +154,7 @@ public class AddAwardService {
 				log.info("After calling process api - response = ");
 				
 				validationResult
-						.setMessage((true ? "All Awards saved in Database" : "Error while saving awards in Database"));
+						.setMessage((true ? "Award saved in Database" : "Error while saving awards in Database"));
 			}
 			return validationResult;
 
