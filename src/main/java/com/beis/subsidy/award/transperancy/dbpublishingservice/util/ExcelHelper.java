@@ -116,8 +116,11 @@ public class ExcelHelper {
 					  break;
 
 				  case 5:
-
-					  bulkUploadAwards.setSubsidyInstrumentOther(currentCell.getStringCellValue());
+					  if(currentCell.getCellType()==CellType.BLANK) {	
+					  bulkUploadAwards.setSubsidyInstrumentOther(null);
+					  }else {
+						  bulkUploadAwards.setSubsidyInstrumentOther(currentCell.getStringCellValue());
+					  }
 
 					  break;
 
@@ -256,8 +259,8 @@ public class ExcelHelper {
 	{
 	    boolean flag = true;
 	    if ((StringUtils.isEmpty(String.valueOf(row.getCell(0))) == true && 
-	    		StringUtils.isEmpty(String.valueOf(row.getCell(1))) == true) ||
-	    (String.valueOf(row.getCell(0))==null && String.valueOf(row.getCell(1))==null))
+	    		StringUtils.isEmpty(String.valueOf(row.getCell(1))) == true && StringUtils.isEmpty(String.valueOf(row.getCell(2))) == true  ) ||
+	    (String.valueOf(row.getCell(0))==null && String.valueOf(row.getCell(1))==null && String.valueOf(row.getCell(2))==null ))
 	    {
 			flag = false;
 	    }
