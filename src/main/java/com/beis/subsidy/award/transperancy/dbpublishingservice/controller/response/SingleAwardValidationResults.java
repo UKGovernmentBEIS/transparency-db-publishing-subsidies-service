@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SingleAwardValidationResult {
+public class SingleAwardValidationResults {
 	
-	public String column;
 	
+	private List<SingleAwardValidationResult> validationErrorResult;
 	private String message;
 
 }

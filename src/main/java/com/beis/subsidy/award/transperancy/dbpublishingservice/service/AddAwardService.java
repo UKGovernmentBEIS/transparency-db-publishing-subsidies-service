@@ -10,7 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.SingleAwardValidationResult;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.ValidationErrorResult;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.SingleAwardValidationResults;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.SingleAwardValidationResult;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.ValidationResult;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.GrantingAuthority;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SingleAward;
@@ -28,7 +29,7 @@ public class AddAwardService {
 	/*
 	 * the below method validate the Award given in  request.
 	 */
-	public SingleAwardValidationResult validateAward(SingleAward award) {
+	public SingleAwardValidationResults validateAward(SingleAward award) {
 
 		try {
 
@@ -36,52 +37,52 @@ public class AddAwardService {
 			log.info("input Award is "+award);
 
 			// Validation National Id length check
-			List<ValidationErrorResult> nationalIdMisingList = validateNationaIdAwards(award);
+			List<SingleAwardValidationResult> nationalIdMisingList = validateNationaIdAwards(award);
 
-			List<ValidationErrorResult> nationalIdTypeMisingList = validateNationalIdType(award);
+			List<SingleAwardValidationResult> nationalIdTypeMisingList = validateNationalIdType(award);
 
 			// Validation - Beneficiary check
-			List<ValidationErrorResult> beneficiaryMisingList = validateBeneficiaryAwards(award);
+			List<SingleAwardValidationResult> beneficiaryMisingList = validateBeneficiaryAwards(award);
 
 			// TODO - Validation - Make call to process API to get data for subsidy measure
 			/*
 			 * 3) If incorrect SC number is entered, user system should throw an error
 			 * Validation Error - Row 6 - Incorrect SC Number - Correct one SC10002
 			 */
-			List<ValidationErrorResult> scNumberNameCheckList = validateScNumberScTitle(award);
+			List<SingleAwardValidationResult> scNumberNameCheckList = validateScNumberScTitle(award);
 
-			List<ValidationErrorResult> subsidyControlNumberLengthList = validateSubsidyNumberLength(award);
+			List<SingleAwardValidationResult> subsidyControlNumberLengthList = validateSubsidyNumberLength(award);
 
-			List<ValidationErrorResult> subsidyControlNumberMismatchList = validateSubsidyControlNumber(
+			List<SingleAwardValidationResult> subsidyControlNumberMismatchList = validateSubsidyControlNumber(
 					award);
 
-			List<ValidationErrorResult> subsidyMeasureTitleNameLengthList = validateSubsidyMeasureNameLength(
+			List<SingleAwardValidationResult> subsidyMeasureTitleNameLengthList = validateSubsidyMeasureNameLength(
 					award);
 
-			List<ValidationErrorResult> subsidyPurposeCheckList = validateSubsidyPurpose(award);
+			List<SingleAwardValidationResult> subsidyPurposeCheckList = validateSubsidyPurpose(award);
 
 			/*
 			 * validate benificiary name length > 255 Validation Error - Row 6 - Incorrect
 			 * SC Number - Correct one SC10002
 			 */
 
-			List<ValidationErrorResult> beneficiaryNameErrorList = validateBeneficiaryName(award);
+			List<SingleAwardValidationResult> beneficiaryNameErrorList = validateBeneficiaryName(award);
 
 			/*
 			 *  validate Granting Authority name length > 255 Validation Error - Row 6 -
 			 * Incorrect SC Number - Correct one SC10002
 			 */
-			List<ValidationErrorResult> grantingAuthorityNameErrorList = validateGrantingAuthorityName(
+			List<SingleAwardValidationResult> grantingAuthorityNameErrorList = validateGrantingAuthorityName(
 					award);
 
 			/*
 			 * validate Granting Authority exists in database or not Validation Error - Row
 			 * 6 - Incorrect SC Number - Correct one SC10002
 			 */
-			List<ValidationErrorResult> grantingAuthorityErrorList = validateGrantingAuthorityNameinDb(
+			List<SingleAwardValidationResult> grantingAuthorityErrorList = validateGrantingAuthorityNameinDb(
 					award);
 			
-			List<ValidationErrorResult> SubsidyElementFullAmountErrorList = validateSubsidyElementFullAmount(
+			List<SingleAwardValidationResult> SubsidyElementFullAmountErrorList = validateSubsidyElementFullAmount(
 					award);
 			
 			 
@@ -89,41 +90,41 @@ public class AddAwardService {
 			 * validate Size of Organization
 			 * 
 			 */
-			List<ValidationErrorResult> sizeOfOrgErrorList = validateSizeOfOrg(award);
+			List<SingleAwardValidationResult> sizeOfOrgErrorList = validateSizeOfOrg(award);
 			/*
 			 * validate Spending Region
 			 * 
 			 */
-			List<ValidationErrorResult> spendingRegionErrorList = validateSpendingRegion(award);
+			List<SingleAwardValidationResult> spendingRegionErrorList = validateSpendingRegion(award);
 			/*
 			 * validate Spending Sector
 			 * 
 			 */
-			List<ValidationErrorResult> spendingSectorErrorList = validateSpendingSector(award);
+			List<SingleAwardValidationResult> spendingSectorErrorList = validateSpendingSector(award);
 
 			/*
 			 * validate Goods or Service
 			 * 
 			 */
 
-			List<ValidationErrorResult> goodsOrServiceErrorList = validateGoodsOrService(award);
+			List<SingleAwardValidationResult> goodsOrServiceErrorList = validateGoodsOrService(award);
 			
 			/*
 			 * validate Legal granting Date
 			 * 
 			 */
 
-			List<ValidationErrorResult> legalGrantingDateErrorList = validateLegalGrantingDate(award);
+			List<SingleAwardValidationResult> legalGrantingDateErrorList = validateLegalGrantingDate(award);
 			
 			/*
 			 * validate Goods or Service
 			 * 
 			 */
 
-			List<ValidationErrorResult> SubsidyInstrumentErrorList = validateSubsidyInstrument(award);
+			List<SingleAwardValidationResult> SubsidyInstrumentErrorList = validateSubsidyInstrument(award);
 			
 			// Merge lists of Validation Errors
-			List<ValidationErrorResult> validationErrorResultList = Stream
+			List<SingleAwardValidationResult> validationErrorResultList = Stream
 					.of(scNumberNameCheckList, subsidyMeasureTitleNameLengthList, subsidyPurposeCheckList,
 							nationalIdTypeMisingList, nationalIdMisingList, beneficiaryNameErrorList,
 							beneficiaryMisingList, subsidyControlNumberLengthList, subsidyControlNumberMismatchList,
@@ -135,7 +136,7 @@ public class AddAwardService {
 
 			log.info("Final validation errors list ...printing list of errors - start");
 
-			SingleAwardValidationResult validationResult = new SingleAwardValidationResult();
+			SingleAwardValidationResults validationResult = new SingleAwardValidationResults();
 			validationResult.setValidationErrorResult(validationErrorResultList);
 			//validationResult.setTotalRows(bulkUploadAwards.size());
 			/*validationResult.setErrorRows(validationErrorResultList.size());
@@ -171,14 +172,14 @@ public class AddAwardService {
 	 * 
 	 * the below method validate either SC number or Sc Title exist in the file.
 	 */
-	private List<ValidationErrorResult> validateScNumberScTitle(SingleAward award) {
+	private List<SingleAwardValidationResult> validateScNumberScTitle(SingleAward award) {
 
 		/*
 		 * validation for eaither Sc number or Sc Title must be exist in the request.
 		 */
-		List<ValidationErrorResult> validationScNumberScTitlResultList = new ArrayList<>();
+		List<SingleAwardValidationResult> validationScNumberScTitlResultList = new ArrayList<>();
 		if(award.getSubsidyControlNumber() == null || award.getSubsidyControlTitle()==null){
-			validationScNumberScTitlResultList.add(new ValidationErrorResult("Either Subsidy Control number or Subsidy title field is mandatory."));
+			validationScNumberScTitlResultList.add(new SingleAwardValidationResult("subsidyControlNumber or subsidyControlTitle","Either Subsidy Control number or Subsidy title field is mandatory."));
 		}
 
 		log.info("Validation Result Error list - Either Subsidy Control number or Subsidy title should enter = "
@@ -191,14 +192,14 @@ public class AddAwardService {
 	 * 
 	 * the below method validate Size of Organization entered or not in the file.
 	 */
-	private List<ValidationErrorResult> validateSizeOfOrg(SingleAward award) {
+	private List<SingleAwardValidationResult> validateSizeOfOrg(SingleAward award) {
 
 		/*
 		 * validation for Size of Organization entered in the input file.
 		 */
-		List<ValidationErrorResult> validationSizeOfOrgErrorListResultList = new ArrayList<>();
+		List<SingleAwardValidationResult> validationSizeOfOrgErrorListResultList = new ArrayList<>();
 		if(award.getOrgSize() == null || StringUtils.isEmpty(award.getOrgSize())){
-			validationSizeOfOrgErrorListResultList.add(new ValidationErrorResult("Size of Organization  field is mandatory."));
+			validationSizeOfOrgErrorListResultList.add(new SingleAwardValidationResult("orgSize","Size of Organization  field is mandatory."));
 		}
 
 		
@@ -212,18 +213,18 @@ public class AddAwardService {
 	 * 
 	 * the below method validate Subsidy Purpose entered or not in the file.
 	 */
-	private List<ValidationErrorResult> validateSubsidyPurpose(SingleAward award) {
+	private List<SingleAwardValidationResult> validateSubsidyPurpose(SingleAward award) {
 
 		/*
 		 * validation for Size of Organization entered in the input file.
 		 */
-		List<ValidationErrorResult> validationSubsidyObjectiveErrorListResultList = new ArrayList<>();
+		List<SingleAwardValidationResult> validationSubsidyObjectiveErrorListResultList = new ArrayList<>();
 		
 		if(award.getSubsidyObjective() == null || StringUtils.isEmpty(award.getSubsidyObjective())) {
-			validationSubsidyObjectiveErrorListResultList.add(new ValidationErrorResult("Subsidy Objective  field is mandatory."));
+			validationSubsidyObjectiveErrorListResultList.add(new SingleAwardValidationResult("subsidyObjective","Subsidy Objective  field is mandatory."));
 		}
 		if(award.getSubsidyObjective()!=null && award.getSubsidyObjectiveOther() .length() > 255){
-			validationSubsidyObjectiveErrorListResultList.add(new ValidationErrorResult("Subsidy Objective- other field lenth is > 255 characters."));
+			validationSubsidyObjectiveErrorListResultList.add(new SingleAwardValidationResult("subsidyObjective","Subsidy Objective- other field lenth is > 255 characters."));
 		}
 			
 		
@@ -237,19 +238,19 @@ public class AddAwardService {
 	 * 
 	 * the below method validate Spending Region entered or not in the file.
 	 */
-	private List<ValidationErrorResult> validateSpendingRegion(SingleAward award) {
+	private List<SingleAwardValidationResult> validateSpendingRegion(SingleAward award) {
 
 		/*
 		 * validation for Size of SpendingRegion entered in the input file.
 		 */
 
-		List<ValidationErrorResult> validationspendingRegionErrorListResultList = new ArrayList<>();
+		List<SingleAwardValidationResult> validationspendingRegionErrorListResultList = new ArrayList<>();
 		
 		if(award.getSpendingRegion() == null || StringUtils.isEmpty(award.getSpendingRegion())) {
-			validationspendingRegionErrorListResultList.add(new ValidationErrorResult("Spending Region  field is mandatory."));
+			validationspendingRegionErrorListResultList.add(new SingleAwardValidationResult("spendingRegion","Spending Region  field is mandatory."));
 		}
-		if(award.getSpendingRegion().length() > 255){
-			validationspendingRegionErrorListResultList.add(new ValidationErrorResult("Spending Region other  field length > 255 charactres."));
+		if(award.getSpendingRegion()!=null && award.getSpendingRegion().length() > 255){
+			validationspendingRegionErrorListResultList.add(new SingleAwardValidationResult("spendingRegion","Spending Region other  field length > 255 charactres."));
 		}
 		
 		
@@ -263,15 +264,15 @@ public class AddAwardService {
 	 * 
 	 * the below method validate Spending sector entered or not in the file.
 	 */
-	private List<ValidationErrorResult> validateSpendingSector(SingleAward award) {
+	private List<SingleAwardValidationResult> validateSpendingSector(SingleAward award) {
 
 		/*
 		 * validation for Size of Spending Sector entered in the input file.
 		 */
-		List<ValidationErrorResult> validationspendingSectorErrorListResultList = new ArrayList<>();
+		List<SingleAwardValidationResult> validationspendingSectorErrorListResultList = new ArrayList<>();
 
 		if(award.getSpendingSector() == null || StringUtils.isEmpty(award.getSpendingSector())) {
-			validationspendingSectorErrorListResultList.add(new ValidationErrorResult("Spending Sector  field is mandatory."));
+			validationspendingSectorErrorListResultList.add(new SingleAwardValidationResult("spendingSector","Spending Sector  field is mandatory."));
 		}
 		
 		log.info("Validation Result Error list - Spending Sector  should enter = "
@@ -285,14 +286,14 @@ public class AddAwardService {
 	 * 
 	 * the below method validate Subsidy Amount field.
 	 */
-	private List<ValidationErrorResult> validateSubsidyElementFullAmount(SingleAward award) {
+	private List<SingleAwardValidationResult> validateSubsidyElementFullAmount(SingleAward award) {
 
 		/*
 		 * validation for SubsidyElementFullAmount entered in the input file.
 		 */
-		List<ValidationErrorResult> validationSubsidyAmountExactErrorResultList = new ArrayList<>();
+		List<SingleAwardValidationResult> validationSubsidyAmountExactErrorResultList = new ArrayList<>();
 		if((award.getSubsidyInstrument()!=null && !award.getSubsidyInstrument().startsWith("Tax"))&& (award.getSubsidyAmountExact() == null || StringUtils.isEmpty(award.getSubsidyAmountExact()))) {
-			validationSubsidyAmountExactErrorResultList.add(new ValidationErrorResult("Subsidy Element Full Amount is mandatory."));
+			validationSubsidyAmountExactErrorResultList.add(new SingleAwardValidationResult("subsidyAmountExact","Subsidy Element Full Amount is mandatory."));
 		}
 		
 		log.info("Validation Result Error list - Subsidy Element Full Amount = "
@@ -306,24 +307,24 @@ public class AddAwardService {
 	 * 
 	 * the below method validate SubsidyInstrument .
 	 */
-	private List<ValidationErrorResult> validateSubsidyInstrument(SingleAward award) {
+	private List<SingleAwardValidationResult> validateSubsidyInstrument(SingleAward award) {
 
 		/*
 		 * validation for SubsidyInstrument mandatory check .
 		 */
-		List<ValidationErrorResult> validationSubsidyInstrumentErrorListResultList = new ArrayList<>();
+		List<SingleAwardValidationResult> validationSubsidyInstrumentErrorListResultList = new ArrayList<>();
 		if(award.getSubsidyInstrument()== null || StringUtils.isEmpty(award.getSubsidyInstrument())) {
-			validationSubsidyInstrumentErrorListResultList.add(new ValidationErrorResult("Subsidy Instrument is Mandatory."));
+			validationSubsidyInstrumentErrorListResultList.add(new SingleAwardValidationResult("subsidyInstrument","Subsidy Instrument is Mandatory."));
 		}
 		
 		if(award.getSubsidyInstrumentOther()!=null && award.getSubsidyInstrumentOther().length() > 255){
 			
-			validationSubsidyInstrumentErrorListResultList.add(new ValidationErrorResult("Subsidy Instrument-other length > 255 characters."));
+			validationSubsidyInstrumentErrorListResultList.add(new SingleAwardValidationResult("subsidyInstrument","Subsidy Instrument-other length > 255 characters."));
 		}
 		
 		if((award.getSubsidyInstrument()!=null && award.getSubsidyInstrument().startsWith("Tax"))&& (award.getSubsidyAmountRange()==null || StringUtils.isEmpty(award.getSubsidyAmountRange()))) {
 			
-			validationSubsidyInstrumentErrorListResultList.add(new ValidationErrorResult("Subsidy Element Full Amount Range is mandatory when Subsidy Instrument is Tax Measure ."));
+			validationSubsidyInstrumentErrorListResultList.add(new SingleAwardValidationResult("subsidyInstrument","Subsidy Element Full Amount Range is mandatory when Subsidy Instrument is Tax Measure ."));
 		}
 		
 		
@@ -337,15 +338,15 @@ public class AddAwardService {
 	 * 
 	 * the below method validate Goods or Service entered or not in the file.
 	 */
-	private List<ValidationErrorResult> validateGoodsOrService(SingleAward award) {
+	private List<SingleAwardValidationResult> validateGoodsOrService(SingleAward award) {
 
 		/*
 		 * validation for GoodsOrService entered in the input file.
 		 */
-		List<ValidationErrorResult> validationgoodsOrServiceErrorListResultList = new ArrayList<>();
+		List<SingleAwardValidationResult> validationgoodsOrServiceErrorListResultList = new ArrayList<>();
 
 		if(award.getGoodsOrServices() == null || StringUtils.isEmpty(award.getGoodsOrServices())){
-			validationgoodsOrServiceErrorListResultList.add(new ValidationErrorResult("Goods or Service  field is mandatory"));
+			validationgoodsOrServiceErrorListResultList.add(new SingleAwardValidationResult("goodsOrServices","Goods or Service  field is mandatory"));
 		}
 		
 		log.info("Validation Result Error list - Goods or Service should enter = "
@@ -360,14 +361,14 @@ public class AddAwardService {
 	 * 
 	 * the below method validate Granting date .
 	 */
-	private List<ValidationErrorResult> validateLegalGrantingDate(SingleAward award) {
+	private List<SingleAwardValidationResult> validateLegalGrantingDate(SingleAward award) {
 
 		/*
 		 * validation for Legal Granting Date  entered in the input file.
 		 */
-		List<ValidationErrorResult> validationlegalGrantingDateErrorListResultList = new ArrayList<>();
+		List<SingleAwardValidationResult> validationlegalGrantingDateErrorListResultList = new ArrayList<>();
 		if(award.getLegalGrantingDate() == null || StringUtils.isEmpty(award.getLegalGrantingDate())) {
-			validationlegalGrantingDateErrorListResultList.add(new ValidationErrorResult("Legal Granting Date is Mandatory."));
+			validationlegalGrantingDateErrorListResultList.add(new SingleAwardValidationResult("legalGrantingDate","Legal Granting Date is Mandatory."));
 		}
 		
 		log.info("Validation Result Error list - Legal Granting Date is Mandatory = "
@@ -377,7 +378,7 @@ public class AddAwardService {
 	}
 	
 	
-	private List<ValidationErrorResult> validateSubsidyControlNumber(SingleAward award) {
+	private List<SingleAwardValidationResult> validateSubsidyControlNumber(SingleAward award) {
 
 		log.info("Calling awardService.getAllSubsidyMeasures()... - start");
 		
@@ -390,18 +391,16 @@ public class AddAwardService {
 
 		log.info("subsidyControlNumberTitleList - String list " + subsidyControlNumberTitleList);
 		//
-		List<ValidationErrorResult> validationSubsidyControlNumberResultList = new ArrayList<>();
+		List<SingleAwardValidationResult> validationSubsidyControlNumberResultList = new ArrayList<>();
 		
 		if(award.getSubsidyControlNumber() != null && award.getSubsidyControlTitle() != null
 						&& !subsidyControlNumberTitleList.contains(award.getSubsidyControlNumber())) {
-			validationSubsidyControlNumberResultList.add(new ValidationErrorResult("Subsidy Control doest not exists."));
+			validationSubsidyControlNumberResultList.add(new SingleAwardValidationResult("subsidyControlNumber","Subsidy Control doest not exists."));
 			
-		}
-		
-		if(smList.stream().noneMatch(
+		} else if(award.getSubsidyControlNumber() != null && smList.stream().noneMatch(
 				bulkAward -> ((bulkAward.getScNumber().equals(award.getSubsidyControlNumber()))
 						&& (bulkAward.getSubsidyMeasureTitle().equals(award.getSubsidyControlTitle()))))){
-			validationSubsidyControlNumberResultList.add(new ValidationErrorResult("Subsidy Control number does not match with title."));
+			validationSubsidyControlNumberResultList.add(new SingleAwardValidationResult("subsidyControlNumber","Subsidy Control number does not match with title."));
 			
 					
 				}
@@ -424,11 +423,11 @@ public class AddAwardService {
 	 * the below method validate the nationalId
 	 */
 
-	private List<ValidationErrorResult> validateNationalIdType(SingleAward award) {
+	private List<SingleAwardValidationResult> validateNationalIdType(SingleAward award) {
 
-		List<ValidationErrorResult> validationNationalIdResultList = new ArrayList<>();
+		List<SingleAwardValidationResult> validationNationalIdResultList = new ArrayList<>();
 		if(award.getNationalIdType() == null) {
-			validationNationalIdResultList.add(new ValidationErrorResult("National Id Type is mandatory."));
+			validationNationalIdResultList.add(new SingleAwardValidationResult("nationalIdType","National Id Type is mandatory."));
 		}
 		
 
@@ -437,7 +436,7 @@ public class AddAwardService {
 		return validationNationalIdResultList;
 	}
 
-	private List<ValidationErrorResult> validateBeneficiaryAwards(SingleAward award) {
+	private List<SingleAwardValidationResult> validateBeneficiaryAwards(SingleAward award) {
 
 		/*
 		 * 2) If the ‘National ID type’ is a UTR or a VAT number, then validate if the
@@ -448,11 +447,11 @@ public class AddAwardService {
 		// TODO - Validation 2 - National ID Type UTR/ VAT, then check beneficiary
 		// present - implement filter method
 		
-		List<ValidationErrorResult> validationBeneficiaryIdResultList = new ArrayList<>();
+		List<SingleAwardValidationResult> validationBeneficiaryIdResultList = new ArrayList<>();
 		if((award.getNationalIdType()!=null) && (award.getNationalIdType().equals("UTR Number")
 						|| award.getNationalIdType().equals("VAT Number"))
 						&& (award.getBeneficiaryName() == null)) {
-			validationBeneficiaryIdResultList.add(new ValidationErrorResult("Enter the Beneficiary Name."));
+			validationBeneficiaryIdResultList.add(new SingleAwardValidationResult("beneficiaryName","Enter the Beneficiary Name."));
 		}
 		
 		log.info(
@@ -465,13 +464,13 @@ public class AddAwardService {
 	 *
 	 * the below method validate the benificiary name length (>255 chars)
 	 */
-	private List<ValidationErrorResult> validateBeneficiaryName(SingleAward award) {
+	private List<SingleAwardValidationResult> validateBeneficiaryName(SingleAward award) {
 
 				
-		List<ValidationErrorResult> validationBeneficiaryIdResultList = new ArrayList<>();
+		List<SingleAwardValidationResult> validationBeneficiaryIdResultList = new ArrayList<>();
 		
 		if(award.getBeneficiaryName()!=null && award.getBeneficiaryName().length() > 255) {
-			validationBeneficiaryIdResultList.add(new ValidationErrorResult("Beneficiary name is too long, it should be 255 characters or fewer."));
+			validationBeneficiaryIdResultList.add(new SingleAwardValidationResult("beneficiaryName","Beneficiary name is too long, it should be 255 characters or fewer."));
 		}
 
 		
@@ -485,16 +484,16 @@ public class AddAwardService {
 	 *
 	 * the below method validate the AuthorityName name length (>255 chars)
 	 */
-	private List<ValidationErrorResult> validateGrantingAuthorityName(SingleAward award) {
+	private List<SingleAwardValidationResult> validateGrantingAuthorityName(SingleAward award) {
 
-		List<ValidationErrorResult> validationGrantingAuthorityResultList = new ArrayList<>();
+		List<SingleAwardValidationResult> validationGrantingAuthorityResultList = new ArrayList<>();
 		
 		if(award.getGrantingAuthorityName()==null) {
-			validationGrantingAuthorityResultList.add(new ValidationErrorResult("Granting Authority name is Mandatory."));
+			validationGrantingAuthorityResultList.add(new SingleAwardValidationResult("grantingAuthorityName","Granting Authority name is Mandatory."));
 		}
 		
 		if(award.getGrantingAuthorityName()!=null && award.getGrantingAuthorityName().length() > 255){
-			validationGrantingAuthorityResultList.add(new ValidationErrorResult("Please enter a valid Granting Authority."));
+			validationGrantingAuthorityResultList.add(new SingleAwardValidationResult("grantingAuthorityName","Please enter a valid Granting Authority."));
 		}
 		
 		
@@ -508,11 +507,11 @@ public class AddAwardService {
 	 *
 	 * the below method validate the subsidy Measure Title length (>255 chars)
 	 */
-	private List<ValidationErrorResult> validateSubsidyMeasureNameLength(SingleAward award) {
+	private List<SingleAwardValidationResult> validateSubsidyMeasureNameLength(SingleAward award) {
 
-		List<ValidationErrorResult> validationSubsidyMeasureNameResultList = new ArrayList<>();
+		List<SingleAwardValidationResult> validationSubsidyMeasureNameResultList = new ArrayList<>();
 		if(award.getSubsidyControlTitle().length() > 255) {
-			validationSubsidyMeasureNameResultList.add(new ValidationErrorResult("Subsidy Measure Title must be 255 characters or fewer"));
+			validationSubsidyMeasureNameResultList.add(new SingleAwardValidationResult("subsidyControlTitle","Subsidy Measure Title must be 255 characters or fewer"));
 		}
 		
 		log.info("Validation Result Error list - Subsidy Measure Title must be 255 characters or fewer = "
@@ -525,11 +524,11 @@ public class AddAwardService {
 	 *
 	 * the below method validate the Subsidy number length (>7 chars)
 	 */
-	private List<ValidationErrorResult> validateSubsidyNumberLength(SingleAward award) {
+	private List<SingleAwardValidationResult> validateSubsidyNumberLength(SingleAward award) {
 		
-		List<ValidationErrorResult> validationSubsidyNumberLengthResultList = new ArrayList<>();
-		if(award.getSubsidyControlNumber().length() > 7){
-			validationSubsidyNumberLengthResultList.add(new ValidationErrorResult("Subsidy Control Number must be 7 characters or fewer."));
+		List<SingleAwardValidationResult> validationSubsidyNumberLengthResultList = new ArrayList<>();
+		if(award.getSubsidyControlNumber()!=null && award.getSubsidyControlNumber().length() > 7){
+			validationSubsidyNumberLengthResultList.add(new SingleAwardValidationResult("subsidyControlNumber","Subsidy Control Number must be 7 characters or fewer."));
 		}
 
 		log.info("Validation Result Error list - Beneficiary Name missing error = "
@@ -543,7 +542,7 @@ public class AddAwardService {
 	 * the below method validate the AuthorityName name exist in data base or not
 	 * (table=Granting_Authority)
 	 */
-	private List<ValidationErrorResult> validateGrantingAuthorityNameinDb(SingleAward award) {
+	private List<SingleAwardValidationResult> validateGrantingAuthorityNameinDb(SingleAward award) {
 
 		log.info("Calling processServiceproxy.getAllGrantingAuthorities()... - start");
 		
@@ -557,11 +556,11 @@ public class AddAwardService {
 
 		log.info("Granting Authority - String list " + grantingAuthorityNamesList);
 
-		List<ValidationErrorResult> validationGrantingAuthorityNameResultList = new ArrayList<>();
+		List<SingleAwardValidationResult> validationGrantingAuthorityNameResultList = new ArrayList<>();
 		
 		if(award.getGrantingAuthorityName() != null
 						&& !grantingAuthorityNamesList.contains(award.getGrantingAuthorityName())){
-			validationGrantingAuthorityNameResultList.add(new ValidationErrorResult("Please enter a valid Granting Authority."));
+			validationGrantingAuthorityNameResultList.add(new SingleAwardValidationResult("grantingAuthorityName","Please enter a valid Granting Authority."));
 			
 		}
 		
@@ -573,7 +572,7 @@ public class AddAwardService {
 		return validationGrantingAuthorityNameResultList;
 	}
 
-	private List<ValidationErrorResult> validateNationaIdAwards(SingleAward award) {
+	private List<SingleAwardValidationResult> validateNationaIdAwards(SingleAward award) {
 
 		/*
 		 * 1) National ID MUST consist of 8 numbers or 2 letters followed by 6 numbers
@@ -587,25 +586,25 @@ public class AddAwardService {
 		 */
 
 		// TODO - Validation 1 - National ID length check - implement filter method
-		List<ValidationErrorResult> validationNationalIdResultList = new ArrayList<>();
+		List<SingleAwardValidationResult> validationNationalIdResultList = new ArrayList<>();
 		
 		if(award.getNationalId()==null) {
-			validationNationalIdResultList.add(new ValidationErrorResult("National ID  is Mandatory."));
+			validationNationalIdResultList.add(new SingleAwardValidationResult("nationalId","National ID  is Mandatory."));
 			log.info("validation fail National ID  is Mandatory.");
 		}
 		
 		
-		if(award.getNationalId().length() > 10) {
-			validationNationalIdResultList.add(new ValidationErrorResult("National ID  must be 10 characters or fewer."));
+		if(award.getNationalId()!=null && award.getNationalId().length() > 10) {
+			validationNationalIdResultList.add(new SingleAwardValidationResult("nationalId","National ID  must be 10 characters or fewer."));
 			log.info("validation fail National ID  must be 10 characters or fewer");
 		}
 		
 		if(award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("VAT Number") && (award.getNationalId().length() > 9 || !award.getNationalId().matches("[0-9]+"))){
-			validationNationalIdResultList.add(new ValidationErrorResult("invalid VAT number."));
+			validationNationalIdResultList.add(new SingleAwardValidationResult("nationalIdType","invalid VAT number."));
 			log.info("invalid VAT number.");
 		}
 		if(award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("UTR Number") && !award.getNationalId().matches("[0-9]+")) {
-			validationNationalIdResultList.add(new ValidationErrorResult("invalid UTR Number."));
+			validationNationalIdResultList.add(new SingleAwardValidationResult("nationalIdType","invalid UTR Number."));
 			log.info("invalid UTR number.");
 		}
 		

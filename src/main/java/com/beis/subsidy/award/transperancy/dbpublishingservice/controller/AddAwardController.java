@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.SingleAwardValidationResult;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.SingleAwardValidationResults;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.ValidationErrorResult;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.ValidationResult;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SingleAward;
@@ -40,18 +41,18 @@ public class AddAwardController {
 	 * @return ResponseEntity - Return response status and description
 	 */
 	@PostMapping("addAward")
-	public ResponseEntity<SingleAwardValidationResult> addSubsidyAward(@Valid @RequestBody SingleAward awardInputRequest) {
+	public ResponseEntity<SingleAwardValidationResults> addSubsidyAward(@Valid @RequestBody SingleAward awardInputRequest) {
 
 		try {
 			log.info("Beofre calling validateFile::::");
 			// TODO - check if we can result list of errors here it self
-			SingleAwardValidationResult validationResult = addAwardService.validateAward(awardInputRequest);
+			SingleAwardValidationResults validationResult = addAwardService.validateAward(awardInputRequest);
 
 			return ResponseEntity.status(HttpStatus.OK).body(validationResult);
 		} catch (Exception e) {
 
 			// 2.0 - CatchException and return validation errors
-			SingleAwardValidationResult validationResult = new SingleAwardValidationResult();
+			SingleAwardValidationResults validationResult = new SingleAwardValidationResults();
 
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(validationResult);
 		}
