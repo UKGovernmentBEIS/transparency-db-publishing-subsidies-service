@@ -102,8 +102,11 @@ public class ExcelHelper {
 					break;
 
 				  case 3:
-
+					  if(currentCell.getCellType()==CellType.BLANK) {
+						  bulkUploadAwards.setSubsidyObjectiveOther(null);
+					  }else {
 					  bulkUploadAwards.setSubsidyObjectiveOther(currentCell.getStringCellValue());
+					  }
 
 					break;
 
@@ -149,8 +152,11 @@ public class ExcelHelper {
 					break;
 
 				  case 9:
-
+					  if(currentCell.getCellType()==CellType.BLANK) {
+						  bulkUploadAwards.setNationalId(null);
+					  }else {
 					  bulkUploadAwards.setNationalId( ((currentCell.getCellType().getCode() == CellType.NUMERIC.getCode()) ?  String.valueOf(Double.valueOf( currentCell.getNumericCellValue()).longValue()) : currentCell.getStringCellValue()));
+					  }
 
 					break;
 
@@ -182,7 +188,7 @@ public class ExcelHelper {
 					break;
 
 				  case 13:
-
+					  
 					  bulkUploadAwards.setLegalGrantingDate(convertDateToString(currentCell.getDateCellValue()));
 
 					break;
@@ -250,6 +256,7 @@ public class ExcelHelper {
 				date = formatter.format(incomingDate).toString();
 			} catch (ParseException e) {
 				log.error("Error while converting the date inside convertDateToString");
+				return date;
 			}
 		}
 	return date;
