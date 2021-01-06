@@ -51,7 +51,7 @@ public class AddAwardService {
 			 */
 			List<SingleAwardValidationResult> scNumberNameCheckList = validateScNumberScTitle(award);
 
-			List<SingleAwardValidationResult> subsidyControlNumberLengthList = validateSubsidyNumberLength(award);
+			//List<SingleAwardValidationResult> subsidyControlNumberLengthList = validateSubsidyNumberLength(award);
 
 			List<SingleAwardValidationResult> subsidyControlNumberMismatchList = validateSubsidyControlNumber(
 					award);
@@ -127,7 +127,7 @@ public class AddAwardService {
 			List<SingleAwardValidationResult> validationErrorResultList = Stream
 					.of(scNumberNameCheckList, subsidyMeasureTitleNameLengthList, subsidyPurposeCheckList,
 							nationalIdTypeMisingList, nationalIdMisingList, beneficiaryNameErrorList,
-							beneficiaryMisingList, subsidyControlNumberLengthList, subsidyControlNumberMismatchList,
+							beneficiaryMisingList, subsidyControlNumberMismatchList,
 							grantingAuthorityNameErrorList, grantingAuthorityErrorList, sizeOfOrgErrorList,
 							spendingRegionErrorList, spendingSectorErrorList, goodsOrServiceErrorList,SubsidyInstrumentErrorList,legalGrantingDateErrorList,SubsidyElementFullAmountErrorList)
 					.flatMap(x -> x.stream()).collect(Collectors.toList());
@@ -153,9 +153,11 @@ public class AddAwardService {
 				awardService.createAward(award);
 
 				log.info("After calling process api - response = ");
-				
+				validationResult.setTotalErrors(0);
 				validationResult
 						.setMessage((true ? "Award saved in Database" : "Error while saving awards in Database"));
+			}else {
+				validationResult.setTotalErrors(validationResult.getValidationErrorResult().size());
 			}
 			return validationResult;
 
@@ -381,9 +383,9 @@ public class AddAwardService {
 	private List<SingleAwardValidationResult> validateSubsidyControlNumber(SingleAward award) {
 
 		log.info("Calling awardService.getAllSubsidyMeasures()... - start");
-		
+
 		List<SubsidyMeasure> smList = awardService.getAllSubsidyMeasures();
-		
+
 		log.info("Calling processServiceproxy.getAllSubsidyMeasures()... - end");
 
 		List<String> subsidyControlNumberTitleList = smList.stream().map(sm -> sm.getScNumber())
@@ -392,27 +394,28 @@ public class AddAwardService {
 		log.info("subsidyControlNumberTitleList - String list " + subsidyControlNumberTitleList);
 		//
 		List<SingleAwardValidationResult> validationSubsidyControlNumberResultList = new ArrayList<>();
-		
-		if(award.getSubsidyControlNumber() != null && award.getSubsidyControlTitle() != null
-						&& !subsidyControlNumberTitleList.contains(award.getSubsidyControlNumber())) {
-			validationSubsidyControlNumberResultList.add(new SingleAwardValidationResult("subsidyControlNumber","Subsidy Control doest not exists."));
-			
-		} else if(award.getSubsidyControlNumber() != null && smList.stream().noneMatch(
-				bulkAward -> ((bulkAward.getScNumber().equals(award.getSubsidyControlNumber()))
-						&& (bulkAward.getSubsidyMeasureTitle().equals(award.getSubsidyControlTitle()))))){
-			validationSubsidyControlNumberResultList.add(new SingleAwardValidationResult("subsidyControlNumber","Subsidy Control number does not match with title."));
-			
-					
-				}
-		
-			
-		
+
+		if (award.getSubsidyControlNumber() != null && award.getSubsidyControlTitle() != null
+				&& !subsidyControlNumberTitleList.contains(award.getSubsidyControlNumber())) {
+			validationSubsidyControlNumberResultList
+					.add(new SingleAwardValidationResult("subsidyControlNumber", "Subsidy Control doest not exists."));
+
+		} else if (award.getSubsidyControlNumber() != null && award.getSubsidyControlNumber().length() > 7) {
+			validationSubsidyControlNumberResultList.add(new SingleAwardValidationResult("subsidyControlNumber",
+					"Subsidy Control Number must be 7 characters or fewer."));
+		} else if (award.getSubsidyControlNumber() != null && smList.stream()
+				.noneMatch(bulkAward -> ((bulkAward.getScNumber().equals(award.getSubsidyControlNumber()))
+						&& (bulkAward.getSubsidyMeasureTitle().equals(award.getSubsidyControlTitle()))))) {
+			validationSubsidyControlNumberResultList.add(new SingleAwardValidationResult("subsidyControlNumber",
+					"Subsidy Control number does not match with title."));
+
+		}
+
 		log.info(
 				"Back validation-3 - subsidy measure title mismatch check...printing list of awards with subsidy measure number error - end");
 
 		// validation scnumber with sctitle.
 
-		
 		log.info("Validation Result Error list - Subsidy Measure Number mismatch error = "
 				+ validationSubsidyControlNumberResultList);
 

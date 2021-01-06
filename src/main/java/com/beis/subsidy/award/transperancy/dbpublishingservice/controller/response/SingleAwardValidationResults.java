@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SingleAwardValidationResults {
 	
-	
+	public int totalErrors=0;
 	private List<SingleAwardValidationResult> validationErrorResult;
 	private String message;
 
