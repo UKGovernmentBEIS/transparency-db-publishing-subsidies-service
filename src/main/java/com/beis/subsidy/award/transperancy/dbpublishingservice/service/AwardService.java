@@ -107,7 +107,7 @@ public class AwardService {
 						bulkaward.getSpendingSector(),
 						"SYSTEM", 
 						"SYSTEM", 
-						"DRAFT",LocalDate.now(), LocalDate.now())
+						"Awaiting Approval",LocalDate.now(), LocalDate.now())
 				
 					)
 				.collect(Collectors.toList());
@@ -156,7 +156,7 @@ public class AwardService {
 					convertToDate(award.getLegalGrantingDate()), award.getSpendingRegion(),
 					((award.getSubsidyInstrument().equalsIgnoreCase("Other")) ? award.getSubsidyInstrumentOther()
 							: award.getSubsidyInstrument()),
-					award.getSpendingSector(), "SYSTEM", "SYSTEM", "DRAFT", LocalDate.now(), LocalDate.now());
+					award.getSpendingSector(), "SYSTEM", "SYSTEM", "Awaiting Approval", LocalDate.now(), LocalDate.now());
 
 			Award savedAwards = awardRepository.save(saveAward);
 			log.info("End process Bulk Awards db");
