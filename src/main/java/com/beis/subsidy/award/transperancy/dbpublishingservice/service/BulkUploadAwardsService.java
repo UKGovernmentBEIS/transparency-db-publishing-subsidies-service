@@ -45,7 +45,7 @@ public class BulkUploadAwardsService {
 			List<ValidationErrorResult> nationalIdTypeMisingList = validateNationalIdType(bulkUploadAwards);
 
 			// Validation - Beneficiary check
-			List<ValidationErrorResult> beneficiaryMisingList = validateBeneficiaryAwards(bulkUploadAwards);
+			//List<ValidationErrorResult> beneficiaryMisingList = validateBeneficiaryAwards(bulkUploadAwards);
 
 			// TODO - Validation - Make call to process API to get data for subsidy measure
 			/*
@@ -130,7 +130,7 @@ public class BulkUploadAwardsService {
 			List<ValidationErrorResult> validationErrorResultList = Stream
 					.of(scNumberNameCheckList, subsidyMeasureTitleNameLengthList, subsidyPurposeCheckList,
 							nationalIdTypeMisingList, nationalIdMisingList, beneficiaryNameErrorList,
-							beneficiaryMisingList, subsidyControlNumberLengthList, subsidyControlNumberMismatchList,
+							subsidyControlNumberLengthList, subsidyControlNumberMismatchList,
 							grantingAuthorityNameErrorList, grantingAuthorityErrorList, sizeOfOrgErrorList,
 							spendingRegionErrorList, spendingSectorErrorList, goodsOrServiceErrorList,SubsidyInstrumentErrorList,legalGrantingDateErrorList,SubsidyElementFullAmountErrorList)
 					.flatMap(x -> x.stream()).collect(Collectors.toList());
@@ -289,7 +289,7 @@ public class BulkUploadAwardsService {
 		List<ValidationErrorResult> validationspendingRegionErrorListResultList = new ArrayList<>();
 		validationspendingRegionErrorListResultList = spendingRegionErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "P",
-						"Spending Region  field is mandatory."))
+						"Spending Region field is mandatory."))
 				.collect(Collectors.toList());
 
 		List<BulkUploadAwards> spendingRegionOtherErrorRecordsList = bulkUploadAwards.stream()
@@ -471,6 +471,14 @@ public class BulkUploadAwardsService {
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "N",
 						"Legal Granting Date is Mandatory."))
 				.collect(Collectors.toList());
+		
+		List<BulkUploadAwards> legalGrantingDateFormatErrorRecordsList = bulkUploadAwards.stream().filter(
+				award -> ("invalid".equalsIgnoreCase(award.getLegalGrantingDate())))
+				.collect(Collectors.toList());
+		validationlegalGrantingDateErrorListResultList.addAll(legalGrantingDateFormatErrorRecordsList.stream()
+				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "N",
+						"Legal Granting Date format is invalid."))
+				.collect(Collectors.toList()));
 
 		log.info("Validation Result Error list - Legal Granting Date is Mandatory = "
 				+ validationlegalGrantingDateErrorListResultList);
@@ -816,9 +824,19 @@ public class BulkUploadAwardsService {
 		
 		int charCount=0;
 		int degitCount=0;
+		boolean isFormat=true;
+		int firstOccurence=-1;
 		for (int i = 0; i < companyNumber.length(); i++) {
 	         if (Character.isLetter(companyNumber.charAt(i))) {
 	        	 charCount++;
+	        	 if(firstOccurence < 0) {
+	        	 firstOccurence=i;
+	        	 
+	        	 }else {
+	        		 if(i-firstOccurence >1) {
+	        			 isFormat=false;
+	        		 }
+	        	 }
 	      }else if (Character.isDigit(companyNumber.charAt(i))){
 	    	  degitCount++;
 	      }

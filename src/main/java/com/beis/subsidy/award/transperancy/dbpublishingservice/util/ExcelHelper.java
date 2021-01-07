@@ -188,8 +188,16 @@ public class ExcelHelper {
 					break;
 
 				  case 13:
-					  
+					 
+					  if(currentCell.getCellType()==CellType.BLANK) {
+						  bulkUploadAwards.setLegalGrantingDate(null);
+					  }
+					  if(currentCell.getCellType()==CellType.STRING) {
+						  bulkUploadAwards.setLegalGrantingDate("invalid");
+						  
+					  }else {
 					  bulkUploadAwards.setLegalGrantingDate(convertDateToString(currentCell.getDateCellValue()));
+					  }
 
 					break;
 
