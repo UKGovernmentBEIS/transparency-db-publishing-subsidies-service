@@ -842,7 +842,7 @@ public class BulkUploadAwardsService {
 	      }
 		}
 		
-		if(charCount > 2 || degitCount > 6) {
+		if(!isFormat || (charCount > 2 || degitCount > 6)) {
 		return false;
 		}else {
 			return true;
