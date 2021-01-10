@@ -685,7 +685,7 @@ public class AddAwardService {
 						
 		for (int i = 0; i < grantingDate.length(); i++) {
 	         if ('.'== grantingDate.charAt(i)) {
-	        	 System.out.println("charrr "+grantingDate.charAt(i));
+	        	 
 	        	 return false;
 		}else if(Character.isLetter(grantingDate.charAt(i))) {
 			 return false;
