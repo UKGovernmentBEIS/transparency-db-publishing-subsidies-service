@@ -682,7 +682,7 @@ public class AddAwardService {
 	 */
 	private boolean validGrantingDate(String grantingDate) {
 		
-		System.out.println("grantingDate "+grantingDate);				
+						
 		for (int i = 0; i < grantingDate.length(); i++) {
 	         if ('.'== grantingDate.charAt(i)) {
 	        	 System.out.println("charrr "+grantingDate.charAt(i));
