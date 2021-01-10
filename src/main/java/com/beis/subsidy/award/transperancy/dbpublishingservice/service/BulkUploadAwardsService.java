@@ -766,7 +766,7 @@ public class BulkUploadAwardsService {
 		}
 		
 		List<BulkUploadAwards> nationsIdVATErrorRecordsList = bulkUploadAwards.stream()
-				.filter(award -> award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("VAT Number") && (award.getNationalId()!=null && (award.getNationalId().length() > 9 || !award.getNationalId().matches("[0-9]+")))).collect(Collectors.toList());
+				.filter(award -> award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("VAT Number") && (award.getNationalId()!=null && (award.getNationalId().length() != 9 || !award.getNationalId().matches("[0-9]+")))).collect(Collectors.toList());
 		
 		if(nationsIdVATErrorRecordsList.size()>0) {
 		validationNationalIdResultList.addAll(nationsIdVATErrorRecordsList.stream()
@@ -786,7 +786,7 @@ public class BulkUploadAwardsService {
 		}
 		
 		List<BulkUploadAwards> nationsIdCharityErrorRecordsList = bulkUploadAwards.stream()
-				.filter(award -> award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("Charity Number") && (award.getNationalId()!=null && (award.getNationalId().length() > 8 || !award.getNationalId().matches("[0-9]+")))).collect(Collectors.toList());
+				.filter(award -> award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("Charity Number") && (award.getNationalId()!=null && (award.getNationalId().length() != 8 || !award.getNationalId().matches("[0-9]+")))).collect(Collectors.toList());
 
 		validationNationalIdResultList.addAll(nationsIdCharityErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "J",
@@ -804,7 +804,7 @@ public class BulkUploadAwardsService {
 		
 		if(nationsIdCompanyNumberFormatErrorRecordsList.size()<0) {
 		List<BulkUploadAwards> nationsIdCompanyNumberErrorRecordsList = bulkUploadAwards.stream()
-				.filter(award -> award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("Company Registration Number") && (award.getNationalId()!=null && (award.getNationalId().length() > 8 || !award.getNationalId().matches("[0-9]+")))).collect(Collectors.toList());
+				.filter(award -> award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("Company Registration Number") && (award.getNationalId()!=null && (award.getNationalId().length() != 8 || !award.getNationalId().matches("[0-9]+")))).collect(Collectors.toList());
 
 		validationNationalIdResultList.addAll(nationsIdCompanyNumberErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "J",
@@ -822,7 +822,6 @@ public class BulkUploadAwardsService {
 	 */
 	private boolean validateCompanyNumber(String companyNumber) {
 		
-		System.out.println("companyNumber "+companyNumber);
 		int charCount=0;
 		int degitCount=0;
 		boolean isFormat=true;
@@ -843,8 +842,7 @@ public class BulkUploadAwardsService {
 	    	  degitCount++;
 	      }
 		}
-		System.out.println(" charCount "+charCount + "isFormat" + isFormat+ "degitCount "+degitCount);
-		
+				
 		if((charCount > 0)&& (!isFormat || (charCount > 2 || degitCount > 6))) {
 		return false;
 		}else {
