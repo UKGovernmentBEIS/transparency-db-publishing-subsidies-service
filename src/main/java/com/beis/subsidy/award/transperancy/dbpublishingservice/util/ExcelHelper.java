@@ -61,6 +61,7 @@ public class ExcelHelper {
 			log.info("last row " + sheet.getLastRowNum());
 			int rowNumber = 0;
 			  while (rows.hasNext()) {
+				  log.info("before rows.next");
 				Row currentRow = rows.next();
 
 				log.info("BulkUploadAwardsController Going Inside switch block");
@@ -273,9 +274,12 @@ public class ExcelHelper {
 	public static boolean containsValue(Row row)
 	{
 	    boolean flag = true;
+	   if(row.getCell(0).getCellType()==CellType.BLANK && row.getCell(1).getCellType()==CellType.BLANK && row.getCell(2).getCellType()==CellType.BLANK) {
+		   return false;
+	   }
 	    if ((StringUtils.isEmpty(String.valueOf(row.getCell(0))) == true && 
 	    		StringUtils.isEmpty(String.valueOf(row.getCell(1))) == true && StringUtils.isEmpty(String.valueOf(row.getCell(2))) == true  ) ||
-	    (String.valueOf(row.getCell(0))==null && String.valueOf(row.getCell(1))==null && String.valueOf(row.getCell(2))==null ))
+	    (String.valueOf(row.getCell(0))==null && String.valueOf(row.getCell(1))==null && String.valueOf(row.getCell(2))==null ) && row.getCell(2).getCellType()==CellType.BLANK)
 	    {
 			flag = false;
 	    }

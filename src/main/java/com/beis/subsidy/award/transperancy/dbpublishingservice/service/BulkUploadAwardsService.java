@@ -190,7 +190,7 @@ public class BulkUploadAwardsService {
 
 		List<ValidationErrorResult> validationScNumberScTitlResultList = new ArrayList<>();
 		validationScNumberScTitlResultList = ScNumberScTitleErrorRecordsList.stream()
-				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "E",
+				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "A",
 						"Either Subsidy Control number or Subsidy title field is mandatory."))
 				.collect(Collectors.toList());
 
@@ -527,7 +527,7 @@ public class BulkUploadAwardsService {
 				.collect(Collectors.toList());
 
 		validationSubsidyControlNumberResultList = subsidyControlNumberWithNameErrorRecordsList.stream()
-				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "B",
+				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "A",
 						"Subsidy Control number does not match with title."))
 				.collect(Collectors.toList());
 
@@ -766,7 +766,7 @@ public class BulkUploadAwardsService {
 		}
 		
 		List<BulkUploadAwards> nationsIdVATErrorRecordsList = bulkUploadAwards.stream()
-				.filter(award -> award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("VAT Number") && (award.getNationalId()!=null && (award.getNationalId().length() > 9 || !award.getNationalId().matches("[0-9]+")))).collect(Collectors.toList());
+				.filter(award -> award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("VAT Number") && (award.getNationalId()!=null && (award.getNationalId().length() != 9 || !award.getNationalId().matches("[0-9]+")))).collect(Collectors.toList());
 		
 		if(nationsIdVATErrorRecordsList.size()>0) {
 		validationNationalIdResultList.addAll(nationsIdVATErrorRecordsList.stream()
@@ -786,7 +786,7 @@ public class BulkUploadAwardsService {
 		}
 		
 		List<BulkUploadAwards> nationsIdCharityErrorRecordsList = bulkUploadAwards.stream()
-				.filter(award -> award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("Charity Number") && (award.getNationalId()!=null && (award.getNationalId().length() > 8 || !award.getNationalId().matches("[0-9]+")))).collect(Collectors.toList());
+				.filter(award -> award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("Charity Number") && (award.getNationalId()!=null && (award.getNationalId().length() != 8 || !award.getNationalId().matches("[0-9]+")))).collect(Collectors.toList());
 
 		validationNationalIdResultList.addAll(nationsIdCharityErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "J",
@@ -804,7 +804,7 @@ public class BulkUploadAwardsService {
 		
 		if(nationsIdCompanyNumberFormatErrorRecordsList.size()<0) {
 		List<BulkUploadAwards> nationsIdCompanyNumberErrorRecordsList = bulkUploadAwards.stream()
-				.filter(award -> award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("Company Registration Number") && (award.getNationalId()!=null && (award.getNationalId().length() > 8 || !award.getNationalId().matches("[0-9]+")))).collect(Collectors.toList());
+				.filter(award -> award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("Company Registration Number") && (award.getNationalId()!=null && (award.getNationalId().length() != 8 || !award.getNationalId().matches("[0-9]+")))).collect(Collectors.toList());
 
 		validationNationalIdResultList.addAll(nationsIdCompanyNumberErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "J",
@@ -826,6 +826,7 @@ public class BulkUploadAwardsService {
 		int degitCount=0;
 		boolean isFormat=true;
 		int firstOccurence=-1;
+		
 		for (int i = 0; i < companyNumber.length(); i++) {
 	         if (Character.isLetter(companyNumber.charAt(i))) {
 	        	 charCount++;
@@ -841,8 +842,8 @@ public class BulkUploadAwardsService {
 	    	  degitCount++;
 	      }
 		}
-		
-		if(!isFormat || (charCount > 2 || degitCount > 6)) {
+				
+		if((charCount > 0)&& (!isFormat || (charCount > 2 || degitCount > 6))) {
 		return false;
 		}else {
 			return true;
