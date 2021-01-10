@@ -681,18 +681,16 @@ public class AddAwardService {
 	 * 
 	 */
 	private boolean validGrantingDate(String grantingDate) {
-		
-						
+
+		boolean isValildDate = true;
 		for (int i = 0; i < grantingDate.length(); i++) {
-	         if ('.'== grantingDate.charAt(i)) {
-	        	 
-	        	 return false;
-		}else if(Character.isLetter(grantingDate.charAt(i))) {
-			 return false;
+			if ('.' == grantingDate.charAt(i) || Character.isLetter(grantingDate.charAt(i))) {
+
+				isValildDate = false;
+			}
 		}
-		}
-				
-		return true;
+
+		return isValildDate;
 	}	
 	
 }
