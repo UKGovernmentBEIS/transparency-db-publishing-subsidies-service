@@ -45,7 +45,7 @@ public class AwardService {
 	private SubsidyMeasureRepository smRepository;
 	
 	private Date convertToDate(String incomingDate) {
-		SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
+		SimpleDateFormat formatter = new SimpleDateFormat("dd-mm-yyyy", Locale.ENGLISH);
 		Date date = null ;
 		try {
 			date = formatter.parse(incomingDate);
@@ -144,7 +144,7 @@ public class AwardService {
 
 			BulkUploadAwards tempAward = new BulkUploadAwards();
 			tempAward.setGrantingAuthorityName(award.getGrantingAuthorityName());
-			tempAward.setSubsidyControlTitle(tempAward.getSubsidyControlTitle());
+			tempAward.setSubsidyControlTitle(award.getSubsidyControlTitle());
 
 			Award saveAward = new Award(null, beneficiary, getGrantingAuthority(tempAward),
 					getSubsidyMeasure(tempAward), award.getSubsidyAmountRange(),
@@ -194,7 +194,7 @@ private Long getBeneficiaryId(BulkUploadAwards bulkaward, List<Beneficiary> bene
 	
 private SubsidyMeasure getSubsidyMeasure(BulkUploadAwards award) {
 		
-		log.info("Inside getSubsidyControlId...");
+		log.info("Inside getSubsidyControlId..."+award.getSubsidyControlTitle());
 		List<SubsidyMeasure> smList = smRepository.findAll();
 		
 		Optional<SubsidyMeasure> smOptional = smList.stream().filter( sm -> sm.getSubsidyMeasureTitle().equals(award.getSubsidyControlTitle())).findAny();
