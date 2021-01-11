@@ -776,7 +776,7 @@ public class BulkUploadAwardsService {
 		}
 		
 		List<BulkUploadAwards> nationsIdUTRErrorRecordsList = bulkUploadAwards.stream()
-				.filter(award -> award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("UTR Number") && (award.getNationalId()!=null && !award.getNationalId().matches("[0-9]+"))).collect(Collectors.toList());
+				.filter(award -> award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("UTR Number") && (award.getNationalId()!=null && (award.getNationalId().length() != 10 ||  !award.getNationalId().matches("[0-9]+")))).collect(Collectors.toList());
 		
 		if(nationsIdUTRErrorRecordsList.size()>0) {
 		validationNationalIdResultList.addAll(nationsIdUTRErrorRecordsList.stream()
@@ -802,15 +802,15 @@ public class BulkUploadAwardsService {
 						"invalid Company Registration Number."))
 				.collect(Collectors.toList()));
 		
-		if(nationsIdCompanyNumberFormatErrorRecordsList.size()<0) {
-		List<BulkUploadAwards> nationsIdCompanyNumberErrorRecordsList = bulkUploadAwards.stream()
-				.filter(award -> award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("Company Registration Number") && (award.getNationalId()!=null && (award.getNationalId().length() != 8 || !award.getNationalId().matches("[0-9]+")))).collect(Collectors.toList());
+		
+		/*List<BulkUploadAwards> nationsIdCompanyNumberErrorRecordsList = bulkUploadAwards.stream()
+				.filter(award -> award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("Company Registration Number") && ((award.getNationalId()!=null && (award.getNationalId().length() != 8 )))).collect(Collectors.toList());
 
 		validationNationalIdResultList.addAll(nationsIdCompanyNumberErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "J",
 						"invalid Company Registration Number."))
-				.collect(Collectors.toList()));
-		}
+				.collect(Collectors.toList()));*/
+		
 		
 		log.info("Validation Result Error list - National ID missing error = " + validationNationalIdResultList);
 
@@ -821,31 +821,36 @@ public class BulkUploadAwardsService {
 	 * 
 	 */
 	private boolean validateCompanyNumber(String companyNumber) {
-		
-		int charCount=0;
-		int degitCount=0;
-		boolean isFormat=true;
-		int firstOccurence=-1;
-		
-		for (int i = 0; i < companyNumber.length(); i++) {
-	         if (Character.isLetter(companyNumber.charAt(i))) {
-	        	 charCount++;
-	        	 if(firstOccurence < 0) {
-	        	 firstOccurence=i;
-	        	 
-	        	 }else {
-	        		 if(i-firstOccurence >1) {
-	        			 isFormat=false;
-	        		 }
-	        	 }
-	      }else if (Character.isDigit(companyNumber.charAt(i))){
-	    	  degitCount++;
-	      }
+
+		int charCount = 0;
+		int degitCount = 0;
+		boolean isFormat = true;
+		int firstOccurence = -1;
+
+		if(companyNumber.length()!=8) {
+			return false;
 		}
-				
-		if((charCount > 0)&& (!isFormat || (charCount > 2 || degitCount > 6))) {
-		return false;
-		}else {
+		for (int i = 0; i < companyNumber.length(); i++) {
+			if (Character.isLetter(companyNumber.charAt(i))) {
+				charCount++;
+				if (firstOccurence < 0) {
+					firstOccurence = i;
+
+				} else {
+					if (i - firstOccurence > 1) {
+						isFormat = false;
+					}
+				}
+			} else if (Character.isDigit(companyNumber.charAt(i))) {
+				degitCount++;
+			}
+		}
+
+		if ((charCount > 0) && (!isFormat || (charCount > 2 || degitCount > 6))) {
+			return false;
+		} else if (charCount == 0 && degitCount == 8) {
+			return true;
+		} else {
 			return true;
 		}
 	}
