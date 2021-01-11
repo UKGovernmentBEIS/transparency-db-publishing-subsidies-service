@@ -45,7 +45,19 @@ public class AwardService {
 	private SubsidyMeasureRepository smRepository;
 	
 	private Date convertToDate(String incomingDate) {
-		SimpleDateFormat formatter = new SimpleDateFormat("dd-mm-yyyy", Locale.ENGLISH);
+		SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
+		Date date = null ;
+		try {
+			date = formatter.parse(incomingDate);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		
+		return date;
+	}
+	
+	private Date convertToDateSingleUpload(String incomingDate) {
+		SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
 		Date date = null ;
 		try {
 			date = formatter.parse(incomingDate);
@@ -152,8 +164,8 @@ public class AwardService {
 							: BigDecimal.ZERO),
 					((award.getSubsidyObjective().equalsIgnoreCase("Other")) ? award.getSubsidyObjectiveOther()
 							: award.getSubsidyObjective()),
-					award.getGoodsOrServices(), convertToDate(award.getLegalGrantingDate()),
-					convertToDate(award.getLegalGrantingDate()), award.getSpendingRegion(),
+					award.getGoodsOrServices(), convertToDateSingleUpload(award.getLegalGrantingDate()),
+					convertToDateSingleUpload(award.getLegalGrantingDate()), award.getSpendingRegion(),
 					((award.getSubsidyInstrument().equalsIgnoreCase("Other")) ? award.getSubsidyInstrumentOther()
 							: award.getSubsidyInstrument()),
 					award.getSpendingSector(), "SYSTEM", "SYSTEM", "Awaiting Approval", LocalDate.now(), LocalDate.now());
