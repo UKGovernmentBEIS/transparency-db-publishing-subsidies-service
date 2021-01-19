@@ -111,11 +111,11 @@ public class AwardService {
 		List<Award> awards = bulkAwards.stream()
 				.map( bulkaward -> new Award(null, getBeneficiaryDetails(bulkaward, beneficiaries), getGrantingAuthority(bulkaward), getSubsidyMeasure(bulkaward), bulkaward.getSubsidyAmountRange(), 
 						( (bulkaward.getSubsidyAmountExact() != null) ? new BigDecimal(bulkaward.getSubsidyAmountExact()) : BigDecimal.ZERO),  
-						((bulkaward.getSubsidyObjective().equalsIgnoreCase("Other"))? bulkaward.getSubsidyObjectiveOther():bulkaward.getSubsidyObjective()), bulkaward.getGoodsOrServices(),
+						((bulkaward.getSubsidyObjective().equalsIgnoreCase("Other"))? "Other - "+bulkaward.getSubsidyObjectiveOther():bulkaward.getSubsidyObjective()), bulkaward.getGoodsOrServices(),
 						convertToDate(bulkaward.getLegalGrantingDate()),
 						convertToDate(bulkaward.getLegalGrantingDate()),
 						bulkaward.getSpendingRegion(), 
-						((bulkaward.getSubsidyInstrument().equalsIgnoreCase("Other"))? bulkaward.getSubsidyInstrumentOther():bulkaward.getSubsidyInstrument()),
+						((bulkaward.getSubsidyInstrument().equalsIgnoreCase("Other"))? "Other - "+bulkaward.getSubsidyInstrumentOther():bulkaward.getSubsidyInstrument()),
 						bulkaward.getSpendingSector(),
 						"SYSTEM", 
 						"SYSTEM", 
@@ -162,11 +162,11 @@ public class AwardService {
 					getSubsidyMeasure(tempAward), award.getSubsidyAmountRange(),
 					((award.getSubsidyAmountExact() != null) ? new BigDecimal(award.getSubsidyAmountExact())
 							: BigDecimal.ZERO),
-					((award.getSubsidyObjective().equalsIgnoreCase("Other")) ? award.getSubsidyObjectiveOther()
+					((award.getSubsidyObjective().equalsIgnoreCase("Other")) ? "Other - "+award.getSubsidyObjectiveOther()
 							: award.getSubsidyObjective()),
 					award.getGoodsOrServices(), convertToDateSingleUpload(award.getLegalGrantingDate()),
 					convertToDateSingleUpload(award.getLegalGrantingDate()), award.getSpendingRegion(),
-					((award.getSubsidyInstrument().equalsIgnoreCase("Other")) ? award.getSubsidyInstrumentOther()
+					((award.getSubsidyInstrument().equalsIgnoreCase("Other")) ? "Other - "+award.getSubsidyInstrumentOther()
 							: award.getSubsidyInstrument()),
 					award.getSpendingSector(), "SYSTEM", "SYSTEM", "Awaiting Approval", LocalDate.now(), LocalDate.now());
 

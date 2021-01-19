@@ -786,7 +786,7 @@ public class BulkUploadAwardsService {
 		}
 		
 		List<BulkUploadAwards> nationsIdCharityErrorRecordsList = bulkUploadAwards.stream()
-				.filter(award -> award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("Charity Number") && (award.getNationalId()!=null && (award.getNationalId().length() != 8 || !award.getNationalId().matches("[0-9]+")))).collect(Collectors.toList());
+				.filter(award -> award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("Charity Number") && (award.getNationalId()!=null && (award.getNationalId().length() > 8 || !award.getNationalId().matches("[0-9]+")))).collect(Collectors.toList());
 
 		validationNationalIdResultList.addAll(nationsIdCharityErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "J",
