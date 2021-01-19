@@ -84,6 +84,9 @@ public class Award {
 	@Column(name = "STATUS")
 	private String status;
 	
+	@Column(name = "REASON")
+	private String reason;
+	
 	@CreationTimestamp
 	@Column(name = "CREATED_TIMESTAMP")
 	private LocalDate createdTimestamp;
