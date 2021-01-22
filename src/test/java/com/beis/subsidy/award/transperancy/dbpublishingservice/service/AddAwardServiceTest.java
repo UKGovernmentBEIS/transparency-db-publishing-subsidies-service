@@ -94,7 +94,7 @@ public class AddAwardServiceTest {
 		when(smRepository.findAll()).thenReturn(smList);
 
 		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
-		expectedResult.setTotalErrors(2);
+		expectedResult.setTotalErrors(1);
 		expectedResult.setMessage("Award saved in Database");
 
 		when(awardServiceMock.getAllSubsidyMeasures()).thenReturn(submList);
