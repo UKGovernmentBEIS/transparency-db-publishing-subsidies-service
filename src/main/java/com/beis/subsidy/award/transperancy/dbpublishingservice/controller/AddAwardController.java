@@ -1,7 +1,5 @@
 package com.beis.subsidy.award.transperancy.dbpublishingservice.controller;
 
-import java.util.Arrays;
-
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.SingleAwardValidationResult;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.SingleAwardValidationResults;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.ValidationErrorResult;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.ValidationResult;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SingleAward;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.service.AddAwardService;
 
@@ -46,6 +41,9 @@ public class AddAwardController {
 		try {
 			log.info("Beofre calling validateFile::::");
 			// TODO - check if we can result list of errors here it self
+			if(awardInputRequest==null) {
+				throw new Exception("awardInputRequest is empty");
+			}
 			SingleAwardValidationResults validationResult = addAwardService.validateAward(awardInputRequest);
 
 			return ResponseEntity.status(HttpStatus.OK).body(validationResult);

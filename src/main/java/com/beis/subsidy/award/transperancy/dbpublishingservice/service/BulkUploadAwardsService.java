@@ -217,7 +217,7 @@ public class BulkUploadAwardsService {
 		List<ValidationErrorResult> validationSizeOfOrgErrorListResultList = new ArrayList<>();
 		validationSizeOfOrgErrorListResultList = sizeOfOrgErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "L",
-						"Size of Organization  field is mandatory."))
+						"Size of Organization field is mandatory."))
 				.collect(Collectors.toList());
 
 		log.info("Validation Result Error list - Size of Organizationshould enter = "
@@ -415,7 +415,7 @@ public class BulkUploadAwardsService {
 		if(SubsidyInstrumentTaxErrorRecordsList.size() > 0) {
 		validationSubsidyInstrumentErrorListResultList = SubsidyInstrumentTaxErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "G",
-						"Subsidy Element Full Amount Range is mandatory when Subsidy Instrument is Tax Measure ."))
+						"Subsidy Element Full Amount Range is mandatory when Subsidy Instrument is Tax Measure."))
 				.collect(Collectors.toList());
 		}
 		log.info("Validation Result Error list - Subsidy Instrument "
@@ -556,14 +556,14 @@ public class BulkUploadAwardsService {
 		return validationNationalIdTypeResultList;
 	}
 
-	private List<ValidationErrorResult> validateBeneficiaryAwards(List<BulkUploadAwards> bulkUploadAwards) {
+	/*private List<ValidationErrorResult> validateBeneficiaryAwards(List<BulkUploadAwards> bulkUploadAwards) {
 
-		/*
+		
 		 * 2) If the ‘National ID type’ is a UTR or a VAT number, then validate if the
 		 * beneficiary name is entered and if not return an error as above. Validation
 		 * Error - Row 9 - Beneficiary missing
 		 * 
-		 */
+		 
 		// TODO - Validation 2 - National ID Type UTR/ VAT, then check beneficiary
 		// present - implement filter method
 		List<BulkUploadAwards> beneficiaryMissingErrorRecordsList = bulkUploadAwards.stream()
@@ -581,7 +581,7 @@ public class BulkUploadAwardsService {
 				"Validation Result Error list - Beneficiary Name missing error = " + validationBeneficiaryIdResultList);
 
 		return validationBeneficiaryIdResultList;
-	}
+	}*/
 
 	/*
 	 *
@@ -656,7 +656,7 @@ public class BulkUploadAwardsService {
 		List<ValidationErrorResult> validationSubsidyMeasureNameResultList = new ArrayList<>();
 		validationSubsidyMeasureNameResultList = validateSubsidyMeasureNameErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "B",
-						"Subsidy Measure Title must be 255 characters or fewer "))
+						"Subsidy Measure Title must be 255 characters or fewer"))
 				.collect(Collectors.toList());
 
 		log.info("Validation Result Error list - Subsidy Measure Title must be 255 characters or fewer = "
