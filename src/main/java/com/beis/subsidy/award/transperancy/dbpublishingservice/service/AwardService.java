@@ -187,22 +187,7 @@ public class AwardService {
 		return ( (benfOptional != null) ? benfOptional.get() : null );
 	}
 
-private Long getBeneficiaryId(BulkUploadAwards bulkaward, List<Beneficiary> beneficiaries) {
-		
-		Optional<Beneficiary> beneOptional = beneficiaries.stream().filter(bene -> bene.getBeneficiaryName().equals(bulkaward.getBeneficiaryName())).findAny();
-		
-		return ( (beneOptional != null) ? beneOptional.get().getBeneficiaryId() : null );
-	}
 
-	private String getSubsidyControlId(BulkUploadAwards award) {
-		
-		log.info("Inside getSubsidyControlId...");
-		List<SubsidyMeasure> smList = smRepository.findAll();
-		
-		Optional<SubsidyMeasure> smOptional = smList.stream().filter( sm -> sm.getSubsidyMeasureTitle().equals(award.getSubsidyControlTitle())).findAny();
-		
-		return ( (smOptional != null) ? smOptional.get().getScNumber(): null);
-	}
 	
 private SubsidyMeasure getSubsidyMeasure(BulkUploadAwards award) {
 		
@@ -214,19 +199,7 @@ private SubsidyMeasure getSubsidyMeasure(BulkUploadAwards award) {
 		return ( (smOptional != null) ? smOptional.get(): null);
 	}
 
-	private Long getGrantingAuthorityId(BulkUploadAwards award) {
-		
-		log.info("Inside getGrantingAuthorityId...");
-
-		List<GrantingAuthority> gaList = gaRepository.findAll();
-		
-		log.info("All granting authority = " + gaList);
-		
-		Optional<GrantingAuthority> gaOptional = gaList.stream().filter(ga -> ga.getGrantingAuthorityName().equals(award.getGrantingAuthorityName())).findAny();
-		
-		log.info("Returning from getGrantingAuthorityId.. = " + gaOptional.get().getGaId());
-		return ((gaOptional != null) ? gaOptional.get().getGaId() : null);
-	}
+	
 	
 	private GrantingAuthority getGrantingAuthority(BulkUploadAwards award) {
 		

@@ -11,8 +11,6 @@ import org.springframework.stereotype.Service;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.SingleAwardValidationResult;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.SingleAwardValidationResults;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.SingleAwardValidationResult;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.ValidationResult;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.GrantingAuthority;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SingleAward;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SubsidyMeasure;
@@ -340,7 +338,7 @@ public class AddAwardService {
 		
 		if((award.getSubsidyInstrument()!=null && award.getSubsidyInstrument().startsWith("Tax"))&& (award.getSubsidyAmountRange()==null || StringUtils.isEmpty(award.getSubsidyAmountRange()))) {
 			
-			validationSubsidyInstrumentErrorListResultList.add(new SingleAwardValidationResult("subsidyAmountRange","Subsidy Element Full Amount Range is mandatory when Subsidy Instrument is Tax Measure ."));
+			validationSubsidyInstrumentErrorListResultList.add(new SingleAwardValidationResult("subsidyAmountRange","Subsidy Element Full Amount Range is mandatory when Subsidy Instrument is Tax Measure."));
 		}
 		
 		
@@ -421,7 +419,7 @@ public class AddAwardService {
 		} else if (award.getSubsidyControlNumber() != null && !StringUtils.isEmpty(award.getSubsidyControlNumber())
 				&& !subsidyControlNumberTitleList.contains(award.getSubsidyControlNumber())) {
 			validationSubsidyControlNumberResultList
-					.add(new SingleAwardValidationResult("subsidyControlNumber", "Subsidy Control doest not exists."));
+					.add(new SingleAwardValidationResult("subsidyControlNumber", "Subsidy Control number does not exists."));
 
 		} else if (award.getSubsidyControlNumber() != null && smList.stream()
 				.noneMatch(bulkAward -> ((bulkAward.getScNumber().equals(award.getSubsidyControlNumber()))
