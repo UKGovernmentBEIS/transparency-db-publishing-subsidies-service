@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SingleAward {
 	
+	private String awardNumber;
 	private String subsidyControlTitle;
 	private String subsidyControlNumber;
 	private String nationalIdType;
