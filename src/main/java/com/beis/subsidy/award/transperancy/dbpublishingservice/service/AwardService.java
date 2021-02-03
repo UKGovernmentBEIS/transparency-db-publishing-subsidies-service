@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.GrantingAuthorityRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.SubsidyMeasureRepository;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -157,6 +159,7 @@ public class AwardService {
 			BulkUploadAwards tempAward = new BulkUploadAwards();
 			tempAward.setGrantingAuthorityName(award.getGrantingAuthorityName());
 			tempAward.setSubsidyControlTitle(award.getSubsidyControlTitle());
+			tempAward.setSubsidyControlNumber(award.getSubsidyControlNumber());
 
 			Award saveAward = new Award(null, beneficiary, getGrantingAuthority(tempAward),
 					getSubsidyMeasure(tempAward), award.getSubsidyAmountRange(),
@@ -179,6 +182,52 @@ public class AwardService {
 			return null;
 		}
 	}
+	
+	@Transactional
+	public Award updateAward(SingleAward award) {
+		try {
+			log.info("inside updateAward db");
+
+			Beneficiary beneficiary = new Beneficiary();
+			beneficiary.setBeneficiaryName(award.getBeneficiaryName());
+			beneficiary.setBeneficiaryType("Individual");
+			beneficiary.setNationalId(award.getNationalId());
+			beneficiary.setNationalIdType(award.getNationalIdType());
+			beneficiary.setOrgSize(award.getOrgSize());
+			beneficiary.setCreatedBy("SYSTEM");
+			beneficiary.setApprovedBy("SYSTEM");
+			beneficiary.setStatus("DRAFT");
+			beneficiary.setSicCode("14455");
+			beneficiary.setCreatedTimestamp(LocalDate.now());
+			beneficiary.setLastModifiedTimestamp(LocalDate.now());
+
+			beneficiaryRepository.save(beneficiary);
+
+			BulkUploadAwards tempAward = new BulkUploadAwards();
+			tempAward.setGrantingAuthorityName(award.getGrantingAuthorityName());
+			tempAward.setSubsidyControlTitle(award.getSubsidyControlTitle());
+
+			Award saveAward = new Award(Long.valueOf(award.getAwardNumber()), beneficiary, getGrantingAuthority(tempAward),
+					getSubsidyMeasure(tempAward), award.getSubsidyAmountRange(),
+					((award.getSubsidyAmountExact() != null) ? new BigDecimal(award.getSubsidyAmountExact())
+							: BigDecimal.ZERO),
+					((award.getSubsidyObjective().equalsIgnoreCase("Other")) ? "Other - "+award.getSubsidyObjectiveOther()
+							: award.getSubsidyObjective()),
+					award.getGoodsOrServices(), convertToDateSingleUpload(award.getLegalGrantingDate()),
+					convertToDateSingleUpload(award.getLegalGrantingDate()), award.getSpendingRegion(),
+					((award.getSubsidyInstrument().equalsIgnoreCase("Other")) ? "Other - "+award.getSubsidyInstrumentOther()
+							: award.getSubsidyInstrument()),
+					award.getSpendingSector(), "SYSTEM", "SYSTEM", "Awaiting Approval", null,LocalDate.now(), LocalDate.now());
+
+			Award savedAwards = awardRepository.save(saveAward);
+			log.info("End process Upload Awards db");
+
+			return savedAwards;
+		} catch (Exception serviceException) {
+			log.info("serviceException occured::" + serviceException.getMessage());
+			return null;
+		}
+	}
 
 	private Beneficiary getBeneficiaryDetails(BulkUploadAwards bulkAward, List<Beneficiary> beneficiaries) {
 		
@@ -189,14 +238,22 @@ public class AwardService {
 
 
 	
-private SubsidyMeasure getSubsidyMeasure(BulkUploadAwards award) {
-		
-		log.info("Inside getSubsidyControlId..."+award.getSubsidyControlTitle());
+	private SubsidyMeasure getSubsidyMeasure(BulkUploadAwards award) {
+
+		log.info("Inside getSubsidyControlId..." + award.getSubsidyControlTitle());
 		List<SubsidyMeasure> smList = smRepository.findAll();
-		
-		Optional<SubsidyMeasure> smOptional = smList.stream().filter( sm -> sm.getSubsidyMeasureTitle().equals(award.getSubsidyControlTitle())).findAny();
-		
-		return ( (smOptional != null) ? smOptional.get(): null);
+		Optional<SubsidyMeasure> smOptional = null;
+		if (!StringUtils.isEmpty(award.getSubsidyControlTitle())) {
+			log.info("inside contrl title");
+			smOptional = smList.stream()
+					.filter(sm -> sm.getSubsidyMeasureTitle().equals(award.getSubsidyControlTitle())).findAny();
+		} else {
+			log.info("inside else title");
+			smOptional = smList.stream().filter(sm -> sm.getScNumber().equals(award.getSubsidyControlNumber()))
+					.findAny();
+		}
+
+		return ((smOptional != null) ? smOptional.get() : null);
 	}
 
 	

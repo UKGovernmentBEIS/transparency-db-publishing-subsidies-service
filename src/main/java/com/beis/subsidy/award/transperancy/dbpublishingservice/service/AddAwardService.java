@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.SingleAwardValidationResult;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.SingleAwardValidationResults;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.model.Award;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.GrantingAuthority;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SingleAward;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SubsidyMeasure;
@@ -148,12 +149,12 @@ public class AddAwardService {
 				
 				log.info("No validation error in bulk excel template");
 
-				awardService.createAward(award);
+				Award savedAward =awardService.createAward(award);
 
 				log.info("After calling process api - response = ");
 				validationResult.setTotalErrors(0);
 				validationResult
-						.setMessage((true ? "Award saved in Database" : "Error while saving awards in Database"));
+						.setMessage((true ? savedAward.getAwardNumber()+" Award saved in Database" : "Error while saving awards in Database"));
 			}else {
 				validationResult.setTotalErrors(validationResult.getValidationErrorResult().size());
 				validationResult.setMessage("validation error");
@@ -421,7 +422,7 @@ public class AddAwardService {
 			validationSubsidyControlNumberResultList
 					.add(new SingleAwardValidationResult("subsidyControlNumber", "Subsidy Control number does not exists."));
 
-		} else if (award.getSubsidyControlNumber() != null && smList.stream()
+		} else if ((award.getSubsidyControlNumber() != null && !StringUtils.isEmpty(award.getSubsidyControlTitle())) && smList.stream()
 				.noneMatch(bulkAward -> ((bulkAward.getScNumber().equals(award.getSubsidyControlNumber()))
 						&& (bulkAward.getSubsidyMeasureTitle().equals(award.getSubsidyControlTitle()))))) {
 			validationSubsidyControlNumberResultList.add(new SingleAwardValidationResult("subsidyControlNumber",
