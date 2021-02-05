@@ -28,9 +28,7 @@ public class AddAwardController {
 
 	@Autowired
 	public AwardService awardService;
-	@Autowired
-	Environment environment;
-
+	
 	/*
 	 * @GetMapping("/health") public ResponseEntity<String> getHealth() { return new
 	 * ResponseEntity<>("Successful health check - AddAward Service API",
@@ -49,7 +47,7 @@ public class AddAwardController {
 			@Valid @RequestBody SingleAward awardInputRequest) {
 
 		try {
-			log.info("environment ***** " + environment.getProperty("keyvault_connection"));
+			
 			log.info("Beofre calling add Award::::");
 			// TODO - check if we can result list of errors here it self
 			if (awardInputRequest == null) {
