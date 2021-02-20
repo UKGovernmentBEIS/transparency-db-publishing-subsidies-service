@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.SingleAwardValidationResult;
@@ -25,25 +26,26 @@ public class AddAwardService {
 	@Autowired
 	private AwardService awardService;
 
+	@Value("${loggingComponentName}")
+	private String loggingComponentName;
+
 	/*
 	 * the below method validate the Award given in  request.
 	 */
-	public SingleAwardValidationResults validateAward(SingleAward award) {
+	public SingleAwardValidationResults validateAward(SingleAward award, String role) {
 
-		try {
+		//try {
 
-			
-			log.info("input Award is "+award);
+			log.info("{} :: Inside validateAward Award", loggingComponentName);
 
 			// Validation National Id length check
-			List<SingleAwardValidationResult> nationalIdMisingList = validateNationaIdAwards(award);
+			List<SingleAwardValidationResult> nationalIdMisingList = validateNationalIdAwards(award);
 
 			List<SingleAwardValidationResult> nationalIdTypeMisingList = validateNationalIdType(award);
 
 			// Validation - Beneficiary check
 			List<SingleAwardValidationResult> beneficiaryMisingList = validateBeneficiaryAwards(award);
 
-			// TODO - Validation - Make call to process API to get data for subsidy measure
 			/*
 			 * 3) If incorrect SC number is entered, user system should throw an error
 			 * Validation Error - Row 6 - Incorrect SC Number - Correct one SC10002
@@ -133,25 +135,17 @@ public class AddAwardService {
 
 		
 
-			log.info("Final validation errors list ...printing list of errors - start");
+			log.info("{} :: Final validation errors list ...printing list of errors - start", loggingComponentName);
 
 			SingleAwardValidationResults validationResult = new SingleAwardValidationResults();
 			validationResult.setValidationErrorResult(validationErrorResultList);
-			//validationResult.setTotalRows(bulkUploadAwards.size());
-			/*validationResult.setErrorRows(validationErrorResultList.size());
-			validationResult.setMessage((validationErrorResultList.size() > 0) ? "Validation Errors in Uploaded file"
-					: "No errors in Uploaded file");
-
-			log.info("Final validation Result object ...printing validationResult - start");
-			validationErrorResultList.stream().forEach(System.out::println);*/
-			
 			if (validationResult.getValidationErrorResult().size() == 0) {
 				
-				log.info("No validation error in bulk excel template");
+				log.info("{}::No validation error in bulk excel template", loggingComponentName);
 
-				Award savedAward =awardService.createAward(award);
+				Award savedAward =awardService.createAward(award, role);
 
-				log.info("After calling process api - response = ");
+				log.info("{} :: After calling process api - response = ", loggingComponentName);
 				validationResult.setTotalErrors(0);
 				validationResult
 						.setMessage((true ? savedAward.getAwardNumber()+" Award saved in Database" : "Error while saving awards in Database"));
@@ -162,12 +156,10 @@ public class AddAwardService {
 			}
 			return validationResult;
 
-		} catch (Exception e) {
-			e.printStackTrace();
-			
-			log.error(" Error in validationResult **** "+e);
+		/*} catch (Exception e) {
+			log.error("{}:: Error in validationResult **** {}",loggingComponentName, e);
 			throw new RuntimeException("Fail to store data : " + e.getMessage());
-		}
+		}*/
 
 	}
 
@@ -186,8 +178,8 @@ public class AddAwardService {
 			validationScNumberScTitlResultList.add(new SingleAwardValidationResult("subsidyControlNumber or subsidyControlTitle","Either Subsidy Control number or Subsidy title field is mandatory."));
 		}
 
-		log.info("Validation Result Error list - Either Subsidy Control number or Subsidy title should enter = "
-				+ validationScNumberScTitlResultList);
+		log.info("{} ::Validation Result Error list - Either Subsidy Control number or Subsidy title should enter = {}",
+				loggingComponentName,validationScNumberScTitlResultList);
 
 		return validationScNumberScTitlResultList;
 	}
@@ -207,8 +199,8 @@ public class AddAwardService {
 		}
 
 		
-		log.info("Validation Result Error list - Size of Organizationshould enter = "
-				+ validationSizeOfOrgErrorListResultList);
+		log.info("{} ::Validation Result Error list - Size of Organization should enter ={} ", loggingComponentName
+				,validationSizeOfOrgErrorListResultList);
 
 		return validationSizeOfOrgErrorListResultList;
 	}
@@ -235,8 +227,7 @@ public class AddAwardService {
 			
 			validationSubsidyObjectiveErrorListResultList.add(new SingleAwardValidationResult("Subsidy Objective- other","Subsidy Objective- other field is mandatory when Subsidy Objective is Other."));
 		}
-		log.info("Validation Result Error list - validateSubsidyObjective = "
-				+ validationSubsidyObjectiveErrorListResultList);
+		log.info("{} ::Validation Result Error list - validateSubsidyObjective = ",loggingComponentName);
 
 		return validationSubsidyObjectiveErrorListResultList;
 	}
@@ -260,10 +251,7 @@ public class AddAwardService {
 			validationspendingRegionErrorListResultList.add(new SingleAwardValidationResult("spendingRegion","Spending Region other field length > 255 charactres."));
 		}
 		
-		
-		log.info("Validation Result Error list - Spending Region should enter = "
-				+ validationspendingRegionErrorListResultList);
-
+		log.info("{} ::Validation Result Error list - Spending Region should enter = ",loggingComponentName);
 		return validationspendingRegionErrorListResultList;
 	}
 
@@ -282,8 +270,7 @@ public class AddAwardService {
 			validationspendingSectorErrorListResultList.add(new SingleAwardValidationResult("spendingSector","Spending Sector field is mandatory."));
 		}
 		
-		log.info("Validation Result Error list - Spending Sector  should enter = "
-				+ validationspendingSectorErrorListResultList);
+		log.info("{} ::Validation Result Error list - Spending Sector  should enter = ",loggingComponentName);
 
 		return validationspendingSectorErrorListResultList;
 	}
@@ -307,8 +294,7 @@ public class AddAwardService {
 			validationSubsidyAmountExactErrorResultList.add(new SingleAwardValidationResult("subsidyAmountExact","Subsidy Element Full Amount is invalid."));
 		}
 		
-		log.info("Validation Result Error list - Subsidy Element Full Amount = "
-				+ validationSubsidyAmountExactErrorResultList);
+		log.info("{} ::Validation Result Error list - Subsidy Element Full Amount = ", loggingComponentName);
 
 		return validationSubsidyAmountExactErrorResultList;
 	}
@@ -571,17 +557,15 @@ public class AddAwardService {
 	 */
 	private List<SingleAwardValidationResult> validateGrantingAuthorityNameinDb(SingleAward award) {
 
-		log.info("Calling processServiceproxy.getAllGrantingAuthorities()... - start");
+		log.info("{} ::Calling processServiceproxy.getAllGrantingAuthorities()... - start", loggingComponentName);
 		
 		List<GrantingAuthority> grantingAuthorityList = awardService.getAllGrantingAuthorities();
 		
-		log.info("smList = " + grantingAuthorityList);
-		log.info("Calling processServiceproxy.getAllSubsidyMeasures()... - end");
+		log.info("{} ::Calling processServiceproxy.getAllSubsidyMeasures()... - end",loggingComponentName);
 
 		List<String> grantingAuthorityNamesList = grantingAuthorityList.stream()
 				.map(grantingAuthority -> grantingAuthority.getGrantingAuthorityName()).collect(Collectors.toList());
 
-		log.info("Granting Authority - String list " + grantingAuthorityNamesList);
 
 		List<SingleAwardValidationResult> validationGrantingAuthorityNameResultList = new ArrayList<>();
 		
@@ -591,15 +575,12 @@ public class AddAwardService {
 			
 		}
 		
-			
-		
-		log.info("Validation Result Error list - Granting Authority Name error = "
-				+ validationGrantingAuthorityNameResultList);
+		log.info("{} :: Validation Result Error list - Granting Authority Name error = ", loggingComponentName);
 
 		return validationGrantingAuthorityNameResultList;
 	}
 
-	private List<SingleAwardValidationResult> validateNationaIdAwards(SingleAward award) {
+	private List<SingleAwardValidationResult> validateNationalIdAwards(SingleAward award) {
 
 		/*
 		 * 1) National ID MUST consist of 8 numbers or 2 letters followed by 6 numbers
@@ -612,7 +593,6 @@ public class AddAwardService {
 		 * 
 		 */
 
-		// TODO - Validation 1 - National ID length check - implement filter method
 		List<SingleAwardValidationResult> validationNationalIdResultList = new ArrayList<>();
 		
 		if(award.getNationalId()==null || StringUtils.isEmpty(award.getNationalId())) {
@@ -626,30 +606,27 @@ public class AddAwardService {
 			log.info("validation fail National ID  must be 10 characters or fewer");
 		} else {
 		 
-		if(!StringUtils.isEmpty(award.getNationalId())&& award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("VAT Number") && (award.getNationalId().length() !=9 || !award.getNationalId().matches("[0-9]+"))){
-			validationNationalIdResultList.add(new SingleAwardValidationResult("nationalId","invalid VAT number."));
-			log.info("invalid VAT number.");
-		}
-		if(!StringUtils.isEmpty(award.getNationalIdType())&& award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("UTR Number") && (!award.getNationalId().matches("[0-9]+")|| award.getNationalId().length()!=10 )) {
-			validationNationalIdResultList.add(new SingleAwardValidationResult("nationalId","invalid UTR Number."));
-			log.info("invalid UTR number.");
-		}
-		
-		if(!StringUtils.isEmpty(award.getNationalIdType())&& award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("Charity Number") && ((!StringUtils.isEmpty(award.getNationalId())&& award.getNationalId()!=null) && (award.getNationalId().length() > 8 || !award.getNationalId().matches("[0-9]+")))){
-			validationNationalIdResultList.add(new SingleAwardValidationResult("nationalId","invalid Charity number."));
-			log.info("invalid Charity number.");
-		}
-		
-		if(!StringUtils.isEmpty(award.getNationalIdType())&& award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("Company Registration Number") && ((!StringUtils.isEmpty(award.getNationalId())&& award.getNationalId()!=null) && (!validateCompanyNumber(award.getNationalId())))){
-			validationNationalIdResultList.add(new SingleAwardValidationResult("nationalId","invalid Company Registration Number."));
-			log.info("invalid Charity number.");
-		}/*else if(!StringUtils.isEmpty(award.getNationalIdType())&& award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("Company Registration Number") && ((!StringUtils.isEmpty(award.getNationalId())&& award.getNationalId()!=null) && (award.getNationalId().length() !=8 || !award.getNationalId().matches("[0-9]+")))){
-			validationNationalIdResultList.add(new SingleAwardValidationResult("nationalId","invalid Company Registration Number."));
-			log.info("invalid Company Registration Number.");
-		}*/
+			if(!StringUtils.isEmpty(award.getNationalId())&& award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("VAT Number") && (award.getNationalId().length() !=9 || !award.getNationalId().matches("[0-9]+"))){
+				validationNationalIdResultList.add(new SingleAwardValidationResult("nationalId","invalid VAT number."));
+				log.info("invalid VAT number.");
+			}
+			if(!StringUtils.isEmpty(award.getNationalIdType())&& award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("UTR Number") && (!award.getNationalId().matches("[0-9]+")|| award.getNationalId().length()!=10 )) {
+				validationNationalIdResultList.add(new SingleAwardValidationResult("nationalId","invalid UTR Number."));
+				log.info("invalid UTR number.");
+			}
+
+			if(!StringUtils.isEmpty(award.getNationalIdType())&& award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("Charity Number") && ((!StringUtils.isEmpty(award.getNationalId())&& award.getNationalId()!=null) && (award.getNationalId().length() > 8 || !award.getNationalId().matches("[0-9]+")))){
+				validationNationalIdResultList.add(new SingleAwardValidationResult("nationalId","invalid Charity number."));
+				log.info("invalid Charity number.");
+			}
+
+			if(!StringUtils.isEmpty(award.getNationalIdType())&& award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("Company Registration Number") && ((!StringUtils.isEmpty(award.getNationalId())&& award.getNationalId()!=null) && (!validateCompanyNumber(award.getNationalId())))){
+				validationNationalIdResultList.add(new SingleAwardValidationResult("nationalId","invalid Company Registration Number."));
+				log.info("invalid Charity number.");
+			}
 		}
 
-		log.info("Validation Result Error list - National ID  = " + validationNationalIdResultList);
+		log.info("{} :: Validation Result Error list - National ID  = ", loggingComponentName);
 
 		return validationNationalIdResultList;
 
@@ -697,7 +674,6 @@ public class AddAwardService {
 	 * 
 	 */
 	private boolean validGrantingDate(String grantingDate) {
-
 		boolean isValildDate = true;
 		for (int i = 0; i < grantingDate.length(); i++) {
 			if ('.' == grantingDate.charAt(i) || Character.isLetter(grantingDate.charAt(i))) {
@@ -705,7 +681,6 @@ public class AddAwardService {
 				isValildDate = false;
 			}
 		}
-
 		return isValildDate;
 	}	
 	

@@ -95,7 +95,7 @@ public class AwardServiceTest {
 		Beneficiary beneficiary = mock(Beneficiary.class);
 		List<GrantingAuthority> gaList = new ArrayList<GrantingAuthority>();
 		List<SubsidyMeasure> smList = new ArrayList<>();
-
+		String role = "Granting Authority Administrator";
 		SubsidyMeasure sub = new SubsidyMeasure();
 		sub.setSubsidyMeasureTitle("AHDB Generic Promotional Measures scheme");
 		sub.setScNumber("SC10000");
@@ -112,11 +112,10 @@ public class AwardServiceTest {
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
 		when(grepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
-		when(awardServiceMock.createAward(awardInputRequest)).thenReturn(expectedAward);
-		Award award = awardServiceMock.createAward(awardInputRequest);
+		when(awardServiceMock.createAward(awardInputRequest,role)).thenReturn(expectedAward);
+		Award award = awardServiceMock.createAward(awardInputRequest,role);
 		assertNotNull(award);
 		assertThat(award.getApprovedBy()).isEqualTo("test");
-		// verify(awardServiceMock, times(1)).createAward(awardInputRequest);
 	}
 
 	@Test
@@ -139,12 +138,13 @@ public class AwardServiceTest {
 		Award saveAward = new Award();
 		beneficiary.setBeneficiaryName("testName");
 		expectedAward.setApprovedBy("test");
+		String role = "Granting Authority Administrator";
 		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
 		when(grepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
-		when(awardServiceMock.createAward(awardInputRequest)).thenReturn(expectedAward);
-		List<Award> awards = awardServiceMock.processBulkAwards(awardList);
+		when(awardServiceMock.createAward(awardInputRequest,role)).thenReturn(expectedAward);
+		List<Award> awards = awardServiceMock.processBulkAwards(awardList,role);
 		assertNotNull(awards);
 
 	}
@@ -159,6 +159,7 @@ public class AwardServiceTest {
 		bulkUploadAward.setLegalGrantingDate("10-12-1999");
 		bulkUploadAward.setSubsidyControlNumber("SC1000000");
 
+		String role = "Granting Authority Administrator";
 		awardList.add(bulkUploadAward);
 		SubsidyMeasure sub = new SubsidyMeasure();
 		sub.setSubsidyMeasureTitle("AHDB Generic Promotional Measures scheme");
@@ -176,8 +177,8 @@ public class AwardServiceTest {
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
 		when(grepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
-		when(awardServiceMock.createAward(awardInputRequest)).thenReturn(expectedAward);
-		List<Award> awards = awardServiceMock.processBulkAwards(awardList);
+		when(awardServiceMock.createAward(awardInputRequest,role)).thenReturn(expectedAward);
+		List<Award> awards = awardServiceMock.processBulkAwards(awardList,role);
 		assertNotNull(awards);
 
 	}
@@ -191,6 +192,7 @@ public class AwardServiceTest {
 		List<BulkUploadAwards> awardList = new ArrayList<>();
 		awardInputRequest.setLegalGrantingDate("10-Feb-1999");
 
+		String role = "Granting Authority Administrator";
 		awardList.add(bulkUploadAward);
 		SubsidyMeasure sub = new SubsidyMeasure();
 		sub.setSubsidyMeasureTitle("AHDB Generic Promotional Measures scheme");
@@ -208,8 +210,8 @@ public class AwardServiceTest {
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
 		when(grepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
-		when(awardServiceMock.createAward(awardInputRequest)).thenReturn(expectedAward);
-		Award award = awardServiceMock.createAward(awardInputRequest);
+		when(awardServiceMock.createAward(awardInputRequest,role)).thenReturn(expectedAward);
+		Award award = awardServiceMock.createAward(awardInputRequest,role);
 		assertNotNull(award);
 
 	}
@@ -223,7 +225,7 @@ public class AwardServiceTest {
 		List<BulkUploadAwards> awardList = new ArrayList<>();
 		awardInputRequest.setNationalIdType("VAT Number");
 		awardInputRequest.setNationalId("123");
-
+		String role = "Granting Authority Administrator";
 		awardList.add(bulkUploadAward);
 		SubsidyMeasure sub = new SubsidyMeasure();
 		sub.setSubsidyMeasureTitle("AHDB Generic Promotional Measures scheme");
@@ -241,8 +243,8 @@ public class AwardServiceTest {
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
 		when(grepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
-		when(awardServiceMock.createAward(awardInputRequest)).thenReturn(expectedAward);
-		Award award = awardServiceMock.createAward(awardInputRequest);
+		when(awardServiceMock.createAward(awardInputRequest, role)).thenReturn(expectedAward);
+		Award award = awardServiceMock.createAward(awardInputRequest, role);
 		assertNotNull(award);
 
 	}
@@ -257,6 +259,7 @@ public class AwardServiceTest {
 		awardInputRequest.setNationalIdType("UTR Number");
 		awardInputRequest.setNationalId("123");
 
+		String role = "Granting Authority Administrator";
 		awardList.add(bulkUploadAward);
 		SubsidyMeasure sub = new SubsidyMeasure();
 		sub.setSubsidyMeasureTitle("AHDB Generic Promotional Measures scheme");
@@ -274,8 +277,8 @@ public class AwardServiceTest {
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
 		when(grepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
-		when(awardServiceMock.createAward(awardInputRequest)).thenReturn(expectedAward);
-		Award award = awardServiceMock.createAward(awardInputRequest);
+		when(awardServiceMock.createAward(awardInputRequest,role)).thenReturn(expectedAward);
+		Award award = awardServiceMock.createAward(awardInputRequest, role);
 		assertNotNull(award);
 
 	}
@@ -289,7 +292,7 @@ public class AwardServiceTest {
 		List<BulkUploadAwards> awardList = new ArrayList<>();
 		awardInputRequest.setNationalIdType("UTR Number");
 		awardInputRequest.setNationalId("1234567899");
-
+		String role = "Granting Authority Administrator";
 		awardList.add(bulkUploadAward);
 		SubsidyMeasure sub = new SubsidyMeasure();
 		sub.setSubsidyMeasureTitle("AHDB Generic Promotional Measures scheme");
@@ -307,8 +310,8 @@ public class AwardServiceTest {
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
 		when(grepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
-		when(awardServiceMock.createAward(awardInputRequest)).thenReturn(expectedAward);
-		Award award = awardServiceMock.createAward(awardInputRequest);
+		when(awardServiceMock.createAward(awardInputRequest,role)).thenReturn(expectedAward);
+		Award award = awardServiceMock.createAward(awardInputRequest, role);
 		assertNotNull(award);
 
 	}

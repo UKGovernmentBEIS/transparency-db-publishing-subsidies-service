@@ -15,6 +15,7 @@ import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.Subsid
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +46,9 @@ public class AwardService {
 	
 	@Autowired
 	private SubsidyMeasureRepository smRepository;
+
+	@Value("${loggingComponentName}")
+	private String loggingComponentName;
 	
 	private Date convertToDate(String incomingDate) {
 		SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
@@ -52,7 +56,7 @@ public class AwardService {
 		try {
 			date = formatter.parse(incomingDate);
 		} catch (ParseException e) {
-			e.printStackTrace();
+		  log.error("{}:: date error parse issue{}",loggingComponentName,e);
 		}
 		
 		return date;
@@ -64,18 +68,12 @@ public class AwardService {
 		try {
 			date = formatter.parse(incomingDate);
 		} catch (ParseException e) {
-			e.printStackTrace();
+			log.error("{}:: date error parse issue{}",loggingComponentName,e);
 		}
 		
 		return date;
 	}
 
-	@Transactional
-	public Award save(Award award) {
-		Beneficiary beneficiaries = beneficiaryRepository.save(award.getBeneficiary());
-		return awardRepository.save(award);
-	}
-	
 	@Transactional
 	public List<Award> saveAwards(List<Award> awards) {
 		
@@ -87,9 +85,9 @@ public class AwardService {
 	}
 	
 	@Transactional
-	public List<Award> processBulkAwards(List<BulkUploadAwards> bulkAwards) {
+	public List<Award> processBulkAwards(List<BulkUploadAwards> bulkAwards, String role) {
 		try {
-		log.info("inside process Bulk Awards db");
+		log.info("{} ::inside process Bulk Awards db",loggingComponentName);
 		List<Beneficiary> beneficiaries = bulkAwards.stream()
 			.map( award -> {
 				Beneficiary beneficiary = new Beneficiary();
@@ -110,6 +108,7 @@ public class AwardService {
 		
 		beneficiaryRepository.saveAll(beneficiaries);
 
+
 		List<Award> awards = bulkAwards.stream()
 				.map( bulkaward -> new Award(null, getBeneficiaryDetails(bulkaward, beneficiaries), getGrantingAuthority(bulkaward), getSubsidyMeasure(bulkaward), bulkaward.getSubsidyAmountRange(), 
 						( (bulkaward.getSubsidyAmountExact() != null) ? new BigDecimal(bulkaward.getSubsidyAmountExact()) : BigDecimal.ZERO),  
@@ -120,8 +119,8 @@ public class AwardService {
 						((bulkaward.getSubsidyInstrument().equalsIgnoreCase("Other"))? "Other - "+bulkaward.getSubsidyInstrumentOther():bulkaward.getSubsidyInstrument()),
 						bulkaward.getSpendingSector(),
 						"SYSTEM", 
-						"SYSTEM", 
-						"Awaiting Approval",null,LocalDate.now(), LocalDate.now())
+						"SYSTEM",
+						addAwardStatus(role),null,LocalDate.now(), LocalDate.now())
 				
 					)
 				.collect(Collectors.toList());
@@ -131,16 +130,24 @@ public class AwardService {
 				
 		return savedAwards;
 		} catch(Exception serviceException) {
-			log.info("serviceException occured::"+serviceException.getMessage());
+			log.error("serviceException occured::" , serviceException.getMessage());
 			return null;
 		}
 	}
-	
+
+	private String addAwardStatus(String role) {
+		String awardStatus = "Published";
+		if ("Granting Authority Encoder".equals(role.trim())) {
+			awardStatus = "Awaiting Approval";
+		}
+		return awardStatus;
+	}
+
 	@Transactional
-	public Award createAward(SingleAward award) {
+	public Award createAward(SingleAward award, String role) {
 		try {
 			log.info("inside process Bulk Awards db");
-
+			String awardStatus = "Published";
 			Beneficiary beneficiary = new Beneficiary();
 			beneficiary.setBeneficiaryName(award.getBeneficiaryName());
 			beneficiary.setBeneficiaryType("Individual");
@@ -150,6 +157,7 @@ public class AwardService {
 			beneficiary.setCreatedBy("SYSTEM");
 			beneficiary.setApprovedBy("SYSTEM");
 			beneficiary.setStatus("DRAFT");
+
 			beneficiary.setSicCode("14455");
 			beneficiary.setCreatedTimestamp(LocalDate.now());
 			beneficiary.setLastModifiedTimestamp(LocalDate.now());
@@ -161,6 +169,10 @@ public class AwardService {
 			tempAward.setSubsidyControlTitle(award.getSubsidyControlTitle());
 			tempAward.setSubsidyControlNumber(award.getSubsidyControlNumber());
 
+			if ("Granting Authority Encoder".equals(role.trim())) {
+				awardStatus = "Awaiting Approval";
+			}
+
 			Award saveAward = new Award(null, beneficiary, getGrantingAuthority(tempAward),
 					getSubsidyMeasure(tempAward), award.getSubsidyAmountRange(),
 					((award.getSubsidyAmountExact() != null) ? new BigDecimal(award.getSubsidyAmountExact())
@@ -171,14 +183,14 @@ public class AwardService {
 					convertToDateSingleUpload(award.getLegalGrantingDate()), award.getSpendingRegion(),
 					((award.getSubsidyInstrument().equalsIgnoreCase("Other")) ? "Other - "+award.getSubsidyInstrumentOther()
 							: award.getSubsidyInstrument()),
-					award.getSpendingSector(), "SYSTEM", "SYSTEM", "Awaiting Approval", null,LocalDate.now(), LocalDate.now());
+					award.getSpendingSector(), "SYSTEM", "SYSTEM", awardStatus, null,LocalDate.now(), LocalDate.now());
 
 			Award savedAwards = awardRepository.save(saveAward);
 			log.info("End process Bulk Awards db");
 
 			return savedAwards;
-		} catch (Exception serviceException) {
-			log.info("serviceException occured::" + serviceException.getMessage());
+		} catch (Exception ex) {
+			log.error("{} :: Award is failed to save ::{} and exception {}",ex.getMessage(),ex);
 			return null;
 		}
 	}
@@ -224,7 +236,7 @@ public class AwardService {
 
 			return savedAwards;
 		} catch (Exception serviceException) {
-			log.info("serviceException occured::" + serviceException.getMessage());
+			log.error("serviceException occured::", serviceException.getMessage());
 			return null;
 		}
 	}
@@ -244,7 +256,7 @@ public class AwardService {
 		List<SubsidyMeasure> smList = smRepository.findAll();
 		Optional<SubsidyMeasure> smOptional = null;
 		if (!StringUtils.isEmpty(award.getSubsidyControlTitle())) {
-			log.info("inside contrl title");
+
 			smOptional = smList.stream()
 					.filter(sm -> sm.getSubsidyMeasureTitle().equals(award.getSubsidyControlTitle())).findAny();
 		} else {
@@ -260,7 +272,7 @@ public class AwardService {
 	
 	private GrantingAuthority getGrantingAuthority(BulkUploadAwards award) {
 		
-		log.info("Inside getGrantingAuthorityId...");
+		log.info("Inside getGrantingAuthority...");
 
 		List<GrantingAuthority> gaList = gaRepository.findAll();
 		

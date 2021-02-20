@@ -1,0 +1,7 @@
+{
+    "userName": "TEST",
+    "password": "password123",
+    "role": "BEIS Administrator",
+    "grantingAuthorityGroupId": "123",
+    "grantingAuthorityGroupName": "test"
+}

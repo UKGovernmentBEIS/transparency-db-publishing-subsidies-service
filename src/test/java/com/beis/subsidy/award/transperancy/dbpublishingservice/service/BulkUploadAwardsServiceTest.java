@@ -130,11 +130,11 @@ public class BulkUploadAwardsServiceTest {
 		subsidy.setSubsidyMeasureTitle("AHDB Generic Promotional Measures scheme");
 		subsidy.setScNumber("SC10000");
 		submList.add(subsidy);
-
+		String role = "Granting Authority Administrator";
 		when(adServiceMock.getAllSubsidyMeasures()).thenReturn(submList);
 		when(adServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
-		ValidationResult results = bulkAwardServiceMock.validateFile(mockMultipartFile);
+		ValidationResult results = bulkAwardServiceMock.validateFile(mockMultipartFile, role);
 
 		assertThat(results.getErrorRows()).isEqualTo(result.getErrorRows());
 
@@ -156,7 +156,7 @@ public class BulkUploadAwardsServiceTest {
 		ValidationResult result = new ValidationResult();
 		result.setErrorRows(2);
 		result.setTotalRows(2);
-
+		String role = "Granting Authority Administrator";
 		awardList.add(bulkUploadAward);
 		SubsidyMeasure sub = new SubsidyMeasure();
 		sub.setSubsidyMeasureTitle("AHDB Generic Promotional Measures scheme");
@@ -174,7 +174,7 @@ public class BulkUploadAwardsServiceTest {
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
 		when(grepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
-		ValidationResult results = bulkAwardServiceMock.validateFile(mockMultipartFile);
+		ValidationResult results = bulkAwardServiceMock.validateFile(mockMultipartFile, role);
 
 		assertThat(results.getErrorRows()).isEqualTo(result.getErrorRows());
 
@@ -192,7 +192,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setNationalIdType("VAT Number");
 		bulkUploadAward.setBeneficiaryName(null);
 		bulkUploadAward.setNationalId("abc123456");
-
+		String role = "Granting Authority Administrator";
 		ValidationResult result = new ValidationResult();
 		result.setErrorRows(2);
 		result.setTotalRows(2);
@@ -214,7 +214,7 @@ public class BulkUploadAwardsServiceTest {
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
 		when(grepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
-		ValidationResult results = bulkAwardServiceMock.validateFile(mockMultipartFile);
+		ValidationResult results = bulkAwardServiceMock.validateFile(mockMultipartFile,role);
 
 		assertThat(results.getErrorRows()).isEqualTo(result.getErrorRows());
 
@@ -232,7 +232,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setNationalIdType("VAT Number");
 		bulkUploadAward.setBeneficiaryName(null);
 		bulkUploadAward.setNationalId("123456");
-
+		String role = "Granting Authority Administrator";
 		ValidationResult result = new ValidationResult();
 		result.setErrorRows(26);
 		result.setTotalRows(2);
@@ -254,7 +254,7 @@ public class BulkUploadAwardsServiceTest {
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
 		when(grepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
-		ValidationResult results = bulkAwardServiceMock.validateFile(mockMultipartFile);
+		ValidationResult results = bulkAwardServiceMock.validateFile(mockMultipartFile, role);
 
 		assertThat(results.getErrorRows()).isEqualTo(result.getErrorRows());
 
@@ -290,11 +290,12 @@ public class BulkUploadAwardsServiceTest {
 		Award saveAward = new Award();
 		beneficiary.setBeneficiaryName("testName");
 		expectedAward.setApprovedBy("test");
+		String role = "Granting Authority Administrator";
 		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
 		when(grepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
-		ValidationResult results = bulkAwardServiceMock.validateFile(mockMultipartFile);
+		ValidationResult results = bulkAwardServiceMock.validateFile(mockMultipartFile,role);
 
 		assertThat(results.getErrorRows()).isEqualTo(result.getErrorRows());
 
@@ -330,11 +331,12 @@ public class BulkUploadAwardsServiceTest {
 		Award saveAward = new Award();
 		beneficiary.setBeneficiaryName("testName");
 		expectedAward.setApprovedBy("test");
+		String role = "Granting Authority Administrator";
 		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
 		when(grepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
-		ValidationResult results = bulkAwardServiceMock.validateFile(mockMultipartFile);
+		ValidationResult results = bulkAwardServiceMock.validateFile(mockMultipartFile, role);
 
 		assertThat(results.getErrorRows()).isEqualTo(result.getErrorRows());
 

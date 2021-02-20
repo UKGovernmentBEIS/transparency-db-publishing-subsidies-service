@@ -73,6 +73,7 @@ public class AddAwardServiceTest {
 	@Test
 	public void testValidategAwards() throws ParseException {
 
+		String role = "Granting Authority Administrator";
 		List<SubsidyMeasure> submList = new ArrayList<>();
 		List<GrantingAuthority> gaList = new ArrayList<GrantingAuthority>();
 		SubsidyMeasure subsidy = new SubsidyMeasure();
@@ -101,7 +102,7 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
-		SingleAwardValidationResults results = addawardServiceMock.validateAward(awardInputRequest);
+		SingleAwardValidationResults results = addawardServiceMock.validateAward(awardInputRequest, role);
 
 		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
 
@@ -142,12 +143,12 @@ public class AddAwardServiceTest {
 		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
 		expectedResult.setTotalErrors(2);
 		expectedResult.setMessage("Award saved in Database");
-
+		String role = "Granting Authority Administrator";
 		when(awardServiceMock.getAllSubsidyMeasures()).thenReturn(submList);
 
 		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
-		SingleAwardValidationResults results = addawardServiceMock.validateAward(awardInputRequest);
+		SingleAwardValidationResults results = addawardServiceMock.validateAward(awardInputRequest, role);
 
 		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
 
@@ -166,7 +167,7 @@ public class AddAwardServiceTest {
 		awardInputRequest.setSubsidyControlNumber("SC12345679");
 		awardInputRequest.setGoodsOrServices(null);
 		awardInputRequest.setSubsidyInstrument(null);
-
+		String role = "Granting Authority Administrator";
 		List<SubsidyMeasure> submList = new ArrayList<>();
 		SubsidyMeasure sub = new SubsidyMeasure();
 		sub.setSubsidyMeasureTitle("AHDB Generic Promotional Measures scheme");
@@ -197,7 +198,7 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
-		SingleAwardValidationResults results = addawardServiceMock.validateAward(awardInputRequest);
+		SingleAwardValidationResults results = addawardServiceMock.validateAward(awardInputRequest, role);
 
 		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
 
@@ -212,7 +213,7 @@ public class AddAwardServiceTest {
 		List<BulkUploadAwards> awardList = new ArrayList<>();
 		awardInputRequest.setNationalIdType(null);
 		awardInputRequest.setNationalId(null);
-
+		String role = "Granting Authority Administrator";
 		List<SubsidyMeasure> submList = new ArrayList<>();
 		SubsidyMeasure sub = new SubsidyMeasure();
 		sub.setSubsidyMeasureTitle("AHDB Generic Promotional Measures scheme");
@@ -243,7 +244,7 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
-		SingleAwardValidationResults results = addawardServiceMock.validateAward(awardInputRequest);
+		SingleAwardValidationResults results = addawardServiceMock.validateAward(awardInputRequest,role);
 
 		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
 
@@ -256,7 +257,7 @@ public class AddAwardServiceTest {
 		List<GrantingAuthority> gaList = new ArrayList<GrantingAuthority>();
 		List<SubsidyMeasure> smList = new ArrayList<>();
 		List<BulkUploadAwards> awardList = new ArrayList<>();
-
+		String role = "Granting Authority Administrator";
 		awardInputRequest.setOrgSize(null);
 		awardInputRequest.setNationalIdType("VAT Number");
 
@@ -292,7 +293,7 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
-		SingleAwardValidationResults results = addawardServiceMock.validateAward(awardInputRequest);
+		SingleAwardValidationResults results = addawardServiceMock.validateAward(awardInputRequest,role);
 
 		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
 
@@ -336,13 +337,13 @@ public class AddAwardServiceTest {
 		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
 		expectedResult.setTotalErrors(3);
 		expectedResult.setMessage("Award saved in Database");
-		// expectedResult.setValidationErrorResult(validationErrorResult);
+		String role = "Granting Authority Administrator";
 
 		when(awardServiceMock.getAllSubsidyMeasures()).thenReturn(submList);
 
 		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
-		SingleAwardValidationResults results = addawardServiceMock.validateAward(awardInputRequest);
+		SingleAwardValidationResults results = addawardServiceMock.validateAward(awardInputRequest,role);
 
 		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
 
@@ -356,6 +357,7 @@ public class AddAwardServiceTest {
 		List<SubsidyMeasure> smList = new ArrayList<>();
 		List<BulkUploadAwards> awardList = new ArrayList<>();
 
+		String role = "Granting Authority Administrator";
 		awardInputRequest.setOrgSize(null);
 		awardInputRequest.setNationalIdType("Charity Number");
 
@@ -391,7 +393,7 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
-		SingleAwardValidationResults results = addawardServiceMock.validateAward(awardInputRequest);
+		SingleAwardValidationResults results = addawardServiceMock.validateAward(awardInputRequest, role);
 
 		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
 
