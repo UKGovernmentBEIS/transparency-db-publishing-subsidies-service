@@ -4,14 +4,16 @@ import java.util.Arrays;
 
 import javax.servlet.MultipartConfigElement;
 
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.SingleAwardValidationResults;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.UserPrinciple;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartResolver;
 
@@ -26,8 +28,17 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 public class BulkUploadAwardsController {
 
+	@Value("${loggingComponentName}")
+	private String loggingComponentName;
+
+	@Autowired
+	private ObjectMapper objectMapper;
+
 	@Autowired
 	public BulkUploadAwardsService bulkUploadAwardsService;
+
+	public static final String All_ROLES[]= {"BEIS Administrator","Granting Authority Administrator",
+			"Granting Authority Approver","Granting Authority Encoder"};
 	
 	@GetMapping("/health")
 	public ResponseEntity<String> getHealth() {
@@ -46,14 +57,22 @@ public class BulkUploadAwardsController {
 	}
 	
 	@PostMapping(value = "/uploadBulkAwards", consumes = { "multipart/form-data" })
-	public ResponseEntity<ValidationResult> uploadAwardsFile(@RequestParam("file") MultipartFile file ){
-		
+	public ResponseEntity<ValidationResult> uploadAwardsFile(@RequestParam("file") MultipartFile file,
+															 @RequestHeader("userPrinciple") HttpHeaders userPrinciple){
+		UserPrinciple userPrincipleObj = null;
 		//1.0 - Check uploaded file format to be xlsx
 		if(ExcelHelper.hasExcelFormat(file)) {
 			
 		   try {
-				log.info("Beofre calling validateFile::::");
-				ValidationResult validationResult = bulkUploadAwardsService.validateFile(file);
+				log.info("{} :: Before calling validateFile", loggingComponentName);
+			   String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
+			   userPrincipleObj = objectMapper.readValue(userPrincipleStr, UserPrinciple.class);
+			   if (!Arrays.asList(All_ROLES).contains(userPrincipleObj.getRole())) {
+				   ValidationResult validationResult = new ValidationResult();
+				   validationResult.setMessage("You are not authorised to bulk upload awards");
+				   return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(validationResult);
+			   }
+				ValidationResult validationResult = bulkUploadAwardsService.validateFile(file,userPrincipleObj.getRole());
 				return ResponseEntity.status(HttpStatus.OK).body(validationResult);
 			
 			} catch (Exception e) {

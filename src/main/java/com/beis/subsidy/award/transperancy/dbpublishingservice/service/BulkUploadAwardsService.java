@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;import org.springframework.boot.context.config.DelegatingApplicationContextInitializer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,7 +30,7 @@ public class BulkUploadAwardsService {
 	/*
 	 * the below method validate the excel file passed in request.
 	 */
-	public ValidationResult validateFile(MultipartFile file) {
+	public ValidationResult validateFile(MultipartFile file, String role) {
 
 		try {
 
@@ -44,10 +44,7 @@ public class BulkUploadAwardsService {
 
 			List<ValidationErrorResult> nationalIdTypeMisingList = validateNationalIdType(bulkUploadAwards);
 
-			// Validation - Beneficiary check
-			//List<ValidationErrorResult> beneficiaryMisingList = validateBeneficiaryAwards(bulkUploadAwards);
 
-			// TODO - Validation - Make call to process API to get data for subsidy measure
 			/*
 			 * 3) If incorrect SC number is entered, user system should throw an error
 			 * Validation Error - Row 6 - Incorrect SC Number - Correct one SC10002
@@ -145,19 +142,15 @@ public class BulkUploadAwardsService {
 					: "No errors in Uploaded file");
 
 			log.info("Final validation Result object ...printing validationResult - start");
-			validationErrorResultList.stream().forEach(System.out::println);
 
 			if (validationResult.getValidationErrorResult().size() == 0) {
 				// if(true) {
 				
 				log.info("No validation error in bulk excel template");
 
-				awardService.processBulkAwards(bulkUploadAwards);
+				awardService.processBulkAwards(bulkUploadAwards,role);
 
 				log.info("After calling process api - response = ");
-				// validationResult.setMessage(
-				// (response.getStatusCode().equals(HttpStatus.CREATED)) ? "All Awards saved in
-				// Database" : "Error while saving awards in Database" );
 				validationResult
 						.setMessage((true ? "All Awards saved in Database" : "Error while saving awards in Database"));
 			}
@@ -556,33 +549,6 @@ public class BulkUploadAwardsService {
 		return validationNationalIdTypeResultList;
 	}
 
-	/*private List<ValidationErrorResult> validateBeneficiaryAwards(List<BulkUploadAwards> bulkUploadAwards) {
-
-		
-		 * 2) If the ‘National ID type’ is a UTR or a VAT number, then validate if the
-		 * beneficiary name is entered and if not return an error as above. Validation
-		 * Error - Row 9 - Beneficiary missing
-		 * 
-		 
-		// TODO - Validation 2 - National ID Type UTR/ VAT, then check beneficiary
-		// present - implement filter method
-		List<BulkUploadAwards> beneficiaryMissingErrorRecordsList = bulkUploadAwards.stream()
-				.filter(award -> (((award.getNationalIdType()!=null) && (award.getNationalIdType().equals("UTR Number")
-						|| award.getNationalIdType().equals("VAT Number")))
-						&& (award.getBeneficiaryName() == null)))
-				.collect(Collectors.toList());
-
-		List<ValidationErrorResult> validationBeneficiaryIdResultList = new ArrayList<>();
-		validationBeneficiaryIdResultList = beneficiaryMissingErrorRecordsList.stream().map(
-				award -> new ValidationErrorResult(String.valueOf(award.getRow()), "K", "Enter the Beneficiary Name."))
-				.collect(Collectors.toList());
-
-		log.info(
-				"Validation Result Error list - Beneficiary Name missing error = " + validationBeneficiaryIdResultList);
-
-		return validationBeneficiaryIdResultList;
-	}*/
-
 	/*
 	 *
 	 * the below method validate the benificiary name length (>255 chars)
@@ -740,17 +706,12 @@ public class BulkUploadAwardsService {
 		 * 
 		 */
 
-		// TODO - Validation 1 - National ID length check - implement filter method
 		List<BulkUploadAwards> nationsIdErrorRecordsList = bulkUploadAwards.stream()
 				.filter(award -> award.getNationalId()!=null && award.getNationalId().length() > 10).collect(Collectors.toList());
 		
 		List<BulkUploadAwards> nationsIdMissingRecordsList = bulkUploadAwards.stream()
 				.filter(award -> award.getNationalId()==null || StringUtils.isEmpty(award.getNationalId())).collect(Collectors.toList());
 
-		log.info(
-				"Back validation-1 - national ID length check...printing list of awards with nation id length error - start");
-		log.info(
-				"Back validation-1 - national ID length check...printing list of awards with nation id length error - end");
 
 		List<ValidationErrorResult> validationNationalIdResultList = new ArrayList<>();
 		validationNationalIdResultList = nationsIdErrorRecordsList.stream()
@@ -801,17 +762,6 @@ public class BulkUploadAwardsService {
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "J",
 						"invalid Company Registration Number."))
 				.collect(Collectors.toList()));
-		
-		
-		/*List<BulkUploadAwards> nationsIdCompanyNumberErrorRecordsList = bulkUploadAwards.stream()
-				.filter(award -> award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("Company Registration Number") && ((award.getNationalId()!=null && (award.getNationalId().length() != 8 )))).collect(Collectors.toList());
-
-		validationNationalIdResultList.addAll(nationsIdCompanyNumberErrorRecordsList.stream()
-				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "J",
-						"invalid Company Registration Number."))
-				.collect(Collectors.toList()));*/
-		
-		
 		log.info("Validation Result Error list - National ID missing error = " + validationNationalIdResultList);
 
 		return validationNationalIdResultList;
