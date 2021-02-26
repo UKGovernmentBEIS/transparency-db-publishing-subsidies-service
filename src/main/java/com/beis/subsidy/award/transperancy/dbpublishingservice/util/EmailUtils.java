@@ -58,9 +58,6 @@ public class EmailUtils {
 		log.info("response :: " + response.getBody());
 	}
 
-	public static void main(String a[]) throws NotificationClientException {
-		
-		EmailUtils.sendSingleAwardEmail("krishna.vamsiparankusam@cognizant.com", "vamsi krishna", "1236789");
-	}
+	
 	
 }
