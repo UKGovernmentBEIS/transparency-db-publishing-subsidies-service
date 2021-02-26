@@ -10,6 +10,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.SingleAwardValidationResults;
@@ -17,6 +19,9 @@ import com.beis.subsidy.award.transperancy.dbpublishingservice.model.Award;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SingleAward;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.service.AddAwardService;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.service.AwardService;
+import com.beis.subsidy.control.accessmanagementservice.controller.feign.GraphAPILoginFeignClient;
+import com.beis.subsidy.control.accessmanagementservice.exception.AccessTokenException;
+import com.beis.subsidy.control.accessmanagementservice.response.AccessTokenResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,6 +46,15 @@ public class AddAwardController {
 	public static final String All_ROLES[]= {"BEIS Administrator","Granting Authority Administrator",
 			"Granting Authority Approver","Granting Authority Encoder"};
 	
+	@Autowired
+    GraphAPILoginFeignClient graphAPILoginFeignClient;
+
+    static final String BEARER = "Bearer ";
+
+  
+    @Autowired
+    Environment environment;
+	
 	/**
 	 * To get Award as input from UI and return Validation results based on input.
 	 * 
@@ -64,7 +78,9 @@ public class AddAwardController {
 			if (awardInputRequest == null) {
 				throw new Exception("awardInputRequest is empty");
 			}
-			SingleAwardValidationResults validationResult = addAwardService.validateAward(awardInputRequest, userPrincipleObj.getRole());
+			 String accessToken= getBearerToken();
+			SingleAwardValidationResults validationResult = addAwardService.validateAward(awardInputRequest, userPrincipleObj.getRole(),accessToken,String.valueOf(userPrincipleObj.getGrantingAuthorityGroupId()),userPrincipleObj.getUserName());
+			
 
 			return ResponseEntity.status(HttpStatus.OK).body(validationResult);
 		} catch (Exception e) {
@@ -105,5 +121,24 @@ public class AddAwardController {
 		}
 
 	}
+	
+	 public String getBearerToken() throws AccessTokenException {
+
+	        MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+	        map.add("grant_type", "client_credentials");
+	        map.add("client_id", environment.getProperty("client-Id"));
+	        map.add("client_secret",environment.getProperty("client-secret"));
+	        map.add("scope", environment.getProperty("graph-api-scope"));
+
+	        AccessTokenResponse openIdTokenResponse = graphAPILoginFeignClient
+	                .getAccessIdToken(environment.getProperty("tenant-id"),map);
+	        
+	        
+	        if (openIdTokenResponse == null) {
+	            throw new AccessTokenException(HttpStatus.valueOf(500),
+	                    "Graph Api Service Failed while bearer token generate");
+	        }
+	        return openIdTokenResponse.getAccessToken();
+	    }
 
 }

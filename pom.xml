@@ -17,6 +17,18 @@
     <spring-cloud.version>Hoxton.SR5</spring-cloud.version>  
     <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version> 
   </properties>  
+  <repositories>
+  <repository>
+    
+    <id>bintray-gov-uk-notify-maven</id>
+     <name>bintray</name>
+     <layout>default</layout>
+     <url>https://dl.bintray.com/gov-uk-notify/maven</url>
+    <snapshots>
+      <enabled>false</enabled>
+    </snapshots>
+  </repository>
+</repositories>
   <dependencies> 
     <dependency> 
       <groupId>org.springframework.boot</groupId>  
@@ -129,6 +141,12 @@
       <artifactId>junit-platform-engine</artifactId>
       <version>1.5.2</version>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+        <groupId>uk.gov.service.notify</groupId>
+        <artifactId>notifications-java-client</artifactId>
+        <version>3.17.0-RELEASE</version>
+        <type>jar</type>
     </dependency>
     </dependencies> 
   </dependencyManagement>  
