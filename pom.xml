@@ -149,58 +149,23 @@
         <type>jar</type>
     </dependency>
     </dependencies> 
+    
   </dependencyManagement>  
   <build> 
     <plugins> 
-      <!--<plugin>
-        <groupId>org.springframework.boot</groupId>  
-        <artifactId>spring-boot-maven-plugin</artifactId> 
-      </plugin>  
-      <plugin> 
-        <groupId>com.microsoft.azure</groupId>  
-        <artifactId>azure-webapp-maven-plugin</artifactId>  
-        <version>1.9.1</version>  
-        <configuration> 
-          <schemaVersion>V2</schemaVersion>  
-          <resourceGroup>BEIS</resourceGroup>  
-		  <appName>publishing-subsidy-service</appName>
-		  
-		  <appServicePlanResourceGroup>BEIS</appServicePlanResourceGroup>
-          <appServicePlanName>transparency-app-svc-plan</appServicePlanName>
-		  
-          <pricingTier>P2v2</pricingTier>  
-          <region>northeurope</region>  
-          <runtime> 
-            <os>linux</os>  
-			<javaVersion>jre8</javaVersion>  
-          </runtime>  
-          <appSettings> 
-            <property>
-			  <name>PORT</name> 
-			  <value>8182</value>
-            </property>
-          </appSettings>  
-          <deployment> 
-            <resources> 
-              <resource> 
-                <directory>${project.basedir}/target</directory>  
-                <includes> 
-                  <include>*.jar</include> 
-                </includes> 
-              </resource> 
-            </resources> 
-		  </deployment> 
-		  
-		  <stopAppDuringDeployment>true</stopAppDuringDeployment>
-
-        </configuration> 
-      </plugin> -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.1</version>
-      </plugin>
+     
+     
       
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.22.1</version>
+			</plugin>
+		
       <plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
