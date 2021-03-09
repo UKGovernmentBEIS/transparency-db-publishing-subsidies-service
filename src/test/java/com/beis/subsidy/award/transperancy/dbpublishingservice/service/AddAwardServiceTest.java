@@ -35,7 +35,7 @@ public class AddAwardServiceTest {
 	private static final String CONSTANT_SYSTEM = "SYSTEM";
 
 	@InjectMocks
-	private AddAwardService addawardServiceMock;
+	private AddAwardService addAwardServiceMock;
 
 	private AwardService awardServiceMock = mock(AwardService.class);
 
@@ -102,7 +102,7 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
-		SingleAwardValidationResults results = addawardServiceMock.validateAward(awardInputRequest, role);
+		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest, role);
 
 		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
 
@@ -148,7 +148,7 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
-		SingleAwardValidationResults results = addawardServiceMock.validateAward(awardInputRequest, role);
+		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest, role);
 
 		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
 
@@ -198,7 +198,7 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
-		SingleAwardValidationResults results = addawardServiceMock.validateAward(awardInputRequest, role);
+		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest, role);
 
 		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
 
@@ -244,7 +244,7 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
-		SingleAwardValidationResults results = addawardServiceMock.validateAward(awardInputRequest,role);
+		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest,role);
 
 		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
 
@@ -293,7 +293,7 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
-		SingleAwardValidationResults results = addawardServiceMock.validateAward(awardInputRequest,role);
+		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest,role);
 
 		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
 
@@ -343,7 +343,7 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
-		SingleAwardValidationResults results = addawardServiceMock.validateAward(awardInputRequest,role);
+		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest,role);
 
 		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
 
@@ -393,7 +393,7 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
-		SingleAwardValidationResults results = addawardServiceMock.validateAward(awardInputRequest, role);
+		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest, role);
 
 		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
 

@@ -49,7 +49,7 @@ public class ExcelHelper {
 	public static List<BulkUploadAwards> excelToAwards(InputStream is) {
 	    try {
 	       	    	
-	    	log.info("ïnside excelToAwards::DBPublishingSubsidies Service" );
+	    	log.info("Inside excelToAwards::DBPublishingSubsidies Service" );
 	        
 	        Workbook workbook = new XSSFWorkbook(is);
 
@@ -61,21 +61,21 @@ public class ExcelHelper {
 			log.info("last row " + sheet.getLastRowNum());
 			int rowNumber = 0;
 			  while (rows.hasNext()) {
-				  log.info("before rows.next");
+			  	log.info("before rows.next");
 				Row currentRow = rows.next();
 
-				log.info("BulkUploadAwardsController Going Inside switch block");
+
 				// skip header
 				if (rowNumber == 0) {
 				  rowNumber++;
 				  continue;
 				}
 				if (containsValue(currentRow)) {
+					log.info("BulkUploadAwardsController Going Inside switch block" ,rowNumber);
+					Iterator<Cell> cellsInRow = currentRow.iterator();
 
-				Iterator<Cell> cellsInRow = currentRow.iterator();
-
-				BulkUploadAwards bulkUploadAwards = new BulkUploadAwards();
-				bulkUploadAwards.setRow(currentRow.getRowNum() + 1);
+					BulkUploadAwards bulkUploadAwards = new BulkUploadAwards();
+					bulkUploadAwards.setRow(currentRow.getRowNum() + 1);
 
 				int cellIdx = 0;
 				while (cellsInRow.hasNext()) {
@@ -129,15 +129,15 @@ public class ExcelHelper {
 					  break;
 
 				  case 6:
-					  //bulkUploadAwards.setOrgSize(currentCell.getStringCellValue());
+
 					  bulkUploadAwards.setSubsidyAmountRange( (currentCell == null || currentCell.getCellType() == CellType.BLANK || (currentCell.getCellType().equals(CellType.STRING) && currentCell.getStringCellValue().trim().isEmpty())) ? null : currentCell.getStringCellValue() );
 
 					break;
 
 				  case 7:
-					  if (currentCell.getCellTypeEnum() == CellType.STRING) {
+					  if (currentCell.getCellType() == CellType.STRING) {
 					  bulkUploadAwards.setSubsidyAmountExact((currentCell.getStringCellValue()));
-					  }else if (currentCell.getCellTypeEnum() == CellType.NUMERIC) {
+					  }else if (currentCell.getCellType() == CellType.NUMERIC) {
 						 bulkUploadAwards.setSubsidyAmountExact((String.valueOf(currentCell.getNumericCellValue())));
 					  }
 
@@ -156,7 +156,9 @@ public class ExcelHelper {
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setNationalId(null);
 					  }else {
-					  bulkUploadAwards.setNationalId( ((currentCell.getCellType().getCode() == CellType.NUMERIC.getCode()) ?  String.valueOf(Double.valueOf( currentCell.getNumericCellValue()).longValue()) : currentCell.getStringCellValue()));
+					 	  bulkUploadAwards.setNationalId( ((currentCell.getCellType() == CellType.NUMERIC) ?
+							  String.valueOf(Double.valueOf( currentCell.getNumericCellValue()).longValue()) :
+							  currentCell.getStringCellValue()));
 					  }
 
 					break;
@@ -206,7 +208,7 @@ public class ExcelHelper {
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setGoodsOrServices(null);
 					  }else {
-					  bulkUploadAwards.setGoodsOrServices(currentCell.getStringCellValue());
+					 	 bulkUploadAwards.setGoodsOrServices(currentCell.getStringCellValue());
 					  }
 
 					break;
@@ -215,7 +217,7 @@ public class ExcelHelper {
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setSpendingRegion(null);
 					  }else {
-					  bulkUploadAwards.setSpendingRegion(currentCell.getStringCellValue());
+					 	 bulkUploadAwards.setSpendingRegion(currentCell.getStringCellValue());
 					  }
 
 					break;
@@ -224,7 +226,7 @@ public class ExcelHelper {
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setSpendingSector(null);
 					  }else {
-					  bulkUploadAwards.setSpendingSector(currentCell.getStringCellValue());
+					  	bulkUploadAwards.setSpendingSector(currentCell.getStringCellValue());
 					  }
 
 					break;
@@ -248,11 +250,10 @@ public class ExcelHelper {
 	      log.info("Excel - List - size = " + bulkUploadAwardsList.size());
 	      return bulkUploadAwardsList;
 	    } catch (IOException e) {
-	      log.info("fail to parse Excel file: " + e.getMessage());
 	      throw new RuntimeException(e);
 	    }
 	    catch (Exception e) {
-	    	log.info("fail to read Excel file: " + e.getMessage());
+
 	    	throw new RuntimeException("fail to read Excel file: " + e);
 	    }
 	  }
@@ -264,7 +265,7 @@ public class ExcelHelper {
 			try {
 				date = formatter.format(incomingDate).toString();
 			} catch (ParseException e) {
-				log.error("Error while converting the date inside convertDateToString");
+				log.error("Error while converting the date inside convertDateToString",e);
 				return date;
 			}
 		}
@@ -274,12 +275,15 @@ public class ExcelHelper {
 	public static boolean containsValue(Row row)
 	{
 	    boolean flag = true;
-	   if(row.getCell(0).getCellType()==CellType.BLANK && row.getCell(1).getCellType()==CellType.BLANK && row.getCell(2).getCellType()==CellType.BLANK) {
+	   if(row.getCell(0).getCellType()==CellType.BLANK && row.getCell(1).getCellType()==CellType.BLANK &&
+			   row.getCell(2).getCellType()==CellType.BLANK) {
 		   return false;
 	   }
 	    if ((StringUtils.isEmpty(String.valueOf(row.getCell(0))) == true && 
-	    		StringUtils.isEmpty(String.valueOf(row.getCell(1))) == true && StringUtils.isEmpty(String.valueOf(row.getCell(2))) == true  ) ||
-	    (String.valueOf(row.getCell(0))==null && String.valueOf(row.getCell(1))==null && String.valueOf(row.getCell(2))==null ) && row.getCell(2).getCellType()==CellType.BLANK)
+	    		StringUtils.isEmpty(String.valueOf(row.getCell(1))) == true &&
+				StringUtils.isEmpty(String.valueOf(row.getCell(2))) == true  ) ||
+				(String.valueOf(row.getCell(0))==null && String.valueOf(row.getCell(1))==null &&
+				String.valueOf(row.getCell(2))==null ) && row.getCell(2).getCellType()==CellType.BLANK)
 	    {
 			flag = false;
 	    }

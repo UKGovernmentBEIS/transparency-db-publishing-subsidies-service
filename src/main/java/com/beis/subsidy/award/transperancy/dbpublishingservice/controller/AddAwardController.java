@@ -2,7 +2,7 @@ package com.beis.subsidy.award.transperancy.dbpublishingservice.controller;
 
 import javax.validation.Valid;
 
-import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.UserPrinciple;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.SingleAwardValidationResults;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.Award;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SingleAward;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.service.AddAwardService;
@@ -20,7 +19,9 @@ import com.beis.subsidy.award.transperancy.dbpublishingservice.service.AwardServ
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -68,9 +69,16 @@ public class AddAwardController {
 
 			return ResponseEntity.status(HttpStatus.OK).body(validationResult);
 		} catch (Exception e) {
-			// 2.0 - CatchException and return validation errors
-			SingleAwardValidationResults validationResult = new SingleAwardValidationResults();
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(validationResult);
+
+			log.error("{} :: Exception block in addSubsidyAward", loggingComponentName,e);
+			SingleAwardValidationResults singleAwardValidationResults = new SingleAwardValidationResults();
+			//2.0 - CatchException and return validation errors
+			List<SingleAwardValidationResult> validationErrorResult = new ArrayList<>();
+			SingleAwardValidationResult validationResult = new SingleAwardValidationResult();
+			validationResult.setMessage(e.getMessage());
+			validationErrorResult.add(validationResult);
+			singleAwardValidationResults.setValidationErrorResult(validationErrorResult);
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(singleAwardValidationResults);
 		}
 
 	}
@@ -100,6 +108,7 @@ public class AddAwardController {
 			return ResponseEntity.status(HttpStatus.OK).body(validationResult);
 		} catch (Exception e) {
 			// 2.0 - CatchException and return validation errors
+			log.error("{} :: Exception block in updateSubsidyAward", loggingComponentName,e);
 			SingleAwardValidationResults validationResult = new SingleAwardValidationResults();
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(validationResult);
 		}

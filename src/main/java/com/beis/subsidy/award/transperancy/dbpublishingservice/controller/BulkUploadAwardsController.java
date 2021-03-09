@@ -1,6 +1,8 @@
 package com.beis.subsidy.award.transperancy.dbpublishingservice.controller;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.servlet.MultipartConfigElement;
 
@@ -39,7 +41,8 @@ public class BulkUploadAwardsController {
 
 	public static final String All_ROLES[]= {"BEIS Administrator","Granting Authority Administrator",
 			"Granting Authority Approver","Granting Authority Encoder"};
-	
+
+
 	@GetMapping("/health")
 	public ResponseEntity<String> getHealth() {
 		return new ResponseEntity<>("Successful health check - DB publishing Subsidies Service API", HttpStatus.OK);
@@ -72,14 +75,20 @@ public class BulkUploadAwardsController {
 				   validationResult.setMessage("You are not authorised to bulk upload awards");
 				   return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(validationResult);
 			   }
-				ValidationResult validationResult = bulkUploadAwardsService.validateFile(file,userPrincipleObj.getRole());
+				ValidationResult validationResult = bulkUploadAwardsService.validateFile(file,"BEIS Administrator");
 				return ResponseEntity.status(HttpStatus.OK).body(validationResult);
 			
 			} catch (Exception e) {
-				
-				//2.0 - CatchException and return validation errors 
+
+			   log.error("{} :: Exception block in BulkUploadAwardsController", loggingComponentName,e);
+		   		//2.0 - CatchException and return validation errors
 				ValidationResult validationResult = new ValidationResult();
-				
+			    validationResult.setMessage("Bulk upload failed");
+			    ValidationErrorResult errorResult = new ValidationErrorResult();
+			    errorResult.setErrorMessages(e.getMessage());
+			    List<ValidationErrorResult> validationErrorResult = new ArrayList<>();
+			    validationErrorResult.add(errorResult);
+			    validationResult.setValidationErrorResult(validationErrorResult);
 				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(validationResult);	
 			}
 		} else {

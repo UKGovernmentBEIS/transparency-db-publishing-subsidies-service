@@ -40,9 +40,9 @@ public class BulkUploadAwardsService {
 			log.info("Back from Excel to awards...printed list of awards - end");
 
 			// Validation National Id length check
-			List<ValidationErrorResult> nationalIdMisingList = validateNationaIdAwards(bulkUploadAwards);
+			List<ValidationErrorResult> nationalIdMissingList = validateNationalIdAwards(bulkUploadAwards);
 
-			List<ValidationErrorResult> nationalIdTypeMisingList = validateNationalIdType(bulkUploadAwards);
+			List<ValidationErrorResult> nationalIdTypeMissingList = validateNationalIdType(bulkUploadAwards);
 
 
 			/*
@@ -50,6 +50,8 @@ public class BulkUploadAwardsService {
 			 * Validation Error - Row 6 - Incorrect SC Number - Correct one SC10002
 			 */
 			List<ValidationErrorResult> scNumberNameCheckList = validateScNumberScTitle(bulkUploadAwards);
+
+			//List<ValidationErrorResult> scNumberStatusList = validateScNumberStatus(bulkUploadAwards,);
 
 			List<ValidationErrorResult> subsidyControlNumberLengthList = validateSubsidyNumberLength(bulkUploadAwards);
 
@@ -79,7 +81,7 @@ public class BulkUploadAwardsService {
 			 * validate Granting Authority exists in database or not Validation Error - Row
 			 * 6 - Incorrect SC Number - Correct one SC10002
 			 */
-			List<ValidationErrorResult> grantingAuthorityErrorList = validateGrantingAuthorityNameinDb(
+			List<ValidationErrorResult> grantingAuthorityErrorList = validateGrantingAuthorityNameInDb(
 					bulkUploadAwards);
 			
 			List<ValidationErrorResult> SubsidyElementFullAmountErrorList = validateSubsidyElementFullAmount(
@@ -126,7 +128,7 @@ public class BulkUploadAwardsService {
 			// Merge lists of Validation Errors
 			List<ValidationErrorResult> validationErrorResultList = Stream
 					.of(scNumberNameCheckList, subsidyMeasureTitleNameLengthList, subsidyPurposeCheckList,
-							nationalIdTypeMisingList, nationalIdMisingList, beneficiaryNameErrorList,
+							nationalIdTypeMissingList, nationalIdMissingList, beneficiaryNameErrorList,
 							subsidyControlNumberLengthList, subsidyControlNumberMismatchList,
 							grantingAuthorityNameErrorList, grantingAuthorityErrorList, sizeOfOrgErrorList,
 							spendingRegionErrorList, spendingSectorErrorList, goodsOrServiceErrorList,SubsidyInstrumentErrorList,legalGrantingDateErrorList,SubsidyElementFullAmountErrorList)
@@ -144,8 +146,7 @@ public class BulkUploadAwardsService {
 			log.info("Final validation Result object ...printing validationResult - start");
 
 			if (validationResult.getValidationErrorResult().size() == 0) {
-				// if(true) {
-				
+
 				log.info("No validation error in bulk excel template");
 
 				awardService.processBulkAwards(bulkUploadAwards,role);
@@ -158,7 +159,7 @@ public class BulkUploadAwardsService {
 			return validationResult;
 
 		} catch (IOException e) {
-			log.error(" Error in validationResult **** " + e);
+			log.error(" Error in validationResult **** ", e);
 			throw new RuntimeException("Fail to store data : " + e.getMessage());
 		}
 
@@ -234,8 +235,8 @@ public class BulkUploadAwardsService {
 				award -> ((award.getSubsidyObjective() == null || StringUtils.isEmpty(award.getSubsidyObjective()))))
 				.collect(Collectors.toList());
 
-		List<ValidationErrorResult> validationSubsidyObjectiveErrorListResultList = new ArrayList<>();
-		validationSubsidyObjectiveErrorListResultList = subsidyPurposeErrorRecordsList.stream()
+		List<ValidationErrorResult> subsidyObjectiveErrorResultList = new ArrayList<>();
+		subsidyObjectiveErrorResultList = subsidyPurposeErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "C",
 						"Subsidy Objective  field is mandatory."))
 				.collect(Collectors.toList());
@@ -243,7 +244,7 @@ public class BulkUploadAwardsService {
 		List<BulkUploadAwards> subsidyPurposeOthersErrorRecordsList = bulkUploadAwards.stream().filter(
 				award -> ((award.getSubsidyObjective()!= null && ("Other".equalsIgnoreCase(award.getSubsidyObjective()) && (award.getSubsidyObjectiveOther()==null || StringUtils.isEmpty(award.getSubsidyObjectiveOther()))))))
 				.collect(Collectors.toList());
-		validationSubsidyObjectiveErrorListResultList.addAll(subsidyPurposeOthersErrorRecordsList.stream()
+		subsidyObjectiveErrorResultList.addAll(subsidyPurposeOthersErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "D",
 						"Subsidy Objective- other field is mandatory when Subsidy Objective is Other"))
 				.collect(Collectors.toList()));
@@ -252,17 +253,17 @@ public class BulkUploadAwardsService {
 				award -> ((award.getSubsidyObjectiveOther()!=null && award.getSubsidyObjectiveOther() .length() > 255)))
 				.collect(Collectors.toList());
 		if (subsidyPurposeOtherErrorRecordsList.size()>0) {
-		
-		validationSubsidyObjectiveErrorListResultList.addAll(subsidyPurposeOtherErrorRecordsList.stream()
+
+			subsidyObjectiveErrorResultList.addAll(subsidyPurposeOtherErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "D",
 						"Subsidy Objective- other field lenth is > 255 characters"))
 				.collect(Collectors.toList()));
 		}
 
 		log.info("Validation Result Error list - validateSubsidyObjective = "
-				+ validationSubsidyObjectiveErrorListResultList);
+				+ subsidyObjectiveErrorResultList);
 
-		return validationSubsidyObjectiveErrorListResultList;
+		return subsidyObjectiveErrorResultList;
 	}
 
 	/*
@@ -292,12 +293,11 @@ public class BulkUploadAwardsService {
 		
 		validationspendingRegionErrorListResultList = spendingRegionOtherErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "P",
-						"Spending Region other  field length > 255 charactres."))
+						"Spending Region other  field length > 255 characters."))
 				.collect(Collectors.toList());
 		}
 		
-		log.info("Validation Result Error list - Spending Region should enter = "
-				+ validationspendingRegionErrorListResultList);
+		log.info("Validation Result Error list - Spending Region should enter = " + validationspendingRegionErrorListResultList.size());
 
 		return validationspendingRegionErrorListResultList;
 	}
@@ -351,7 +351,7 @@ public class BulkUploadAwardsService {
 		List<BulkUploadAwards> subsidyAmountFormatErrorRecordsList = bulkUploadAwards.stream().filter(
 				award -> (((award.getSubsidyInstrument()!=null && !award.getSubsidyInstrument().startsWith("Tax"))&& (award.getSubsidyAmountExact()!=null && award.getSubsidyAmountExact().matches("[a-zA-Z]+")))))
 				.collect(Collectors.toList());
-		bulkUploadAwards.stream().forEach(System.out::println);
+		//bulkUploadAwards.stream().forEach(System.out::println);
 		if(subsidyAmountFormatErrorRecordsList.size()>0) {
 		validationSubsidyAmountExactErrorResultList.addAll(subsidyAmountFormatErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "H",
@@ -359,8 +359,7 @@ public class BulkUploadAwardsService {
 				.collect(Collectors.toList()));
 		}
 		
-		log.info("Validation Result Error list - Subsidy Element Full Amount = "
-				+ validationSubsidyAmountExactErrorResultList);
+		log.info("Validation Result Error list - Subsidy Element Full Amount {}:: " ,validationSubsidyAmountExactErrorResultList.size());
 
 		return validationSubsidyAmountExactErrorResultList;
 	}
@@ -482,22 +481,21 @@ public class BulkUploadAwardsService {
 	
 	private List<ValidationErrorResult> validateSubsidyControlNumber(List<BulkUploadAwards> bulkUploadAwards) {
 
-		log.info("Calling awardService.getAllSubsidyMeasures()... - start");
+		log.info("{} :: Inside validateSubsidyControlNumber()");
 		
 		List<SubsidyMeasure> smList = awardService.getAllSubsidyMeasures();
-		
-		log.info("Calling processServiceproxy.getAllSubsidyMeasures()... - end");
 
 		List<String> subsidyControlNumberTitleList = smList.stream().map(sm -> sm.getScNumber())
 				.collect(Collectors.toList());
 
-		log.info("subsidyControlNumberTitleList - String list " + subsidyControlNumberTitleList);
-		//
-		
+		log.info("subsidyControlNumber size - String {}:: " , subsidyControlNumberTitleList.size());
+
 		List<BulkUploadAwards> subsidyControlNumberErrorRecordsList = bulkUploadAwards.stream()
-				.filter(award -> award.getSubsidyControlNumber() != null && award.getSubsidyControlTitle() != null
+				.filter(award -> award.getSubsidyControlNumber() != null
 						&& !subsidyControlNumberTitleList.contains(award.getSubsidyControlNumber()))
 				.collect(Collectors.toList());
+
+
 
 		// validation scnumber with sctitle.
 
@@ -506,7 +504,7 @@ public class BulkUploadAwardsService {
 						&& !StringUtils.isEmpty(requestAward.getSubsidyControlTitle()))
 				.collect(Collectors.toList());
 
-		List<BulkUploadAwards> subsidyControlNumberWithNameErrorRecordsList = subsidyControlNumberExistsList.stream()
+		List<BulkUploadAwards> scNumberWithNameErrorRecordsList = subsidyControlNumberExistsList.stream()
 				.filter(requestAward -> smList.stream().noneMatch(
 						bulkAward -> ((bulkAward.getScNumber().equals(requestAward.getSubsidyControlNumber()))
 								&& (bulkAward.getSubsidyMeasureTitle().equals(requestAward.getSubsidyControlTitle())))))
@@ -518,16 +516,45 @@ public class BulkUploadAwardsService {
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "A",
 						"Subsidy Control doest not exists."))
 				.collect(Collectors.toList());
-
-		validationSubsidyControlNumberResultList = subsidyControlNumberWithNameErrorRecordsList.stream()
+		List<ValidationErrorResult> validationScNumberNotMatchWithTitle = new ArrayList<>();
+		validationScNumberNotMatchWithTitle = scNumberWithNameErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "A",
 						"Subsidy Control number does not match with title."))
 				.collect(Collectors.toList());
+		validationSubsidyControlNumberResultList.addAll(validationScNumberNotMatchWithTitle);
 
-		log.info("Validation Result Error list - Subsidy Measure Number mismatch error = "
-				+ validationSubsidyControlNumberResultList);
-
+		validationSubsidyControlNumberResultList.addAll(validateScNumberStatus(smList,bulkUploadAwards));
+		log.info("{} :: Validation Result Error list - Subsidy Measure Number mismatch error = ",
+				validationSubsidyControlNumberResultList.size());
 		return validationSubsidyControlNumberResultList;
+	}
+
+
+	private List<ValidationErrorResult> validateScNumberStatus(List<SubsidyMeasure> smList,
+										List<BulkUploadAwards> bulkUploadAwards) {
+
+		List<ValidationErrorResult> scNumberInActiveResultList = new ArrayList<>();
+		bulkUploadAwards.forEach( award -> {
+
+			if(isScNumberStatusActive(smList,award.getSubsidyControlNumber())) {
+
+				scNumberInActiveResultList.add(new ValidationErrorResult(String.valueOf(award.getRow()), "A",
+						"Subsidy Control status not active."));
+			}});
+		return scNumberInActiveResultList;
+	}
+
+	private boolean isScNumberStatusActive(List<SubsidyMeasure> subsidyMeasures,
+										   String scNumberReq) {
+		boolean isinValid= false;
+		for (SubsidyMeasure subsidyMeasure : subsidyMeasures) {
+			if(subsidyMeasure.getScNumber().equals(scNumberReq) &&
+					"Inactive".equals(subsidyMeasure.getStatus())) {
+				isinValid = true;
+				break;
+			}
+		}
+		return isinValid;
 	}
 
 	/*
@@ -657,29 +684,21 @@ public class BulkUploadAwardsService {
 	 * the below method validate the AuthorityName name exist in data base or not
 	 * (table=Granting_Authority)
 	 */
-	private List<ValidationErrorResult> validateGrantingAuthorityNameinDb(List<BulkUploadAwards> bulkUploadAwards) {
+	private List<ValidationErrorResult> validateGrantingAuthorityNameInDb(List<BulkUploadAwards> bulkUploadAwards) {
 
-		log.info("Calling processServiceproxy.getAllGrantingAuthorities()... - start");
+		log.info("Calling validateGrantingAuthorityNameInDb... - start");
 		
 		List<GrantingAuthority> grantingAuthorityList = awardService.getAllGrantingAuthorities();
 		
-		log.info("smList = " + grantingAuthorityList);
-		log.info("Calling processServiceproxy.getAllSubsidyMeasures()... - end");
-
 		List<String> grantingAuthorityNamesList = grantingAuthorityList.stream()
 				.map(grantingAuthority -> grantingAuthority.getGrantingAuthorityName()).collect(Collectors.toList());
 
-		log.info("Granting Authority - String list " + grantingAuthorityNamesList);
+		log.info("Granting Authority - String list size " + grantingAuthorityNamesList.size());
 
 		List<BulkUploadAwards> grantingAuthorityNameErrorRecordsList = bulkUploadAwards.stream()
 				.filter(award -> award.getGrantingAuthorityName() != null
 						&& !grantingAuthorityNamesList.contains(award.getGrantingAuthorityName()))
 				.collect(Collectors.toList());
-
-		log.info("Back validation-6 - Granting Authority Name  measure check...with data base table  error - start");
-		grantingAuthorityNameErrorRecordsList.stream().forEach(System.out::println);
-		log.info(
-				"Back validation-6 - Granting Authority Name  measure check...with data base table  error - start - end");
 
 		List<ValidationErrorResult> validationGrantingAuthorityNameResultList = new ArrayList<>();
 		validationGrantingAuthorityNameResultList = grantingAuthorityNameErrorRecordsList.stream()
@@ -693,7 +712,7 @@ public class BulkUploadAwardsService {
 		return validationGrantingAuthorityNameResultList;
 	}
 
-	private List<ValidationErrorResult> validateNationaIdAwards(List<BulkUploadAwards> bulkUploadAwards) {
+	private List<ValidationErrorResult> validateNationalIdAwards(List<BulkUploadAwards> bulkUploadAwards) {
 
 		/*
 		 * 1) National ID MUST consist of 8 numbers or 2 letters followed by 6 numbers
