@@ -578,7 +578,7 @@ public class BulkUploadAwardsService {
 
 	/*
 	 *
-	 * the below method validate the benificiary name length (>255 chars)
+	 * the below method validate the beneficiary name length (>255 chars)
 	 */
 	private List<ValidationErrorResult> validateBeneficiaryName(List<BulkUploadAwards> bulkUploadAwards) {
 
