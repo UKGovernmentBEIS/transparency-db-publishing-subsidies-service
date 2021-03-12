@@ -3,12 +3,16 @@ package com.beis.subsidy.award.transperancy.dbpublishingservice.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.UserPrinciple;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.model.AuditLogs;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AuditLogsRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -288,5 +292,46 @@ public class ExcelHelper {
 			flag = false;
 	    }
 	 	return flag;
+	}
+
+	public static void saveAuditLog(UserPrinciple userPrinciple, String action,String role,
+									AuditLogsRepository auditLogsRepository) {
+		AuditLogs audit = new AuditLogs();
+		try {
+			String status ="Published";
+
+			if ("Granting Authority Encoder".equals(role.trim())) {
+				status = "Awaiting Approval";
+			}
+			StringBuilder msg = new StringBuilder("Award ")
+					.append(" added by " ).append(userPrinciple.getUserName()).append(" with status").append(status);
+			String userName = userPrinciple.getUserName();
+			audit.setUserName(userName);
+			audit.setEventType(action);
+			audit.setEventId(role);
+			audit.setEventMessage(msg.toString());
+			audit.setGaName(userPrinciple.getGrantingAuthorityGroupName());
+			audit.setCreatedTimestamp(LocalDate.now());
+			auditLogsRepository.save(audit);
+		} catch(Exception e) {
+			log.error("{} :: saveAuditLog failed to perform action", e);
+		}
+	}
+
+	public static void saveAuditLogForUpdate(UserPrinciple userPrinciple, String action,String awardNo, String eventMsg,
+									AuditLogsRepository auditLogsRepository) {
+		AuditLogs audit = new AuditLogs();
+		try {
+			String userName = userPrinciple.getUserName();
+			audit.setUserName(userName);
+			audit.setEventType(action);
+			audit.setEventId(awardNo);
+			audit.setEventMessage(eventMsg.toString());
+			audit.setGaName(userPrinciple.getGrantingAuthorityGroupName());
+			audit.setCreatedTimestamp(LocalDate.now());
+			auditLogsRepository.save(audit);
+		} catch(Exception e) {
+			log.error("{} :: saveAuditLogForUpdate failed to perform action", e);
+		}
 	}
 }

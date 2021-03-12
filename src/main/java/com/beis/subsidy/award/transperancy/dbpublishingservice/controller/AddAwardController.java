@@ -3,6 +3,8 @@ package com.beis.subsidy.award.transperancy.dbpublishingservice.controller;
 import javax.validation.Valid;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.*;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AuditLogsRepository;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.util.ExcelHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +12,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.Award;
@@ -22,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @RestController
@@ -32,6 +36,9 @@ public class AddAwardController {
 
 	@Autowired
 	public AwardService awardService;
+
+	@Autowired
+	AuditLogsRepository auditLogsRepository;
 
 	@Value("${loggingComponentName}")
 	private String loggingComponentName;
@@ -67,6 +74,10 @@ public class AddAwardController {
 			}
 			SingleAwardValidationResults validationResult = addAwardService.validateAward(awardInputRequest, userPrincipleObj.getRole());
 
+			if ( validationResult.getTotalErrors() == 0) {
+				ExcelHelper.saveAuditLog(userPrincipleObj, "Add Award", userPrincipleObj.getRole(), auditLogsRepository);
+			}
+
 			return ResponseEntity.status(HttpStatus.OK).body(validationResult);
 		} catch (Exception e) {
 
@@ -92,7 +103,7 @@ public class AddAwardController {
 	 * @return ResponseEntity - Return response status and description
 	 */
 	@PutMapping("award")
-	public ResponseEntity<SingleAwardValidationResults> updateSubsidyAward(
+	public ResponseEntity<SingleAwardValidationResults> updateSubsidyAward(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
 			@Valid @RequestBody SingleAward awardInputRequest) {
 
 		try {
@@ -104,7 +115,15 @@ public class AddAwardController {
 			SingleAwardValidationResults validationResult = new SingleAwardValidationResults();
 			Award updatedAward = awardService.updateAward(awardInputRequest);
 			validationResult.setMessage(updatedAward.getAwardNumber() + " updated successfully");
-
+			if(Objects.nonNull(updatedAward)|| !StringUtils.isEmpty(updatedAward.getAwardNumber())) {
+				String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
+				UserPrinciple userPrincipleObj = objectMapper.readValue(userPrincipleStr, UserPrinciple.class);
+				//Audit entry
+				StringBuilder eventMsg = new StringBuilder("Award status ").append(updatedAward.getStatus())
+						.append(" Updated By ").append(userPrincipleObj.getUserName());
+				ExcelHelper.saveAuditLogForUpdate(userPrincipleObj, "Update Award", updatedAward.getAwardNumber().toString()
+						,eventMsg.toString(),auditLogsRepository);
+			}
 			return ResponseEntity.status(HttpStatus.OK).body(validationResult);
 		} catch (Exception e) {
 			// 2.0 - CatchException and return validation errors

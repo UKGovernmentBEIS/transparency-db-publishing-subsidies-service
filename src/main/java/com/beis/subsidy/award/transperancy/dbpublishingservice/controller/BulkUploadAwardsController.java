@@ -8,6 +8,7 @@ import javax.servlet.MultipartConfigElement;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.SingleAwardValidationResults;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.UserPrinciple;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AuditLogsRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +36,9 @@ public class BulkUploadAwardsController {
 
 	@Autowired
 	private ObjectMapper objectMapper;
+
+	@Autowired
+	AuditLogsRepository auditLogsRepository;
 
 	@Autowired
 	public BulkUploadAwardsService bulkUploadAwardsService;
@@ -75,7 +79,12 @@ public class BulkUploadAwardsController {
 				   validationResult.setMessage("You are not authorised to bulk upload awards");
 				   return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(validationResult);
 			   }
-				ValidationResult validationResult = bulkUploadAwardsService.validateFile(file,"BEIS Administrator");
+				ValidationResult validationResult = bulkUploadAwardsService.validateFile(file,
+						userPrincipleObj.getRole());
+			   if (validationResult.getErrorRows() == 0) {
+				   ExcelHelper.saveAuditLog(userPrincipleObj, "Bulk upload Awards", userPrincipleObj.getRole(),
+						   auditLogsRepository);
+			   }
 				return ResponseEntity.status(HttpStatus.OK).body(validationResult);
 			
 			} catch (Exception e) {
