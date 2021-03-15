@@ -130,7 +130,7 @@ public class AwardService {
 				
 		return savedAwards;
 		} catch(Exception serviceException) {
-			log.error("serviceException occured::" , serviceException.getMessage());
+			log.error("serviceException occured::" , serviceException);
 			return null;
 		}
 	}
@@ -236,7 +236,7 @@ public class AwardService {
 
 			return savedAwards;
 		} catch (Exception serviceException) {
-			log.error("serviceException occured::", serviceException.getMessage());
+			log.error("serviceException occured::", serviceException);
 			return null;
 		}
 	}

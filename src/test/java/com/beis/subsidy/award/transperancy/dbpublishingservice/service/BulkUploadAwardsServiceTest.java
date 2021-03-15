@@ -154,7 +154,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setNationalId("abc123456");
 
 		ValidationResult result = new ValidationResult();
-		result.setErrorRows(2);
+		result.setErrorRows(3);
 		result.setTotalRows(2);
 		String role = "Granting Authority Administrator";
 		awardList.add(bulkUploadAward);
@@ -181,7 +181,7 @@ public class BulkUploadAwardsServiceTest {
 	}
 
 	@Test
-	public void testValidateBenificaryError() throws ParseException, IOException {
+	public void testValidateBeneficiaryError() throws ParseException, IOException {
 
 		MockMultipartFile mockMultipartFile = new MockMultipartFile("file",
 				"Bulk_upload_Awards_Template_local_success v1.9.xlsx", "multipart/form-data", inputStream);
@@ -194,7 +194,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setNationalId("abc123456");
 		String role = "Granting Authority Administrator";
 		ValidationResult result = new ValidationResult();
-		result.setErrorRows(2);
+		result.setErrorRows(3);
 		result.setTotalRows(2);
 
 		awardList.add(bulkUploadAward);
@@ -234,7 +234,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setNationalId("123456");
 		String role = "Granting Authority Administrator";
 		ValidationResult result = new ValidationResult();
-		result.setErrorRows(26);
+		result.setErrorRows(34);
 		result.setTotalRows(2);
 
 		awardList.add(bulkUploadAward);
@@ -274,7 +274,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setNationalId("123456");
 
 		ValidationResult result = new ValidationResult();
-		result.setErrorRows(26);
+		result.setErrorRows(34);
 		result.setTotalRows(2);
 
 		awardList.add(bulkUploadAward);
@@ -315,7 +315,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setNationalId("123456");
 
 		ValidationResult result = new ValidationResult();
-		result.setErrorRows(26);
+		result.setErrorRows(34);
 		result.setTotalRows(2);
 
 		awardList.add(bulkUploadAward);
