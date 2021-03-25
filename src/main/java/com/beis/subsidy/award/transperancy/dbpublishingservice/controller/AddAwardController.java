@@ -105,7 +105,7 @@ public class AddAwardController {
 	@PutMapping("award")
 	public ResponseEntity<SingleAwardValidationResults> updateSubsidyAward(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
 			@Valid @RequestBody SingleAward awardInputRequest) {
-
+		HttpStatus httpStatus = HttpStatus.OK;
 		try {
 			log.info("{}::Before calling update award",loggingComponentName);
 
@@ -124,7 +124,11 @@ public class AddAwardController {
 				ExcelHelper.saveAuditLogForUpdate(userPrincipleObj, "Update Award", updatedAward.getAwardNumber().toString()
 						,eventMsg.toString(),auditLogsRepository);
 			}
-			return ResponseEntity.status(HttpStatus.OK).body(validationResult);
+
+			if (Objects.nonNull(validationResult) && validationResult.getTotalErrors() > 0) {
+				httpStatus = HttpStatus.BAD_REQUEST;
+			}
+			return ResponseEntity.status(httpStatus).body(validationResult);
 		} catch (Exception e) {
 			// 2.0 - CatchException and return validation errors
 			log.error("{} :: Exception block in updateSubsidyAward", loggingComponentName,e);

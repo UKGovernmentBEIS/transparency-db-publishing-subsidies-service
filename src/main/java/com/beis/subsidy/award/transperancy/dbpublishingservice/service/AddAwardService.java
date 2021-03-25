@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AwardRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.SubsidyMeasureRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SingleAward
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SubsidyMeasure;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Service
@@ -30,6 +32,9 @@ public class AddAwardService {
 
 	@Autowired
 	private SubsidyMeasureRepository smRepository;
+
+	@Autowired
+	private AwardRepository awardRepository;
 
 	@Value("${loggingComponentName}")
 	private String loggingComponentName;
@@ -55,7 +60,6 @@ public class AddAwardService {
 			 */
 			List<SingleAwardValidationResult> scNumberNameCheckList = validateScNumberScTitle(award);
 
-			//List<SingleAwardValidationResult> subsidyControlNumberLengthList = validateSubsidyNumberLength(award);
 
 			List<SingleAwardValidationResult> subsidyControlNumberMismatchList = validateSubsidyControlNumber(
 					award);
@@ -306,14 +310,28 @@ public class AddAwardService {
 
 		if((!StringUtils.isEmpty(award.getSubsidyControlTitle())||!StringUtils.isEmpty(award.getSubsidyControlNumber()))
 				&& (!StringUtils.isEmpty(award.getSubsidyInstrument())
-				&& !award.getSubsidyInstrument().startsWith("Tax"))&& (award.getSubsidyAmountExact().matches("[0-9]+"))) {
+				&& !award.getSubsidyInstrument().startsWith("Tax")) &&
+				(award.getSubsidyAmountExact().matches("[0-9]+"))) {
 
 			SubsidyMeasure subsidyMeasure = getSubsidyMeasureByScNumberOrMeasureTitle(award);
-			if (subsidyMeasure != null) {
+			if (Objects.nonNull(subsidyMeasure) && validateBudget(subsidyMeasure.getBudget(), award.getSubsidyAmountExact())) {
 
-				validateBudget(subsidyMeasure.getBudget(), award.getSubsidyAmountExact());
+
 				validationSubsidyAmountExactErrorResultList.add(new SingleAwardValidationResult("subsidyAmountExact",
 						"Subsidy Amount Exact is exceeded over the scheme budget amount."));
+			}
+
+			if (Objects.nonNull(subsidyMeasure) && subsidyMeasure.isAdhoc()) {
+
+				List<Award> awards = awardRepository.findBySubsidyMeasure(subsidyMeasure);
+
+				if (!CollectionUtils.isEmpty(awards) & awards.size() > 0) {
+
+					validationSubsidyAmountExactErrorResultList.add(
+							new SingleAwardValidationResult("subsidyControlNumber or subsidyControlTitle",
+							"Scheme type is adhoc hence subsidyControlNumber cannot  assigned to another award."));
+				}
+
 			}
 
 		}
