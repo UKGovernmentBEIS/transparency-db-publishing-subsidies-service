@@ -44,12 +44,12 @@
             <artifactId>commons-collections4</artifactId>
             <version>4.1</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
             <optional>true</optional>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
@@ -87,10 +87,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-config</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -100,17 +97,11 @@
             <artifactId>notifications-java-client</artifactId>
             <version>3.17.0-RELEASE</version>
         </dependency>
-        <dependency>
-            <!-- Required to use PATCH -->
-            <groupId>io.github.openfeign</groupId>
-            <artifactId>feign-httpclient</artifactId>
-            <version>11.0</version>
-        </dependency>
-        <dependency>
+         <!--<dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-netflix-core</artifactId>
             <version>1.4.7.RELEASE</version>
-        </dependency>
+        </dependency>-->
     </dependencies>
     <dependencyManagement>
         <dependencies>
@@ -176,17 +167,15 @@
     <build>
         <plugins>
 
-
-
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-            <plugin>
+           <!-- <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.1</version>
-            </plugin>
+            </plugin>-->
 
             <plugin>
                 <groupId>org.jacoco</groupId>
