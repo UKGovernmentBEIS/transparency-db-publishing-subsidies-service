@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.feign.GraphAPIFeignClient;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.*;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.exception.PublishingSubsidiesException;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AwardRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.GrantingAuthorityRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.SubsidyMeasureRepository;
@@ -21,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -951,7 +949,6 @@ public class AddAwardService {
 		} catch (FeignException ex) {
 			log.error("{}:: get  groupId Graph Api is failed:: status code {} & message {}",
 					loggingComponentName, ex.status(), ex.getMessage());
-			throw new PublishingSubsidiesException(HttpStatus.valueOf(ex.status()), "Graph Api failed");
 		}
 		return userRolesResponse;
 	}
