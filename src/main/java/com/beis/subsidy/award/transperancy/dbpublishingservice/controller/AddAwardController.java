@@ -2,6 +2,7 @@ package com.beis.subsidy.award.transperancy.dbpublishingservice.controller;
 
 import javax.validation.Valid;
 
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.feign.GraphAPILoginFeignClient;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.*;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AuditLogsRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.util.ExcelHelper;
@@ -12,6 +13,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,6 +49,12 @@ public class AddAwardController {
 	@Autowired
 	private ObjectMapper objectMapper;
 
+	@Autowired
+	GraphAPILoginFeignClient graphAPILoginFeignClient;
+
+	@Autowired
+	Environment environment;
+
 	public static final String All_ROLES[]= {"BEIS Administrator","Granting Authority Administrator",
 			"Granting Authority Approver","Granting Authority Encoder"};
 	
@@ -62,17 +71,23 @@ public class AddAwardController {
 		UserPrinciple userPrincipleObj = null;
 		try {
 			log.info("{} :: Before calling add Award",loggingComponentName);
+			SingleAwardValidationResults validationResult = new SingleAwardValidationResults();
 			String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
 			userPrincipleObj = objectMapper.readValue(userPrincipleStr, UserPrinciple.class);
 			if (!Arrays.asList(All_ROLES).contains(userPrincipleObj.getRole())) {
-				SingleAwardValidationResults validationResult = new SingleAwardValidationResults();
 				validationResult.setMessage("You are not authorised to add single award");
-				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(validationResult);
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(validationResult);
+			} else if (awardInputRequest == null) {
+				validationResult.setMessage("awardInputRequest is empty");
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validationResult);
 			}
-			if (awardInputRequest == null) {
-				throw new Exception("awardInputRequest is empty");
+
+			String accessToken= getBearerToken();
+			if (StringUtils.isEmpty(accessToken)) {
+				validationResult.setMessage("Graph Api Service Failed while bearer token generate");
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validationResult);
 			}
-			SingleAwardValidationResults validationResult = addAwardService.validateAward(awardInputRequest, userPrincipleObj.getRole());
+			validationResult = addAwardService.validateAward(awardInputRequest, userPrincipleObj,accessToken);
 
 			if ( validationResult.getTotalErrors() == 0) {
 				ExcelHelper.saveAuditLog(userPrincipleObj, "Add Award", userPrincipleObj.getRole(), auditLogsRepository);
@@ -135,7 +150,19 @@ public class AddAwardController {
 			SingleAwardValidationResults validationResult = new SingleAwardValidationResults();
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(validationResult);
 		}
-
 	}
 
+	public String getBearerToken() {
+
+		MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+		map.add("grant_type", "client_credentials");
+		map.add("client_id", environment.getProperty("client-Id"));
+		map.add("client_secret",environment.getProperty("client-secret"));
+		map.add("scope", environment.getProperty("graph-api-scope"));
+
+		AccessTokenResponse openIdTokenResponse = graphAPILoginFeignClient
+				.getAccessIdToken(environment.getProperty("tenant-id"),map);
+
+		return  openIdTokenResponse != null ? openIdTokenResponse.getAccessToken() : null ;
+	}
 }

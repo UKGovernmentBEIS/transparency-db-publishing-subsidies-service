@@ -8,6 +8,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.UserPrinciple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -43,7 +44,7 @@ public class AddAwardServiceTest {
 
 	private final AwardRepository awardRepository = mock(AwardRepository.class);
 	private BeneficiaryRepository beneficiaryRepository = mock(BeneficiaryRepository.class);
-	private final GrantingAuthorityRepository grepo = mock(GrantingAuthorityRepository.class);
+	private final GrantingAuthorityRepository gRepo = mock(GrantingAuthorityRepository.class);
 	private SubsidyMeasureRepository smRepository = mock(SubsidyMeasureRepository.class);
 
 	@BeforeEach
@@ -71,7 +72,7 @@ public class AddAwardServiceTest {
 	}
 
 	@Test
-	public void testValidategAwards() throws ParseException {
+	public void testValidateAwards() throws ParseException {
 
 		String role = "Granting Authority Administrator";
 		List<SubsidyMeasure> submList = new ArrayList<>();
@@ -87,11 +88,12 @@ public class AddAwardServiceTest {
 		gaList.add(ga);
 
 		Beneficiary beneficiary = mock(Beneficiary.class);
+		UserPrinciple upMock = mock(UserPrinciple.class);
 		Award saveAward = new Award();
 		Award expectedAward = new Award();
 		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
-		when(grepo.findAll()).thenReturn(gaList);
+		when(gRepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
 
 		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
@@ -102,7 +104,7 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
-		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest, role);
+		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest, null,"role");
 
 		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
 
@@ -112,6 +114,7 @@ public class AddAwardServiceTest {
 	public void testNationalIdError() throws ParseException {
 
 		Beneficiary beneficiary = mock(Beneficiary.class);
+		UserPrinciple upMock = mock(UserPrinciple.class);
 		List<GrantingAuthority> gaList = new ArrayList<GrantingAuthority>();
 		List<SubsidyMeasure> smList = new ArrayList<>();
 		List<BulkUploadAwards> awardList = new ArrayList<>();
@@ -137,7 +140,7 @@ public class AddAwardServiceTest {
 		expectedAward.setApprovedBy("test");
 		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
-		when(grepo.findAll()).thenReturn(gaList);
+		when(gRepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
 
 		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
@@ -148,7 +151,7 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
-		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest, role);
+		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest,upMock,"role");
 
 		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
 
@@ -158,6 +161,7 @@ public class AddAwardServiceTest {
 	public void testNationalIdErrors() throws ParseException {
 
 		Beneficiary beneficiary = mock(Beneficiary.class);
+		UserPrinciple upMock = mock(UserPrinciple.class);
 		List<GrantingAuthority> gaList = new ArrayList<GrantingAuthority>();
 		List<SubsidyMeasure> smList = new ArrayList<>();
 		List<BulkUploadAwards> awardList = new ArrayList<>();
@@ -187,7 +191,7 @@ public class AddAwardServiceTest {
 		expectedAward.setApprovedBy("test");
 		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
-		when(grepo.findAll()).thenReturn(gaList);
+		when(gRepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
 
 		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
@@ -198,7 +202,7 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
-		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest, role);
+		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest, upMock,"role");
 
 		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
 
@@ -208,6 +212,7 @@ public class AddAwardServiceTest {
 	public void testvalidateErrors() throws ParseException {
 
 		Beneficiary beneficiary = mock(Beneficiary.class);
+		UserPrinciple upMock = mock(UserPrinciple.class);
 		List<GrantingAuthority> gaList = new ArrayList<GrantingAuthority>();
 		List<SubsidyMeasure> smList = new ArrayList<>();
 		List<BulkUploadAwards> awardList = new ArrayList<>();
@@ -233,7 +238,7 @@ public class AddAwardServiceTest {
 		expectedAward.setApprovedBy("test");
 		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
-		when(grepo.findAll()).thenReturn(gaList);
+		when(gRepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
 
 		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
@@ -244,16 +249,17 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
-		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest,role);
+		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest,upMock,"role");
 
 		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
 
 	}
 
 	@Test
-	public void testvalidateAwardErrors() throws ParseException {
+	public void testValidateAwardErrors() throws ParseException {
 
 		Beneficiary beneficiary = mock(Beneficiary.class);
+		UserPrinciple upMock = mock(UserPrinciple.class);
 		List<GrantingAuthority> gaList = new ArrayList<GrantingAuthority>();
 		List<SubsidyMeasure> smList = new ArrayList<>();
 		List<BulkUploadAwards> awardList = new ArrayList<>();
@@ -282,7 +288,7 @@ public class AddAwardServiceTest {
 		expectedAward.setApprovedBy("test");
 		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
-		when(grepo.findAll()).thenReturn(gaList);
+		when(gRepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
 
 		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
@@ -293,19 +299,21 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
-		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest,role);
+		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest,upMock,"role");
 
 		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
 
 	}
 
 	@Test
-	public void testvalidateUTRErrors() throws ParseException {
+	public void testValidateUTRErrors() throws ParseException {
 
 		Beneficiary beneficiary = mock(Beneficiary.class);
 		List<GrantingAuthority> gaList = new ArrayList<GrantingAuthority>();
 		List<SubsidyMeasure> smList = new ArrayList<>();
 		List<BulkUploadAwards> awardList = new ArrayList<>();
+
+		UserPrinciple upMock = mock(UserPrinciple.class);
 
 		awardInputRequest.setOrgSize(null);
 		awardInputRequest.setNationalIdType("UTR Number");
@@ -331,7 +339,7 @@ public class AddAwardServiceTest {
 		expectedAward.setApprovedBy("test");
 		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
-		when(grepo.findAll()).thenReturn(gaList);
+		when(gRepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
 
 		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
@@ -343,20 +351,22 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
-		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest,role);
+		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest,upMock, "accessToken");
 
 		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
 
 	}
 
 	@Test
-	public void testvalidateCharityrrors() throws ParseException {
+	public void testValidateCharityErrors() throws ParseException {
 
 		Beneficiary beneficiary = mock(Beneficiary.class);
 		List<GrantingAuthority> gaList = new ArrayList<GrantingAuthority>();
 		List<SubsidyMeasure> smList = new ArrayList<>();
 		List<BulkUploadAwards> awardList = new ArrayList<>();
 
+		UserPrinciple upMock = mock(UserPrinciple.class);
+		String accessToken = "Bearer abcdf";
 		String role = "Granting Authority Administrator";
 		awardInputRequest.setOrgSize(null);
 		awardInputRequest.setNationalIdType("Charity Number");
@@ -382,9 +392,9 @@ public class AddAwardServiceTest {
 		expectedAward.setApprovedBy("test");
 		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
-		when(grepo.findAll()).thenReturn(gaList);
+		when(gRepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
-
+		when(upMock.getUserName()).thenReturn("Granting Authority Approver");
 		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
 		expectedResult.setTotalErrors(3);
 		expectedResult.setMessage("Award saved in Database");
@@ -393,7 +403,7 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
-		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest, role);
+		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest, upMock, accessToken);
 
 		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
 

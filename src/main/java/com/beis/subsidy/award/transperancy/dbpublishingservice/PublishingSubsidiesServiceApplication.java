@@ -1,5 +1,7 @@
 package com.beis.subsidy.award.transperancy.dbpublishingservice;
 
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.feign.GraphAPIFeignClient;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.feign.GraphAPILoginFeignClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,7 +13,9 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 
 @SpringBootApplication
-@EnableFeignClients("com.beis.subsidy.award.transperancy.dbpublishingservice.service")
+@EnableFeignClients(basePackages = {
+		"com.beis.subsidy.award.transperancy.dbpublishingservice.controller.feign" },
+		basePackageClasses = { GraphAPIFeignClient.class, GraphAPILoginFeignClient.class })
 public class PublishingSubsidiesServiceApplication {
 
 	public static void main(String[] args) {
