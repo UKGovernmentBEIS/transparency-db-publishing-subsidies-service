@@ -163,10 +163,12 @@ public class AddAwardController {
 
 		MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
 		map.add("grant_type", "client_credentials");
-		map.add("client_id", environment.getProperty("client-id"));
+		map.add("client_id", environment.getProperty("client-Id"));
 		map.add("client_secret",environment.getProperty("client-secret"));
 		map.add("scope", environment.getProperty("graph-api-scope"));
 		log.info("input request body::{}", map);
+		log.info("client-Id input request body::{}", environment.getProperty("client-Id"));
+
 		AccessTokenResponse openIdTokenResponse = graphAPILoginFeignClient
 				.getAccessIdToken(environment.getProperty("tenant-id"),map);
 
