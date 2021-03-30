@@ -75,15 +75,18 @@ public class AddAwardController {
 			String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
 			userPrincipleObj = objectMapper.readValue(userPrincipleStr, UserPrinciple.class);
 			if (!Arrays.asList(All_ROLES).contains(userPrincipleObj.getRole())) {
+				validationResult.setTotalErrors(validationResult.getTotalErrors() + 1);
 				validationResult.setMessage("You are not authorised to add single award");
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(validationResult);
 			} else if (awardInputRequest == null) {
+				validationResult.setTotalErrors(validationResult.getTotalErrors() + 1);
 				validationResult.setMessage("awardInputRequest is empty");
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validationResult);
 			}
 
 			String accessToken= getBearerToken();
 			if (StringUtils.isEmpty(accessToken)) {
+				validationResult.setTotalErrors(validationResult.getTotalErrors() + 1);
 				validationResult.setMessage("Graph Api Service Failed while bearer token generate");
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validationResult);
 			}
@@ -104,6 +107,8 @@ public class AddAwardController {
 			validationResult.setMessage(e.getMessage());
 			validationErrorResult.add(validationResult);
 			singleAwardValidationResults.setValidationErrorResult(validationErrorResult);
+			singleAwardValidationResults.setTotalErrors(validationErrorResult.size() + 1);
+			singleAwardValidationResults.setMessage(e.getMessage());
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(singleAwardValidationResults);
 		}
 
@@ -156,10 +161,10 @@ public class AddAwardController {
 
 		MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
 		map.add("grant_type", "client_credentials");
-		map.add("client_id", environment.getProperty("client-Id"));
+		map.add("client_id", environment.getProperty("client-id"));
 		map.add("client_secret",environment.getProperty("client-secret"));
 		map.add("scope", environment.getProperty("graph-api-scope"));
-
+		log.info("input request body::{}", map);
 		AccessTokenResponse openIdTokenResponse = graphAPILoginFeignClient
 				.getAccessIdToken(environment.getProperty("tenant-id"),map);
 
