@@ -109,8 +109,8 @@ public class AddAwardController {
 			validationResult.setMessage(e.getMessage());
 			validationErrorResult.add(validationResult);
 			singleAwardValidationResults.setValidationErrorResult(validationErrorResult);
-			singleAwardValidationResults.setTotalErrors(validationErrorResult.size() + 1);
-			singleAwardValidationResults.setMessage(e.getMessage());
+			singleAwardValidationResults.setTotalErrors(validationErrorResult.size());
+			singleAwardValidationResults.setMessage("failed");
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(singleAwardValidationResults);
 		}
 
@@ -162,15 +162,15 @@ public class AddAwardController {
 	public String getBearerToken() {
 
 		MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-		map.add("grant_type", "client_credentials");
-		map.add("client_id", environment.getProperty("client-Id"));
-		map.add("client_secret",environment.getProperty("client-secret"));
-		map.add("scope", environment.getProperty("graph-api-scope"));
-		log.info("input request body::{}", map);
-		log.info("client-Id input request body::{}", environment.getProperty("client-Id"));
+			map.add("grant_type", "client_credentials");
+			map.add("client_id", environment.getProperty("client-Id"));
+			map.add("client_secret",environment.getProperty("client-secret"));
+			map.add("scope", environment.getProperty("graph-api-scope"));
+			log.info("input request body::{}", map);
+			log.info("client-Id input request body::{}", environment.getProperty("client-Id"));
 
-		AccessTokenResponse openIdTokenResponse = graphAPILoginFeignClient
-				.getAccessIdToken(environment.getProperty("tenant-id"),map);
+			AccessTokenResponse openIdTokenResponse = graphAPILoginFeignClient
+					.getAccessIdToken(environment.getProperty("tenant-id"),map);
 
 		return  openIdTokenResponse != null ? openIdTokenResponse.getAccessToken() : null ;
 	}
