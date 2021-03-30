@@ -69,6 +69,7 @@ public class AddAwardController {
 	public ResponseEntity<SingleAwardValidationResults> addSubsidyAward(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
 			@Valid @RequestBody SingleAward awardInputRequest) {
 		UserPrinciple userPrincipleObj = null;
+		HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
 		try {
 			log.info("{} :: Before calling add Award",loggingComponentName);
 			SingleAwardValidationResults validationResult = new SingleAwardValidationResults();
@@ -94,9 +95,10 @@ public class AddAwardController {
 
 			if ( validationResult.getTotalErrors() == 0) {
 				ExcelHelper.saveAuditLog(userPrincipleObj, "Add Award", userPrincipleObj.getRole(), auditLogsRepository);
+				httpStatus = HttpStatus.OK;
 			}
 
-			return ResponseEntity.status(HttpStatus.OK).body(validationResult);
+			return ResponseEntity.status(httpStatus).body(validationResult);
 		} catch (Exception e) {
 
 			log.error("{} :: Exception block in addSubsidyAward", loggingComponentName,e);
