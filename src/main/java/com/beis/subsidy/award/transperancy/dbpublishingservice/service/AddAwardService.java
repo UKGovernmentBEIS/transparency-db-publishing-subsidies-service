@@ -907,19 +907,26 @@ public class AddAwardService {
 
 	public  void mapGroupInfoToUser(String token, List<UserResponse> userProfiles) {
 
-		// final UserRolesResponse userResponse;
+
 		log.info("{}::before calling toGraph Api in the mapGroupInfoToUser",loggingComponentName);
 		userProfiles.forEach(userProfile -> {
 			UserRolesResponse userRolesResponse = getUserGroup(token,userProfile.getId());
-			String roleName = userRolesResponse.getUserRoles().stream().filter(
-					userRole -> userRole.getPrincipalType().equalsIgnoreCase("GROUP"))
-					.map(UserRoleResponse::getPrincipalDisplayName).findFirst().get();
-			if(!org.springframework.util.StringUtils.isEmpty(roleName)) {
+			log.info("{}::in the mapGroupInfoToUser & userRolesResponse{} ::",loggingComponentName, userRolesResponse.getUserRoles());
+			if (Objects.nonNull(userRolesResponse) && !CollectionUtils.isEmpty(userRolesResponse.getUserRoles())) {
 
-				userProfile.setRoleName(roleName);
+				String roleName = userRolesResponse.getUserRoles().stream().filter(
+						userRole -> userRole.getPrincipalType().equalsIgnoreCase("GROUP"))
+						.map(UserRoleResponse::getPrincipalDisplayName).findFirst().get();
+
+				log.info("{}::in the mapGroupInfoToUser {} ::",loggingComponentName, roleName);
+				if(!StringUtils.isEmpty(roleName)) {
+
+					userProfile.setRoleName(roleName);
+				}
+
 			}
-
 		});
+		log.info("{}::After calling toGraph Api in the mapGroupInfoToUser",loggingComponentName);
 	}
 
 	/**
@@ -935,9 +942,9 @@ public class AddAwardService {
 		Object clazz;
 		String groupName = null;
 		try {
-			log.info("{}::Before calling to Graph Api getUserGroupName and user id is {}",loggingComponentName, userId);
+			log.info("{}::Before calling to Graph Api getUserGroup and user id is {}",loggingComponentName, userId);
 			response = graphAPIFeignClient.getUserGroupName("Bearer " + token,userId);
-			log.info("{}:: After the call Graph Api getUserGroupName and  status is {}", loggingComponentName,response.status());
+			log.info("{}:: After the call Graph Api getUserGroup and  status is {}", loggingComponentName,response.status());
 
 			if (response.status() == 200) {
 				clazz = UserRolesResponse.class;

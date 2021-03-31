@@ -76,10 +76,12 @@ public class AddAwardController {
 			String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
 			userPrincipleObj = objectMapper.readValue(userPrincipleStr, UserPrinciple.class);
 			if (!Arrays.asList(All_ROLES).contains(userPrincipleObj.getRole())) {
+				log.error("{} :: role validation  failed in  add Award",loggingComponentName);
 				validationResult.setTotalErrors(validationResult.getTotalErrors() + 1);
 				validationResult.setMessage("You are not authorised to add single award");
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(validationResult);
 			} else if (awardInputRequest == null) {
+				log.error("{} :: awardInputRequest is null in  add Award",loggingComponentName);
 				validationResult.setTotalErrors(validationResult.getTotalErrors() + 1);
 				validationResult.setMessage("awardInputRequest is empty");
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validationResult);
@@ -87,6 +89,7 @@ public class AddAwardController {
 
 			String accessToken= getBearerToken();
 			if (StringUtils.isEmpty(accessToken)) {
+				log.error("{} :: bearer token problem in  add Award",loggingComponentName);
 				validationResult.setTotalErrors(validationResult.getTotalErrors() + 1);
 				validationResult.setMessage("Graph Api Service Failed while bearer token generate");
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validationResult);
@@ -94,8 +97,10 @@ public class AddAwardController {
 			validationResult = addAwardService.validateAward(awardInputRequest, userPrincipleObj,accessToken);
 
 			if ( validationResult.getTotalErrors() == 0) {
+				log.info("{} :: before saving the audit log in  add Award ::{}",loggingComponentName, userPrincipleObj.getRole());
 				ExcelHelper.saveAuditLog(userPrincipleObj, "Add Award", userPrincipleObj.getRole(), auditLogsRepository);
 				httpStatus = HttpStatus.OK;
+				log.info("{} :: after saving the audit log in  add Award",loggingComponentName);
 			}
 
 			return ResponseEntity.status(httpStatus).body(validationResult);
@@ -162,16 +167,16 @@ public class AddAwardController {
 	public String getBearerToken() {
 
 		MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-			map.add("grant_type", "client_credentials");
-			map.add("client_id", environment.getProperty("client-Id"));
-			map.add("client_secret",environment.getProperty("client-secret"));
-			map.add("scope", environment.getProperty("graph-api-scope"));
-			log.info("input request body::{}", map);
-			log.info("client-Id input request body::{}", environment.getProperty("client-Id"));
+		map.add("grant_type", "client_credentials");
+		map.add("client_id", environment.getProperty("client-Id"));
+		map.add("client_secret",environment.getProperty("client-secret"));
+		map.add("scope", environment.getProperty("graph-api-scope"));
+		log.info("input request body::{}", map);
+		log.info("client-Id input request body::{}", environment.getProperty("client-Id"));
 
-			AccessTokenResponse openIdTokenResponse = graphAPILoginFeignClient
-					.getAccessIdToken(environment.getProperty("tenant-id"),map);
+		AccessTokenResponse openIdTokenResponse = graphAPILoginFeignClient
+				.getAccessIdToken(environment.getProperty("tenant-id"),map);
 
-		return  openIdTokenResponse != null ? openIdTokenResponse.getAccessToken() : null ;
+	    return  openIdTokenResponse != null ? openIdTokenResponse.getAccessToken() : null ;
 	}
 }
