@@ -35,6 +35,20 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>4.1.1</version>
@@ -44,12 +58,7 @@
             <artifactId>commons-collections4</artifactId>
             <version>4.1</version>
         </dependency>
-        <!--<dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
-        </dependency>-->
+
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
@@ -65,16 +74,6 @@
             <artifactId>spring-cloud-starter-feign</artifactId>
             <version>1.4.7.RELEASE</version>
         </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -88,20 +87,13 @@
             </exclusions>
         </dependency>
 
+
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-         <dependency>
             <groupId>uk.gov.service.notify</groupId>
             <artifactId>notifications-java-client</artifactId>
             <version>3.17.0-RELEASE</version>
         </dependency>
-         <!--<dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-netflix-core</artifactId>
-            <version>1.4.7.RELEASE</version>
-        </dependency>-->
+
     </dependencies>
     <dependencyManagement>
         <dependencies>
@@ -155,12 +147,7 @@
                 <version>1.5.2</version>
                 <scope>compile</scope>
             </dependency>
-            <dependency>
-                <groupId>uk.gov.service.notify</groupId>
-                <artifactId>notifications-java-client</artifactId>
-                <version>3.17.0-RELEASE</version>
-                <type>jar</type>
-            </dependency>
+
         </dependencies>
 
     </dependencyManagement>
@@ -171,11 +158,11 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-           <!-- <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.1</version>
-            </plugin>-->
+            <!-- <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+                 <artifactId>maven-surefire-plugin</artifactId>
+                 <version>2.22.1</version>
+             </plugin>-->
 
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -229,17 +216,4 @@
             </plugin>
         </plugins>
     </build>
-    <!--  <build>
-       <sourceDirectory>src</sourceDirectory>
-       <plugins>
-         <plugin>
-           <artifactId>maven-compiler-plugin</artifactId>
-           <version>3.7.0</version>
-           <configuration>
-             <source>1.8</source>
-             <target>1.8</target>
-           </configuration>
-         </plugin>
-       </plugins>
-     </build> -->
 </project>
