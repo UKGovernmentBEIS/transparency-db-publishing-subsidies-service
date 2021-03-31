@@ -55,7 +55,7 @@ public class AddAwardController {
 	@Autowired
 	Environment environment;
 
-	public static final String All_ROLES[]= {"BEIS Administrator","Granting Authority Administrator",
+	public static final String[] All_ROLES = {"BEIS Administrator","Granting Authority Administrator",
 			"Granting Authority Approver","Granting Authority Encoder"};
 	
 	/**
@@ -68,8 +68,7 @@ public class AddAwardController {
 	@PostMapping("addAward")
 	public ResponseEntity<SingleAwardValidationResults> addSubsidyAward(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
 			@Valid @RequestBody SingleAward awardInputRequest) {
-		UserPrinciple userPrincipleObj = null;
-		HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+		UserPrinciple userPrincipleObj;
 		try {
 			log.info("{} :: Before calling add Award",loggingComponentName);
 			SingleAwardValidationResults validationResult = new SingleAwardValidationResults();
@@ -99,11 +98,10 @@ public class AddAwardController {
 			if ( validationResult.getTotalErrors() == 0) {
 				log.info("{} :: before saving the audit log in  add Award ::{}",loggingComponentName, userPrincipleObj.getRole());
 				ExcelHelper.saveAuditLog(userPrincipleObj, "Add Award", userPrincipleObj.getRole(), auditLogsRepository);
-				httpStatus = HttpStatus.OK;
 				log.info("{} :: after saving the audit log in  add Award",loggingComponentName);
 			}
 
-			return ResponseEntity.status(httpStatus).body(validationResult);
+			return ResponseEntity.status(HttpStatus.OK).body(validationResult);
 		} catch (Exception e) {
 
 			log.error("{} :: Exception block in addSubsidyAward", loggingComponentName,e);
@@ -132,7 +130,7 @@ public class AddAwardController {
 	@PutMapping("award")
 	public ResponseEntity<SingleAwardValidationResults> updateSubsidyAward(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
 			@Valid @RequestBody SingleAward awardInputRequest) {
-		HttpStatus httpStatus = HttpStatus.OK;
+
 		try {
 			log.info("{}::Before calling update award",loggingComponentName);
 
@@ -142,7 +140,7 @@ public class AddAwardController {
 			SingleAwardValidationResults validationResult = new SingleAwardValidationResults();
 			Award updatedAward = awardService.updateAward(awardInputRequest);
 			validationResult.setMessage(updatedAward.getAwardNumber() + " updated successfully");
-			if(Objects.nonNull(updatedAward)|| !StringUtils.isEmpty(updatedAward.getAwardNumber())) {
+			if(!StringUtils.isEmpty(updatedAward.getAwardNumber())) {
 				String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
 				UserPrinciple userPrincipleObj = objectMapper.readValue(userPrincipleStr, UserPrinciple.class);
 				//Audit entry
@@ -152,10 +150,7 @@ public class AddAwardController {
 						,eventMsg.toString(),auditLogsRepository);
 			}
 
-			if (Objects.nonNull(validationResult) && validationResult.getTotalErrors() > 0) {
-				httpStatus = HttpStatus.BAD_REQUEST;
-			}
-			return ResponseEntity.status(httpStatus).body(validationResult);
+			return ResponseEntity.status(HttpStatus.OK).body(validationResult);
 		} catch (Exception e) {
 			// 2.0 - CatchException and return validation errors
 			log.error("{} :: Exception block in updateSubsidyAward", loggingComponentName,e);
