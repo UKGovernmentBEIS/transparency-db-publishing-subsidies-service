@@ -28,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @RestController
@@ -96,7 +95,7 @@ public class AddAwardController {
 			validationResult = addAwardService.validateAward(awardInputRequest, userPrincipleObj,accessToken);
 
 			if ( validationResult.getTotalErrors() == 0) {
-				log.info("{} :: before saving the audit log in  add Award ::{}",loggingComponentName, userPrincipleObj.getRole());
+
 				ExcelHelper.saveAuditLog(userPrincipleObj, "Add Award", userPrincipleObj.getRole(), auditLogsRepository);
 				log.info("{} :: after saving the audit log in  add Award",loggingComponentName);
 			}
@@ -166,8 +165,6 @@ public class AddAwardController {
 		map.add("client_id", environment.getProperty("client-Id"));
 		map.add("client_secret",environment.getProperty("client-secret"));
 		map.add("scope", environment.getProperty("graph-api-scope"));
-		log.info("input request body::{}", map);
-		log.info("client-Id input request body::{}", environment.getProperty("client-Id"));
 
 		AccessTokenResponse openIdTokenResponse = graphAPILoginFeignClient
 				.getAccessIdToken(environment.getProperty("tenant-id"),map);

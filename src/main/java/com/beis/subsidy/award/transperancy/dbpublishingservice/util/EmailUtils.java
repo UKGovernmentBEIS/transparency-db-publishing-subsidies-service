@@ -21,10 +21,10 @@ public class EmailUtils {
         personalisation.put("award_number", awardNumber);
 
         if (!StringUtils.isEmpty(environment.getProperty("apiKey"))
-            && !StringUtils.isEmpty(environment.getProperty("single_award_notification"))) {
+            && !StringUtils.isEmpty(environment.getProperty("single-award-notification-template"))) {
 
             NotificationClient client = new NotificationClient(environment.getProperty("apiKey"));
-            SendEmailResponse response = client.sendEmail(environment.getProperty("single_award_notification"), emailId,
+            SendEmailResponse response = client.sendEmail(environment.getProperty("single-award-notification-template"), emailId,
                     personalisation, null);
             log.info(" single award email notification sent :: ");
         }
