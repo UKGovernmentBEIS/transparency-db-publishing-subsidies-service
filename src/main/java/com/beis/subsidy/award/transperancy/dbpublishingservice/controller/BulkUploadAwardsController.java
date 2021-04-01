@@ -6,7 +6,6 @@ import java.util.List;
 
 import javax.servlet.MultipartConfigElement;
 
-import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.SingleAwardValidationResults;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.UserPrinciple;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AuditLogsRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;

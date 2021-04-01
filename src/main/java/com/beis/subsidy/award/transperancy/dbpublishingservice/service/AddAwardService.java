@@ -1,20 +1,28 @@
 package com.beis.subsidy.award.transperancy.dbpublishingservice.service;
 
+import static com.beis.subsidy.award.transperancy.dbpublishingservice.util.JsonFeignResponseUtil.toResponseEntity;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.feign.GraphAPIFeignClient;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.*;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AwardRepository;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.GrantingAuthorityRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.SubsidyMeasureRepository;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.util.EmailUtils;
+import feign.FeignException;
+import feign.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.SingleAwardValidationResult;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.SingleAwardValidationResults;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.Award;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.GrantingAuthority;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SingleAward;
@@ -22,6 +30,7 @@ import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SubsidyMeas
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
+import uk.gov.service.notify.NotificationClientException;
 
 @Slf4j
 @Service
@@ -36,13 +45,22 @@ public class AddAwardService {
 	@Autowired
 	private AwardRepository awardRepository;
 
+	@Autowired
+	private GrantingAuthorityRepository gaRepository;
+
 	@Value("${loggingComponentName}")
 	private String loggingComponentName;
+
+	@Autowired
+	GraphAPIFeignClient graphAPIFeignClient;
+
+	@Autowired
+	Environment environment;
 
 	/*
 	 * the below method validate the Award given in  request.
 	 */
-	public SingleAwardValidationResults validateAward(SingleAward award, String role) {
+	public SingleAwardValidationResults validateAward(SingleAward award,UserPrinciple userPrinciple, String accessToken) {
 
 		    log.info("{} :: Inside validateAward Award", loggingComponentName);
 
@@ -151,12 +169,37 @@ public class AddAwardService {
 				
 				log.info("{}::No validation error in bulk excel template", loggingComponentName);
 
-				Award savedAward =awardService.createAward(award, role);
+				Award savedAward =awardService.createAward(award, userPrinciple.getRole());
 
 				log.info("{} :: After calling process api - response = ", loggingComponentName);
 				validationResult.setTotalErrors(0);
 				validationResult
-						.setMessage((true ? savedAward.getAwardNumber()+" Award saved in Database" : "Error while saving awards in Database"));
+						.setMessage(savedAward.getAwardNumber()  + " Award saved in Database");
+				//notification call START here
+
+				GrantingAuthority gaObj = gaRepository
+						.findByGrantingAuthorityName(userPrinciple.getGrantingAuthorityGroupName());
+				String groupId = gaObj != null ? gaObj.getAzureGroupId() : null;
+				UserDetailsResponse response =  getUserRolesByGrpId(accessToken,gaObj.getAzureGroupId());
+				if (Objects.nonNull(response) && !CollectionUtils.isEmpty(response.getUserProfiles())) {
+
+					List<UserResponse> users= response.getUserProfiles();
+					for (UserResponse userResponse : users) {
+						if (!org.springframework.util.StringUtils.isEmpty(userResponse.getRoleName()) &&
+								userResponse.getRoleName().contains("GrantingAuthorityApprovers")) {
+							try {
+								log.info("{}::email sending to",loggingComponentName);
+								EmailUtils.sendSingleAwardEmail(userResponse.getMail(),userPrinciple.getUserName(),savedAward.getAwardNumber(),environment);
+							} catch (NotificationClientException e) {
+								log.error("{} :: error in sending feedback mail", loggingComponentName,e);
+							}
+						}
+
+					}
+					//end Notification
+				}
+
+
 			}else {
 				validationResult.setTotalErrors(validationResult.getValidationErrorResult().size());
 				validationResult.setMessage("validation error");
@@ -601,7 +644,8 @@ public class AddAwardService {
 	private List<SingleAwardValidationResult> validateSubsidyMeasureNameLength(SingleAward award) {
 
 		List<SingleAwardValidationResult> validationSubsidyMeasureNameResultList = new ArrayList<>();
-		if(award.getSubsidyControlTitle().length() > 255) {
+		if(!StringUtils.isEmpty(award.getSubsidyControlTitle()) &&
+			award.getSubsidyControlTitle().length() > 255) {
 			validationSubsidyMeasureNameResultList.add(new SingleAwardValidationResult("SubsidyMeasureTitle ",
 					"Subsidy Measure Title must be 255 characters or fewer"));
 		}
@@ -819,5 +863,102 @@ public class AddAwardService {
 
 		return subsidyMeasure;
 	}
-	
+
+
+	@Value("${graphApiUrl}")
+	private String graphApiUrl;
+
+	/**
+	 * Get the group info
+	 * @param token
+	 * @param groupId
+	 * @return
+	 */
+	public UserDetailsResponse getUserRolesByGrpId(String token, String groupId) {
+		// Graph API call.
+		UserDetailsResponse userDetailsResponse = null;
+		Response response = null;
+		Object clazz;
+		try {
+			log.info("{}::before calling to getUsersByGroupId  Graph Api",loggingComponentName);
+			response = graphAPIFeignClient.getUsersByGroupId("Bearer " + token,groupId);
+			log.info("{}::After calling to getUsersByGroupId  Graph Api", loggingComponentName);
+
+			if (response.status() == 200) {
+				clazz = UserDetailsResponse.class;
+				ResponseEntity<Object> responseResponseEntity =  toResponseEntity(response, clazz);
+				userDetailsResponse
+						= (UserDetailsResponse) responseResponseEntity.getBody();
+				if (Objects.nonNull(userDetailsResponse)) {
+					mapGroupInfoToUser(token,userDetailsResponse.getUserProfiles());
+				}
+
+			}  else {
+				log.error("{} ::get user details by groupId Graph Api is failed ::{}",loggingComponentName,response.status());
+
+			}
+
+		} catch (FeignException ex) {
+			log.error("{}:: get  groupId Graph Api is failed:: status code {} & message {}",
+					loggingComponentName, ex.status(), ex.getMessage());
+		}
+		return userDetailsResponse;
+	}
+
+	public  void mapGroupInfoToUser(String token, List<UserResponse> userProfiles) {
+
+
+		log.info("{}::before calling toGraph Api in the mapGroupInfoToUser",loggingComponentName);
+		userProfiles.forEach(userProfile -> {
+			UserRolesResponse userRolesResponse = getUserGroup(token,userProfile.getId());
+			log.info("{}::in the mapGroupInfoToUser & userRolesResponse{} ::",loggingComponentName, userRolesResponse.getUserRoles());
+			if (Objects.nonNull(userRolesResponse) && !CollectionUtils.isEmpty(userRolesResponse.getUserRoles())) {
+
+				String roleName = userRolesResponse.getUserRoles().stream().filter(
+						userRole -> userRole.getPrincipalType().equalsIgnoreCase("GROUP"))
+						.map(UserRoleResponse::getPrincipalDisplayName).findFirst().get();
+
+				log.info("{}::in the mapGroupInfoToUser {} ::",loggingComponentName, roleName);
+				if(!StringUtils.isEmpty(roleName)) {
+
+					userProfile.setRoleName(roleName);
+				}
+
+			}
+		});
+		log.info("{}::After calling toGraph Api in the mapGroupInfoToUser",loggingComponentName);
+	}
+
+	/**
+	 * This method is used to get the user group based on the userId
+	 * @param token
+	 * @param userId
+	 * @return
+	 */
+	public UserRolesResponse getUserGroup(String token, String userId) {
+		// Graph API call.
+		UserRolesResponse userRolesResponse = null;
+		Response response = null;
+		Object clazz;
+		String groupName = null;
+		try {
+			log.info("{}::Before calling to Graph Api getUserGroup and user id is {}",loggingComponentName, userId);
+			response = graphAPIFeignClient.getUserGroupName("Bearer " + token,userId);
+			log.info("{}:: After the call Graph Api getUserGroup and  status is {}", loggingComponentName,response.status());
+
+			if (response.status() == 200) {
+				clazz = UserRolesResponse.class;
+				ResponseEntity<Object> responseResponseEntity =  toResponseEntity(response, clazz);
+				userRolesResponse
+						= (UserRolesResponse) responseResponseEntity.getBody();
+			}
+
+		} catch (FeignException ex) {
+			log.error("{}:: get  groupId Graph Api is failed:: status code {} & message {}",
+					loggingComponentName, ex.status(), ex.getMessage());
+		}
+		return userRolesResponse;
+	}
+
+
 }
