@@ -1,6 +1,7 @@
 package com.beis.subsidy.award.transperancy.dbpublishingservice.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -85,6 +86,7 @@ public class AddAwardServiceTest {
 		GrantingAuthority ga = new GrantingAuthority();
 		ga.setGaId(Long.valueOf(1));
 		ga.setGrantingAuthorityName("BEIS");
+		ga.setStatus("Inactive");
 		gaList.add(ga);
 
 		Beneficiary beneficiary = mock(Beneficiary.class);
@@ -93,16 +95,14 @@ public class AddAwardServiceTest {
 		Award expectedAward = new Award();
 		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
-		when(gRepo.findAll()).thenReturn(gaList);
+		when(gRepo.findByGrantingAuthorityName(anyString())).thenReturn(ga);
 		when(smRepository.findAll()).thenReturn(smList);
 
 		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
-		expectedResult.setTotalErrors(1);
-		expectedResult.setMessage("Award saved in Database");
+		expectedResult.setTotalErrors(2);
+		expectedResult.setMessage("Award not saved in Database");
 
 		when(awardServiceMock.getAllSubsidyMeasures()).thenReturn(submList);
-
-		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
 		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest, null,"role");
 
@@ -133,6 +133,7 @@ public class AddAwardServiceTest {
 		GrantingAuthority ga = new GrantingAuthority();
 		ga.setGaId(Long.valueOf(1));
 		ga.setGrantingAuthorityName("BEIS");
+		ga.setStatus("Active");
 		gaList.add(ga);
 		Award expectedAward = new Award();
 		Award saveAward = new Award();
@@ -140,7 +141,7 @@ public class AddAwardServiceTest {
 		expectedAward.setApprovedBy("test");
 		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
-		when(gRepo.findAll()).thenReturn(gaList);
+		when(gRepo.findByGrantingAuthorityName(anyString())).thenReturn(ga);
 		when(smRepository.findAll()).thenReturn(smList);
 
 		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
@@ -184,6 +185,7 @@ public class AddAwardServiceTest {
 		GrantingAuthority ga = new GrantingAuthority();
 		ga.setGaId(Long.valueOf(1));
 		ga.setGrantingAuthorityName("BEIS");
+		ga.setStatus("Active");
 		gaList.add(ga);
 		Award expectedAward = new Award();
 		Award saveAward = new Award();
@@ -191,7 +193,7 @@ public class AddAwardServiceTest {
 		expectedAward.setApprovedBy("test");
 		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
-		when(gRepo.findAll()).thenReturn(gaList);
+		when(gRepo.findByGrantingAuthorityName(anyString())).thenReturn(ga);
 		when(smRepository.findAll()).thenReturn(smList);
 
 		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
@@ -200,7 +202,7 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllSubsidyMeasures()).thenReturn(submList);
 
-		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
+		//when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
 		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest, upMock,"role");
 
@@ -231,6 +233,7 @@ public class AddAwardServiceTest {
 		GrantingAuthority ga = new GrantingAuthority();
 		ga.setGaId(Long.valueOf(1));
 		ga.setGrantingAuthorityName("BEIS");
+		ga.setStatus("Active");
 		gaList.add(ga);
 		Award expectedAward = new Award();
 		Award saveAward = new Award();
@@ -238,7 +241,7 @@ public class AddAwardServiceTest {
 		expectedAward.setApprovedBy("test");
 		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
-		when(gRepo.findAll()).thenReturn(gaList);
+		when(gRepo.findByGrantingAuthorityName(anyString())).thenReturn(ga);
 		when(smRepository.findAll()).thenReturn(smList);
 
 		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
@@ -247,7 +250,7 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllSubsidyMeasures()).thenReturn(submList);
 
-		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
+		//when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
 		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest,upMock,"role");
 
@@ -281,6 +284,7 @@ public class AddAwardServiceTest {
 		GrantingAuthority ga = new GrantingAuthority();
 		ga.setGaId(Long.valueOf(1));
 		ga.setGrantingAuthorityName("BEIS");
+		ga.setStatus("Active");
 		gaList.add(ga);
 		Award expectedAward = new Award();
 		Award saveAward = new Award();
@@ -288,7 +292,7 @@ public class AddAwardServiceTest {
 		expectedAward.setApprovedBy("test");
 		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
-		when(gRepo.findAll()).thenReturn(gaList);
+		when(gRepo.findByGrantingAuthorityName(anyString())).thenReturn(ga);
 		when(smRepository.findAll()).thenReturn(smList);
 
 		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
@@ -297,7 +301,7 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllSubsidyMeasures()).thenReturn(submList);
 
-		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
+		//when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
 		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest,upMock,"role");
 
@@ -332,6 +336,7 @@ public class AddAwardServiceTest {
 		GrantingAuthority ga = new GrantingAuthority();
 		ga.setGaId(Long.valueOf(1));
 		ga.setGrantingAuthorityName("BEIS");
+		ga.setStatus("Active");
 		gaList.add(ga);
 		Award expectedAward = new Award();
 		Award saveAward = new Award();
@@ -339,7 +344,7 @@ public class AddAwardServiceTest {
 		expectedAward.setApprovedBy("test");
 		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
-		when(gRepo.findAll()).thenReturn(gaList);
+		when(gRepo.findByGrantingAuthorityName(anyString())).thenReturn(ga);
 		when(smRepository.findAll()).thenReturn(smList);
 
 		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
@@ -349,7 +354,7 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllSubsidyMeasures()).thenReturn(submList);
 
-		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
+		//when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
 		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest,upMock, "accessToken");
 
@@ -385,6 +390,7 @@ public class AddAwardServiceTest {
 		GrantingAuthority ga = new GrantingAuthority();
 		ga.setGaId(Long.valueOf(1));
 		ga.setGrantingAuthorityName("BEIS");
+		ga.setStatus("Active");
 		gaList.add(ga);
 		Award expectedAward = new Award();
 		Award saveAward = new Award();
@@ -392,7 +398,7 @@ public class AddAwardServiceTest {
 		expectedAward.setApprovedBy("test");
 		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
-		when(gRepo.findAll()).thenReturn(gaList);
+		when(gRepo.findByGrantingAuthorityName(anyString())).thenReturn(ga);
 		when(smRepository.findAll()).thenReturn(smList);
 		when(upMock.getUserName()).thenReturn("Granting Authority Approver");
 		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
@@ -401,7 +407,7 @@ public class AddAwardServiceTest {
 
 		when(awardServiceMock.getAllSubsidyMeasures()).thenReturn(submList);
 
-		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
+		//when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
 
 		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest, upMock, accessToken);
 
