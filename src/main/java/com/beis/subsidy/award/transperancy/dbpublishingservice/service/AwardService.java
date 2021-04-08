@@ -186,7 +186,7 @@ public class AwardService {
 					award.getSpendingSector(), "SYSTEM", "SYSTEM", awardStatus, null,LocalDate.now(), LocalDate.now());
 
 			Award savedAwards = awardRepository.save(saveAward);
-			log.info("End process Bulk Awards db");
+			log.info("{} :: End process Bulk Awards db");
 
 			return savedAwards;
 		} catch (Exception ex) {
@@ -196,7 +196,7 @@ public class AwardService {
 	}
 	
 	@Transactional
-	public Award updateAward(SingleAward award) {
+	public Award updateAward(SingleAward award, String role) {
 		try {
 			log.info("inside updateAward db");
 
@@ -229,14 +229,14 @@ public class AwardService {
 					convertToDateSingleUpload(award.getLegalGrantingDate()), award.getSpendingRegion(),
 					((award.getSubsidyInstrument().equalsIgnoreCase("Other")) ? "Other - "+award.getSubsidyInstrumentOther()
 							: award.getSubsidyInstrument()),
-					award.getSpendingSector(), "SYSTEM", "SYSTEM", "Awaiting Approval", null,LocalDate.now(), LocalDate.now());
+					award.getSpendingSector(), "SYSTEM", "SYSTEM", addAwardStatus(role), null,LocalDate.now(), LocalDate.now());
 
 			Award savedAwards = awardRepository.save(saveAward);
-			log.info("End process Upload Awards db");
+			log.info("{} ::End process Upload Awards db");
 
 			return savedAwards;
 		} catch (Exception serviceException) {
-			log.error("serviceException occured::", serviceException);
+			log.error("serviceException occurred::", serviceException);
 			return null;
 		}
 	}

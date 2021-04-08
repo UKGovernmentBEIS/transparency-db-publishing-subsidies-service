@@ -137,11 +137,12 @@ public class AddAwardController {
 				throw new Exception("awardInputRequest is empty");
 			}
 			SingleAwardValidationResults validationResult = new SingleAwardValidationResults();
-			Award updatedAward = awardService.updateAward(awardInputRequest);
+			String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
+			UserPrinciple userPrincipleObj = objectMapper.readValue(userPrincipleStr, UserPrinciple.class);
+			Award updatedAward = awardService.updateAward(awardInputRequest, userPrincipleObj.getRole());
 			validationResult.setMessage(updatedAward.getAwardNumber() + " updated successfully");
 			if(!StringUtils.isEmpty(updatedAward.getAwardNumber())) {
-				String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
-				UserPrinciple userPrincipleObj = objectMapper.readValue(userPrincipleStr, UserPrinciple.class);
+
 				//Audit entry
 				StringBuilder eventMsg = new StringBuilder("Award ").append(updatedAward.getAwardNumber())
 						.append("is Published");
