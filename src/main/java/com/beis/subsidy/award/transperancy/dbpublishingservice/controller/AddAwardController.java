@@ -143,8 +143,8 @@ public class AddAwardController {
 				String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
 				UserPrinciple userPrincipleObj = objectMapper.readValue(userPrincipleStr, UserPrinciple.class);
 				//Audit entry
-				StringBuilder eventMsg = new StringBuilder("Award status ").append(updatedAward.getStatus())
-						.append(" Updated By ").append(userPrincipleObj.getUserName());
+				StringBuilder eventMsg = new StringBuilder("Award ").append(updatedAward.getAwardNumber())
+						.append("is Published");
 				ExcelHelper.saveAuditLogForUpdate(userPrincipleObj, "Update Award", updatedAward.getAwardNumber().toString()
 						,eventMsg.toString(),auditLogsRepository);
 			}
