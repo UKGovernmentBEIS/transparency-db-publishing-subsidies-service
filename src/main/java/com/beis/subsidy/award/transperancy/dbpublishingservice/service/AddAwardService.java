@@ -57,6 +57,9 @@ public class AddAwardService {
 	@Autowired
 	Environment environment;
 
+	@Value("${graphApiUrl}")
+	private String graphApiUrl;
+
 	/*
 	 * the below method validate the Award given in  request.
 	 */
@@ -179,9 +182,10 @@ public class AddAwardService {
 
 				GrantingAuthority gaObj = gaRepository
 						.findByGrantingAuthorityName(userPrinciple.getGrantingAuthorityGroupName());
-				String groupId = gaObj != null ? gaObj.getAzureGroupId() : null;
+
 				UserDetailsResponse response =  getUserRolesByGrpId(accessToken,gaObj.getAzureGroupId());
-				if (Objects.nonNull(response) && !CollectionUtils.isEmpty(response.getUserProfiles())) {
+				if (Objects.nonNull(response) && !CollectionUtils.isEmpty(response.getUserProfiles()) &&
+				   "Granting Authority Encoder".equals(userPrinciple.getRole())) {
 
 					List<UserResponse> users= response.getUserProfiles();
 					for (UserResponse userResponse : users) {
@@ -669,28 +673,23 @@ public class AddAwardService {
 	 */
 	private List<SingleAwardValidationResult> validateGrantingAuthorityNameInDb(SingleAward award) {
 
-		log.info("{} ::Calling processServiceproxy.getAllGrantingAuthorities()... - start", loggingComponentName);
+		log.info("{} ::getAllGrantingAuthorities()... - start", loggingComponentName);
 		
-		List<GrantingAuthority> grantingAuthorityList = awardService.getAllGrantingAuthorities();
+		GrantingAuthority grantingAuthority =  award.getGrantingAuthorityName() != null ?
+				gaRepository.findByGrantingAuthorityName(award.getGrantingAuthorityName()): null;
+
+		List<SingleAwardValidationResult> valGANameResultList = new ArrayList<>();
 		
-		log.info("{} ::Calling processServiceproxy.getAllSubsidyMeasures()... - end",loggingComponentName);
+		if (Objects.isNull(grantingAuthority) || "Inactive".equals(grantingAuthority.getStatus().trim())) {
 
-		List<String> grantingAuthorityNamesList = grantingAuthorityList.stream()
-				.map(grantingAuthority -> grantingAuthority.getGrantingAuthorityName()).collect(Collectors.toList());
-
-
-		List<SingleAwardValidationResult> validationGrantingAuthorityNameResultList = new ArrayList<>();
-		
-		if(award.getGrantingAuthorityName() != null
-						&& !grantingAuthorityNamesList.contains(award.getGrantingAuthorityName())){
-			validationGrantingAuthorityNameResultList.add(new SingleAwardValidationResult("grantingAuthorityName",
-					"You must enter the name of the granting authority."));
+			valGANameResultList.add(new SingleAwardValidationResult("grantingAuthorityName",
+					"You must enter the name of the granting authority or Granting authority is Inactive."));
 			
 		}
-		
+
 		log.info("{} :: Validation Result Error list - Granting Authority Name error = ", loggingComponentName);
 
-		return validationGrantingAuthorityNameResultList;
+		return valGANameResultList;
 	}
 
 	private List<SingleAwardValidationResult> validateNationalIdAwards(SingleAward award) {
@@ -853,8 +852,7 @@ public class AddAwardService {
 	}
 
 
-	@Value("${graphApiUrl}")
-	private String graphApiUrl;
+
 
 	/**
 	 * Get the group info
