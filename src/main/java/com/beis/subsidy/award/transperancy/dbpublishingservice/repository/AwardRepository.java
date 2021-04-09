@@ -10,4 +10,5 @@ import java.util.List;
 public interface AwardRepository extends JpaRepository<Award, Long> {
 
     List<Award> findBySubsidyMeasure(SubsidyMeasure subsidyMeasure);
+    Award findByAwardNumber(Long awardNumber);
 }

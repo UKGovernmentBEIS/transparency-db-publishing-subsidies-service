@@ -126,20 +126,21 @@ public class AddAwardController {
 	 *            - Input as SingleAward object from front end
 	 * @return ResponseEntity - Return response status and description
 	 */
-	@PutMapping("award")
+	@PutMapping("award/{awardNumber}")
 	public ResponseEntity<SingleAwardValidationResults> updateSubsidyAward(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
-			@Valid @RequestBody SingleAward awardInputRequest) {
+			@Valid @RequestBody SingleAward awardInputRequest,
+			 @PathVariable("awardNumber") Long awardNumber) {
 
 		try {
 			log.info("{}::Before calling update award",loggingComponentName);
 
-			if (awardInputRequest == null) {
+			if (awardInputRequest == null || awardNumber == 0) {
 				throw new Exception("awardInputRequest is empty");
 			}
 			SingleAwardValidationResults validationResult = new SingleAwardValidationResults();
 			String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
 			UserPrinciple userPrincipleObj = objectMapper.readValue(userPrincipleStr, UserPrinciple.class);
-			Award updatedAward = awardService.updateAward(awardInputRequest, userPrincipleObj.getRole());
+			Award updatedAward = awardService.updateAward(awardNumber,awardInputRequest, userPrincipleObj.getRole());
 			validationResult.setMessage(updatedAward.getAwardNumber() + " updated successfully");
 			if(!StringUtils.isEmpty(updatedAward.getAwardNumber())) {
 
