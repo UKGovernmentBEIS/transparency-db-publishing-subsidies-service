@@ -683,7 +683,7 @@ public class AddAwardService {
 		if (Objects.isNull(grantingAuthority) || "Inactive".equals(grantingAuthority.getStatus().trim())) {
 
 			valGANameResultList.add(new SingleAwardValidationResult("grantingAuthorityName",
-					"Granting authority is Inactive."));
+					"Granting authority is either inactive or invalid"));
 			
 		}
 
