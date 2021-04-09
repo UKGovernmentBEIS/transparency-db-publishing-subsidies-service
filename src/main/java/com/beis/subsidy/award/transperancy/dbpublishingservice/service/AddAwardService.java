@@ -740,7 +740,7 @@ public class AddAwardService {
 					((!StringUtils.isEmpty(award.getNationalId())&& award.getNationalId()!=null) &&
 							(award.getNationalId().length() > 8 || !award.getNationalId().matches("[0-9]+")))){
 				validationNationalIdResultList.add(new SingleAwardValidationResult("nationalId",
-						"The charity commission number must be 8 digits. This may include a dash (-) before the last digit."));
+						"The charity commission number can be up to 8 digits."));
 
 			}
 
