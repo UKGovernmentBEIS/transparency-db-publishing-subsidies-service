@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -186,7 +187,7 @@ public class AwardService {
 					award.getSpendingSector(), "SYSTEM", "SYSTEM", awardStatus, null,LocalDate.now(), LocalDate.now());
 
 			Award savedAwards = awardRepository.save(saveAward);
-			log.info("End process Bulk Awards db");
+			log.info("{} :: End process Bulk Awards db");
 
 			return savedAwards;
 		} catch (Exception ex) {
@@ -196,47 +197,64 @@ public class AwardService {
 	}
 	
 	@Transactional
-	public Award updateAward(SingleAward award) {
+	public Award updateAward(Long awardNumber,SingleAward awardUpdateRequest, String role) {
+
 		try {
 			log.info("inside updateAward db");
+			Award award = awardRepository.findByAwardNumber(awardNumber);
+			if (Objects.isNull(award)) {
 
-			Beneficiary beneficiary = new Beneficiary();
-			beneficiary.setBeneficiaryName(award.getBeneficiaryName());
-			beneficiary.setBeneficiaryType("Individual");
-			beneficiary.setNationalId(award.getNationalId());
-			beneficiary.setNationalIdType(award.getNationalIdType());
-			beneficiary.setOrgSize(award.getOrgSize());
-			beneficiary.setCreatedBy("SYSTEM");
-			beneficiary.setApprovedBy("SYSTEM");
-			beneficiary.setStatus("DRAFT");
-			beneficiary.setSicCode("14455");
-			beneficiary.setCreatedTimestamp(LocalDate.now());
-			beneficiary.setLastModifiedTimestamp(LocalDate.now());
+				throw new Exception("Award details not found::" + awardNumber);
+			}
 
-			beneficiaryRepository.save(beneficiary);
+			award.setStatus(awardUpdateRequest.getStatus());
 
-			BulkUploadAwards tempAward = new BulkUploadAwards();
-			tempAward.setGrantingAuthorityName(award.getGrantingAuthorityName());
-			tempAward.setSubsidyControlTitle(award.getSubsidyControlTitle());
+			award.setLastModifiedTimestamp(LocalDate.now());
+			if (!StringUtils.isEmpty(awardUpdateRequest.getSubsidyAmountExact())) {
+				award.setSubsidyFullAmountExact(new BigDecimal(awardUpdateRequest.getSubsidyAmountExact()));
+			}
+			if (!StringUtils.isEmpty(awardUpdateRequest.getSubsidyAmountRange())) {
+				award.setSubsidyFullAmountRange(awardUpdateRequest.getSubsidyAmountRange());
+			}
+			if (!StringUtils.isEmpty(awardUpdateRequest.getSpendingRegion())) {
+				award.setSpendingRegion(awardUpdateRequest.getSpendingRegion());
+			}
+			if (!StringUtils.isEmpty(awardUpdateRequest.getSpendingSector())) {
+				award.setSpendingSector(awardUpdateRequest.getSpendingSector());
+			}
+			if (!StringUtils.isEmpty(awardUpdateRequest.getGoodsOrServices())) {
+				award.setGoodsServicesFilter(awardUpdateRequest.getGoodsOrServices());
+			}
+			SubsidyMeasure measure = award.getSubsidyMeasure();
 
-			Award saveAward = new Award(Long.valueOf(award.getAwardNumber()), beneficiary, getGrantingAuthority(tempAward),
-					getSubsidyMeasure(tempAward), award.getSubsidyAmountRange(),
-					((award.getSubsidyAmountExact() != null) ? new BigDecimal(award.getSubsidyAmountExact())
-							: BigDecimal.ZERO),
-					((award.getSubsidyObjective().equalsIgnoreCase("Other")) ? "Other - "+award.getSubsidyObjectiveOther()
-							: award.getSubsidyObjective()),
-					award.getGoodsOrServices(), convertToDateSingleUpload(award.getLegalGrantingDate()),
-					convertToDateSingleUpload(award.getLegalGrantingDate()), award.getSpendingRegion(),
-					((award.getSubsidyInstrument().equalsIgnoreCase("Other")) ? "Other - "+award.getSubsidyInstrumentOther()
-							: award.getSubsidyInstrument()),
-					award.getSpendingSector(), "SYSTEM", "SYSTEM", "Awaiting Approval", null,LocalDate.now(), LocalDate.now());
+			if (!StringUtils.isEmpty(awardUpdateRequest.getSubsidyControlTitle())) {
+				measure.setSubsidyMeasureTitle(awardUpdateRequest.getSubsidyControlTitle().trim());
+			}
+			award.setSubsidyMeasure(measure);
+			Beneficiary beneficiaryDtls = award.getBeneficiary();
+			if (!StringUtils.isEmpty(awardUpdateRequest.getNationalId())) {
+				beneficiaryDtls.setNationalId(awardUpdateRequest.getNationalId().trim());
+			}
+			if (!StringUtils.isEmpty(awardUpdateRequest.getBeneficiaryName())) {
+				beneficiaryDtls.setBeneficiaryName(awardUpdateRequest.getBeneficiaryName().trim());
+			}
+			if (!StringUtils.isEmpty(awardUpdateRequest.getOrgSize())) {
+				beneficiaryDtls.setOrgSize(awardUpdateRequest.getOrgSize().trim());
+			}
+			award.setBeneficiary(beneficiaryDtls);
 
-			Award savedAwards = awardRepository.save(saveAward);
-			log.info("End process Upload Awards db");
+			GrantingAuthority grantingAuthority = award.getGrantingAuthority();
+			if (!StringUtils.isEmpty(awardUpdateRequest.getGrantingAuthorityName())) {
+				grantingAuthority.setGrantingAuthorityName(awardUpdateRequest.getGrantingAuthorityName().trim());
+				award.setGrantingAuthority(grantingAuthority);
+			}
+
+			Award savedAwards = awardRepository.save(award);
+			log.info("{} ::End of update Award info in db");
 
 			return savedAwards;
 		} catch (Exception serviceException) {
-			log.error("serviceException occured::", serviceException);
+			log.error("serviceException occurred::", serviceException);
 			return null;
 		}
 	}

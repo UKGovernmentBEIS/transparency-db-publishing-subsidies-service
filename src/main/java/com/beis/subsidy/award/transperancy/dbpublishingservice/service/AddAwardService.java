@@ -57,6 +57,9 @@ public class AddAwardService {
 	@Autowired
 	Environment environment;
 
+	@Value("${graphApiUrl}")
+	private String graphApiUrl;
+
 	/*
 	 * the below method validate the Award given in  request.
 	 */
@@ -179,9 +182,10 @@ public class AddAwardService {
 
 				GrantingAuthority gaObj = gaRepository
 						.findByGrantingAuthorityName(userPrinciple.getGrantingAuthorityGroupName());
-				String groupId = gaObj != null ? gaObj.getAzureGroupId() : null;
+
 				UserDetailsResponse response =  getUserRolesByGrpId(accessToken,gaObj.getAzureGroupId());
-				if (Objects.nonNull(response) && !CollectionUtils.isEmpty(response.getUserProfiles())) {
+				if (Objects.nonNull(response) && !CollectionUtils.isEmpty(response.getUserProfiles()) &&
+				   "Granting Authority Encoder".equals(userPrinciple.getRole())) {
 
 					List<UserResponse> users= response.getUserProfiles();
 					for (UserResponse userResponse : users) {
@@ -264,20 +268,19 @@ public class AddAwardService {
 		
 		if(award.getSubsidyObjective() == null || StringUtils.isEmpty(award.getSubsidyObjective())) {
 			validationSubsidyObjErrorResultList.add(new SingleAwardValidationResult("subsidyObjective",
-					"Subsidy Objective field is mandatory."));
+					"You must select a subsidy type."));
 		}
 		if(!StringUtils.isEmpty(award.getSubsidyObjectiveOther()) && award.getSubsidyObjectiveOther() .length() > 255){
 			validationSubsidyObjErrorResultList.add(new SingleAwardValidationResult("Subsidy Objective- other",
-					"Subsidy Objective- other field length is > 255 characters."));
+					"The subsidy type must be less than 248 characters."));
 		}
 			
 		if(award.getSubsidyObjective()!= null && ("Other".equalsIgnoreCase(award.getSubsidyObjective()) &&
 				(award.getSubsidyObjectiveOther()==null || StringUtils.isEmpty(award.getSubsidyObjectiveOther())))){
 
 			validationSubsidyObjErrorResultList.add(new SingleAwardValidationResult("Subsidy Objective- other",
-					"Subsidy Objective- other field is mandatory when Subsidy Objective is Other."));
+					"You must enter the details of the subsidy type."));
 		}
-		log.info("{} ::Validation Result Error list - validateSubsidyObjective = ",loggingComponentName);
 
 		return validationSubsidyObjErrorResultList;
 	}
@@ -296,14 +299,13 @@ public class AddAwardService {
 		
 		if(award.getSpendingRegion() == null || StringUtils.isEmpty(award.getSpendingRegion())) {
 			validationSpendingRegionErrorResultList.add(new SingleAwardValidationResult("spendingRegion",
-					"Spending Region field is mandatory."));
+					"You must select the region that the recipient organisation is based in."));
 		}
 		if(award.getSpendingRegion()!=null && award.getSpendingRegion().length() > 255){
 			validationSpendingRegionErrorResultList.add(new SingleAwardValidationResult("spendingRegion",
 					"Spending Region other field length > 255 characters."));
 		}
 		
-		log.info("{} ::Validation Result Error list - Spending Region should enter = ",loggingComponentName);
 		return validationSpendingRegionErrorResultList;
 	}
 
@@ -319,11 +321,10 @@ public class AddAwardService {
 		List<SingleAwardValidationResult> validationSpendingSectorErrorResultList = new ArrayList<>();
 
 		if(award.getSpendingSector() == null || StringUtils.isEmpty(award.getSpendingSector())) {
-			validationSpendingSectorErrorResultList.add(new SingleAwardValidationResult("spendingSector","Spending Sector field is mandatory."));
+			validationSpendingSectorErrorResultList.add(new SingleAwardValidationResult("spendingSector",
+					"You must select the sector that the recipient organisation belongs to."));
 		}
 		
-		log.info("{} ::Validation Result Error list - Spending Sector  should enter = ",loggingComponentName);
-
 		return validationSpendingSectorErrorResultList;
 	}
 	
@@ -341,7 +342,7 @@ public class AddAwardService {
 		if((award.getSubsidyInstrument()!=null && !award.getSubsidyInstrument().startsWith("Tax"))&&
 				(award.getSubsidyAmountExact() == null || StringUtils.isEmpty(award.getSubsidyAmountExact()))) {
 			validationSubsidyAmountExactErrorResultList.add(new SingleAwardValidationResult("subsidyAmountExact",
-					"Subsidy Element Full Amount is mandatory."));
+					"You must enter the details of the Subsidy Element Full Amount"));
 		}
 		
 		if((award.getSubsidyInstrument()!=null && !award.getSubsidyInstrument().startsWith("Tax"))&&
@@ -378,7 +379,6 @@ public class AddAwardService {
 			}
 
 		}
-		log.info("{} ::Validation Result Error list - Subsidy Element Full Amount = ", loggingComponentName);
 
 		return validationSubsidyAmountExactErrorResultList;
 	}
@@ -406,14 +406,14 @@ public class AddAwardService {
 		List<SingleAwardValidationResult> subsidyInstrumentErrorResultList = new ArrayList<>();
 		if(award.getSubsidyInstrument()== null || StringUtils.isEmpty(award.getSubsidyInstrument())) {
 			subsidyInstrumentErrorResultList.add(new SingleAwardValidationResult("subsidyInstrument",
-					"Subsidy Instrument is Mandatory."));
+					"You must enter the details of the Subsidy Instrument."));
 		}
 		
 		if(award.getSubsidyInstrument()!= null && ("Other".equalsIgnoreCase(award.getSubsidyInstrument()) &&
 				(award.getSubsidyInstrumentOther()==null || StringUtils.isEmpty(award.getSubsidyInstrumentOther())))) {
 
 			subsidyInstrumentErrorResultList.add(new SingleAwardValidationResult("SubsidyInstrument-other",
-					"Subsidy Instrument-other field is mandatory when Subsidy Instrument is Other."));
+					"You must enter the details of the Subsidy Instrument-other when Subsidy Instrument is Other."));
 		}
 		if(award.getSubsidyInstrumentOther()!=null && award.getSubsidyInstrumentOther().length() > 255){
 
@@ -425,7 +425,7 @@ public class AddAwardService {
 				(award.getSubsidyAmountRange()==null || StringUtils.isEmpty(award.getSubsidyAmountRange()))) {
 
 			subsidyInstrumentErrorResultList.add(new SingleAwardValidationResult("subsidyAmountRange",
-					"Subsidy Element Full Amount Range is mandatory when Subsidy Instrument is Tax Measure."));
+					"You must enter the subsidy amount."));
 		}
 		if((!StringUtils.isEmpty(award.getSubsidyInstrument()) && award.getSubsidyInstrument().startsWith("Tax"))&&
 				!StringUtils.isEmpty((award.getSubsidyAmountRange()))) {
@@ -461,11 +461,11 @@ public class AddAwardService {
 
 		if(award.getGoodsOrServices() == null || StringUtils.isEmpty(award.getGoodsOrServices())){
 			validationGoodsOrServiceErrorResultList.add(new SingleAwardValidationResult("goodsOrServices",
-					"Goods or Services field is mandatory"));
+					"You must select what the recipient organisation provides. This will be either goods or services."));
 		}
 		
-		log.info("Validation Result Error list - Goods or Service should enter = "
-				+ validationGoodsOrServiceErrorResultList.size());
+		log.info("Validation Result Error list - Goods or Service should enter = {}",
+				validationGoodsOrServiceErrorResultList.size());
 
 		return validationGoodsOrServiceErrorResultList;
 	}
@@ -484,13 +484,13 @@ public class AddAwardService {
 		List<SingleAwardValidationResult> legalGrantingDateErrorsResultList = new ArrayList<>();
 		if(award.getLegalGrantingDate() == null || StringUtils.isEmpty(award.getLegalGrantingDate())) {
 			legalGrantingDateErrorsResultList.add(new SingleAwardValidationResult("legalGrantingDate",
-					"Legal Granting Date is Mandatory."));
+					"You must enter the date that the subsidy was awarded"));
 		}
 		
 		if((award.getLegalGrantingDate()!= null && !StringUtils.isEmpty(award.getLegalGrantingDate())) &&
 				!validGrantingDate(award.getLegalGrantingDate())) {
 			legalGrantingDateErrorsResultList.add(new SingleAwardValidationResult("legalGrantingDate",
-					"Legal Granting Date inValid."));
+					"You must enter the date that the subsidy was awarded in the following format: DD/MM/YYYY"));
 		}
 		
 		
@@ -513,30 +513,30 @@ public class AddAwardService {
 				.collect(Collectors.toList());
 
 		log.info("subsidyControlNumberTitleList - String list " + subsidyControlNumberTitleList);
-		//
+
 		List<SingleAwardValidationResult> validationScNumberResultList = new ArrayList<>();
 
 		if (!StringUtils.isEmpty(award.getSubsidyControlNumber())  &&
 				award.getSubsidyControlNumber().length() > 7) {
 			validationScNumberResultList.add(new SingleAwardValidationResult("subsidyControlNumber",
-					"Subsidy Control Number must be 7 characters or fewer."));
+					"The subsidy control number must start with SC, followed by 6 digits."));
 		
 		} else if (award.getSubsidyControlNumber() != null && !StringUtils.isEmpty(award.getSubsidyControlNumber())
 				&& !subsidyControlNumberTitleList.contains(award.getSubsidyControlNumber())) {
 			validationScNumberResultList
 					.add(new SingleAwardValidationResult("subsidyControlNumber",
-							"Subsidy Control number does not exists."));
+							"The subsidy control number does not match an existing subsidy scheme."));
 
 		} else if ((!StringUtils.isEmpty(award.getSubsidyControlNumber())&& !StringUtils.isEmpty(award.getSubsidyControlTitle())) && smList.stream()
 				.noneMatch(bulkAward -> ((bulkAward.getScNumber().equals(award.getSubsidyControlNumber()))
 						&& (bulkAward.getSubsidyMeasureTitle().equals(award.getSubsidyControlTitle()))))) {
 			validationScNumberResultList.add(new SingleAwardValidationResult("subsidyControlNumber",
-					"Subsidy Control number does not match with title."));
+					"The subsidy control number does not match with the title."));
 
 		} else if(isScNumberStatusActive(smList,award.getSubsidyControlNumber())){
 
 			validationScNumberResultList.add(new SingleAwardValidationResult("subsidyControlNumber",
-					"Subsidy Control number is in Inactive status."));
+					"Subsidy control number is in Inactive status."));
 		}
 
 		log.info("Validation Result Error list - Subsidy Measure Number mismatch error size = {} ",
@@ -556,7 +556,7 @@ public class AddAwardService {
 			validationNationalIdResultList.add(new SingleAwardValidationResult("nationalIdType",
 					"National Id Type is mandatory."));
 		}
-		log.info("Validation Result Error list - National ID  missing error = " + validationNationalIdResultList);
+
 		return validationNationalIdResultList;
 	}
 
@@ -576,12 +576,9 @@ public class AddAwardService {
 						|| award.getNationalIdType().equals("VAT Number"))
 						&& (award.getBeneficiaryName() == null)) {
 			validationBeneficiaryIdResultList.add(new SingleAwardValidationResult("beneficiaryName",
-					"Enter the Beneficiary Name."));
+					"The recipient name must be less than 255 characters."));
 		}
 		
-		log.info(
-				"Validation Result Error list - Beneficiary Name missing error = " + validationBeneficiaryIdResultList);
-
 		return validationBeneficiaryIdResultList;
 	}
 
@@ -604,10 +601,6 @@ public class AddAwardService {
 			validationBeneficiaryIdResultList.add(new SingleAwardValidationResult("beneficiaryName",
 					"Beneficiary name is too long, it should be 255 characters or fewer."));
 		}
-
-		
-		log.info(
-				"Validation Result Error list - Beneficiary Name missing error = " + validationBeneficiaryIdResultList);
 
 		return validationBeneficiaryIdResultList;
 	}
@@ -680,28 +673,23 @@ public class AddAwardService {
 	 */
 	private List<SingleAwardValidationResult> validateGrantingAuthorityNameInDb(SingleAward award) {
 
-		log.info("{} ::Calling processServiceproxy.getAllGrantingAuthorities()... - start", loggingComponentName);
+		log.info("{} ::getAllGrantingAuthorities()... - start", loggingComponentName);
 		
-		List<GrantingAuthority> grantingAuthorityList = awardService.getAllGrantingAuthorities();
+		GrantingAuthority grantingAuthority =  award.getGrantingAuthorityName() != null ?
+				gaRepository.findByGrantingAuthorityName(award.getGrantingAuthorityName()): null;
+
+		List<SingleAwardValidationResult> valGANameResultList = new ArrayList<>();
 		
-		log.info("{} ::Calling processServiceproxy.getAllSubsidyMeasures()... - end",loggingComponentName);
+		if (Objects.isNull(grantingAuthority) || "Inactive".equals(grantingAuthority.getStatus().trim())) {
 
-		List<String> grantingAuthorityNamesList = grantingAuthorityList.stream()
-				.map(grantingAuthority -> grantingAuthority.getGrantingAuthorityName()).collect(Collectors.toList());
-
-
-		List<SingleAwardValidationResult> validationGrantingAuthorityNameResultList = new ArrayList<>();
-		
-		if(award.getGrantingAuthorityName() != null
-						&& !grantingAuthorityNamesList.contains(award.getGrantingAuthorityName())){
-			validationGrantingAuthorityNameResultList.add(new SingleAwardValidationResult("grantingAuthorityName",
-					"Please enter a valid Granting Authority."));
+			valGANameResultList.add(new SingleAwardValidationResult("grantingAuthorityName",
+					"Granting authority is either inactive or invalid"));
 			
 		}
-		
+
 		log.info("{} :: Validation Result Error list - Granting Authority Name error = ", loggingComponentName);
 
-		return validationGrantingAuthorityNameResultList;
+		return valGANameResultList;
 	}
 
 	private List<SingleAwardValidationResult> validateNationalIdAwards(SingleAward award) {
@@ -722,7 +710,7 @@ public class AddAwardService {
 		if(award.getNationalId()==null || StringUtils.isEmpty(award.getNationalId())) {
 			validationNationalIdResultList.add(new SingleAwardValidationResult("nationalId",
 					"National ID is Mandatory."));
-			log.info("validation fail National ID  is Mandatory.");
+
 		}
 		
 		
@@ -730,22 +718,21 @@ public class AddAwardService {
 				award.getNationalId().length() > 10) {
 			validationNationalIdResultList.add(new SingleAwardValidationResult("nationalId",
 					"National ID must be 10 characters or fewer."));
-			log.info("validation fail National ID  must be 10 characters or fewer");
+
 		} else {
 		 
 			if(!StringUtils.isEmpty(award.getNationalId())&& award.getNationalIdType()!=null &&
 					award.getNationalIdType().equalsIgnoreCase("VAT Number") &&
 					(award.getNationalId().length() !=9 || !award.getNationalId().matches("[0-9]+"))){
 				validationNationalIdResultList.add(new SingleAwardValidationResult("nationalId",
-						"invalid VAT number."));
-				log.info("invalid VAT number.");
+						"The VAT number must be 9 digits."));
+				log.info("The VAT number must be 9 digits");
 			}
 			if(!StringUtils.isEmpty(award.getNationalIdType())&& award.getNationalIdType()!=null &&
 					award.getNationalIdType().equalsIgnoreCase("UTR Number") &&
 					(!award.getNationalId().matches("[0-9]+")|| award.getNationalId().length()!=10 )) {
 				validationNationalIdResultList.add(new SingleAwardValidationResult("nationalId",
-						"invalid UTR Number."));
-				log.info("invalid UTR number.");
+						"The UTR number must be 10 digits."));
 			}
 
 			if(!StringUtils.isEmpty(award.getNationalIdType())&& award.getNationalIdType()!=null &&
@@ -753,8 +740,8 @@ public class AddAwardService {
 					((!StringUtils.isEmpty(award.getNationalId())&& award.getNationalId()!=null) &&
 							(award.getNationalId().length() > 8 || !award.getNationalId().matches("[0-9]+")))){
 				validationNationalIdResultList.add(new SingleAwardValidationResult("nationalId",
-						"invalid Charity number."));
-				log.info("invalid Charity number.");
+						"The charity commission number can be up to 8 digits."));
+
 			}
 
 			if(!StringUtils.isEmpty(award.getNationalIdType())&& award.getNationalIdType()!=null &&
@@ -762,12 +749,12 @@ public class AddAwardService {
 					((!StringUtils.isEmpty(award.getNationalId())&& award.getNationalId()!=null) &&
 							(!validateCompanyNumber(award.getNationalId())))){
 				validationNationalIdResultList.add(new SingleAwardValidationResult("nationalId",
-						"invalid Company Registration Number."));
-				log.info("invalid Charity number.");
+						"The company number must be in one of the following formats: 8 digits 2 letters, followed by 6 digits"));
+
 			}
 		}
 
-		log.info("{} :: Validation Result Error list - National ID  = ", loggingComponentName);
+		log.info("{} :: After Validation Result Error list - National ID  = {}", loggingComponentName,validationNationalIdResultList.size());
 
 		return validationNationalIdResultList;
 
@@ -865,8 +852,7 @@ public class AddAwardService {
 	}
 
 
-	@Value("${graphApiUrl}")
-	private String graphApiUrl;
+
 
 	/**
 	 * Get the group info

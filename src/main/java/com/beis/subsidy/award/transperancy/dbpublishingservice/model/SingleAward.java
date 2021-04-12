@@ -27,4 +27,5 @@ public class SingleAward {
 	private String spendingSector;
 	private String subsidyObjectiveOther;
 	private String subsidyInstrumentOther;
+	private String status;
 }

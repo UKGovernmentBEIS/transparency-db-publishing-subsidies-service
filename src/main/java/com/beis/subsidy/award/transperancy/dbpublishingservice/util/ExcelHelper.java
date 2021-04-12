@@ -304,7 +304,8 @@ public class ExcelHelper {
 				status = "Awaiting Approval";
 			}
 			StringBuilder msg = new StringBuilder("Award ")
-					.append(" added by " ).append(userPrinciple.getUserName()).append(" with status").append(status);
+					.append(" added with status ").append(status) ;
+
 			String userName = userPrinciple.getUserName();
 			audit.setUserName(userName);
 			audit.setEventType(action);
