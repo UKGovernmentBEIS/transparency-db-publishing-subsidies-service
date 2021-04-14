@@ -146,7 +146,7 @@ public class AddAwardController {
 
 				//Audit entry
 				StringBuilder eventMsg = new StringBuilder("Award ").append(updatedAward.getAwardNumber())
-						.append("is updated to ").append(awardInputRequest.getStatus());
+						.append(" is updated to ").append(awardInputRequest.getStatus());
 				ExcelHelper.saveAuditLogForUpdate(userPrincipleObj, "Update Award", updatedAward.getAwardNumber().toString()
 						,eventMsg.toString(),auditLogsRepository);
 			}
