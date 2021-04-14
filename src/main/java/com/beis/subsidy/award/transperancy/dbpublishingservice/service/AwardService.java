@@ -225,6 +225,23 @@ public class AwardService {
 			if (!StringUtils.isEmpty(awardUpdateRequest.getGoodsOrServices())) {
 				award.setGoodsServicesFilter(awardUpdateRequest.getGoodsOrServices());
 			}
+			if (!StringUtils.isEmpty(awardUpdateRequest.getSubsidyObjective())) {
+				award.setSubsidyObjective(awardUpdateRequest.getSubsidyObjective());
+			} else if (!StringUtils.isEmpty(awardUpdateRequest.getSubsidyObjectiveOther())) {
+				award.setSubsidyObjective(awardUpdateRequest.getSubsidyObjectiveOther());
+			}
+
+			if (!StringUtils.isEmpty(awardUpdateRequest.getSubsidyInstrument())) {
+				award.setSubsidyInstrument(awardUpdateRequest.getSubsidyObjective().trim());
+			} else if(!StringUtils.isEmpty(awardUpdateRequest.getSubsidyInstrumentOther())){
+				award.setSubsidyInstrument(awardUpdateRequest.getSubsidyInstrumentOther().trim());
+			}
+
+			if (!StringUtils.isEmpty(awardUpdateRequest.getLegalGrantingDate())) {
+				award.setLegalGrantingDate(convertToDateSingleUpload(awardUpdateRequest.getLegalGrantingDate().trim()));
+			}
+
+
 			SubsidyMeasure measure = award.getSubsidyMeasure();
 
 			if (!StringUtils.isEmpty(awardUpdateRequest.getSubsidyControlTitle())) {
@@ -234,6 +251,9 @@ public class AwardService {
 			Beneficiary beneficiaryDtls = award.getBeneficiary();
 			if (!StringUtils.isEmpty(awardUpdateRequest.getNationalId())) {
 				beneficiaryDtls.setNationalId(awardUpdateRequest.getNationalId().trim());
+			}
+			if (!StringUtils.isEmpty(awardUpdateRequest.getNationalIdType())) {
+				beneficiaryDtls.setNationalIdType(awardUpdateRequest.getNationalIdType().trim());
 			}
 			if (!StringUtils.isEmpty(awardUpdateRequest.getBeneficiaryName())) {
 				beneficiaryDtls.setBeneficiaryName(awardUpdateRequest.getBeneficiaryName().trim());
@@ -251,7 +271,6 @@ public class AwardService {
 
 			Award savedAwards = awardRepository.save(award);
 			log.info("{} ::End of update Award info in db");
-
 			return savedAwards;
 		} catch (Exception serviceException) {
 			log.error("serviceException occurred::", serviceException);
