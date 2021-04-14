@@ -232,7 +232,7 @@ public class AwardService {
 			}
 
 			if (!StringUtils.isEmpty(awardUpdateRequest.getSubsidyInstrument())) {
-				award.setSubsidyInstrument(awardUpdateRequest.getSubsidyObjective().trim());
+				award.setSubsidyInstrument(awardUpdateRequest.getSubsidyInstrument().trim());
 			} else if(!StringUtils.isEmpty(awardUpdateRequest.getSubsidyInstrumentOther())){
 				award.setSubsidyInstrument(awardUpdateRequest.getSubsidyInstrumentOther().trim());
 			}
