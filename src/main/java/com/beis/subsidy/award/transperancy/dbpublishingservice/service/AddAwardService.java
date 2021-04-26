@@ -528,8 +528,8 @@ public class AddAwardService {
 							"The subsidy control number does not match an existing subsidy scheme."));
 
 		} else if ((!StringUtils.isEmpty(award.getSubsidyControlNumber())&& !StringUtils.isEmpty(award.getSubsidyControlTitle())) && smList.stream()
-				.noneMatch(bulkAward -> ((bulkAward.getScNumber().equals(award.getSubsidyControlNumber()))
-						&& (bulkAward.getSubsidyMeasureTitle().equals(award.getSubsidyControlTitle()))))) {
+				.noneMatch(bulkAward -> ((bulkAward.getScNumber().trim().equals(award.getSubsidyControlNumber()))
+						&& (bulkAward.getSubsidyMeasureTitle().trim().equals(award.getSubsidyControlTitle()))))) {
 			validationScNumberResultList.add(new SingleAwardValidationResult("subsidyControlNumber",
 					"The subsidy control number does not match with the title."));
 
