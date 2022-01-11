@@ -115,7 +115,7 @@ public class AwardService {
 						( (bulkaward.getSubsidyAmountExact() != null) ? new BigDecimal(bulkaward.getSubsidyAmountExact()) : BigDecimal.ZERO),  
 						((bulkaward.getSubsidyObjective().equalsIgnoreCase("Other"))? "Other - "+bulkaward.getSubsidyObjectiveOther():bulkaward.getSubsidyObjective()), bulkaward.getGoodsOrServices(),
 						convertToDate(bulkaward.getLegalGrantingDate()),
-						convertToDate(bulkaward.getLegalGrantingDate()),
+						convertToDate(bulkaward.getPublishedAwardDate()),
 						bulkaward.getSpendingRegion(), 
 						((bulkaward.getSubsidyInstrument().equalsIgnoreCase("Other"))? "Other - "+bulkaward.getSubsidyInstrumentOther():bulkaward.getSubsidyInstrument()),
 						bulkaward.getSpendingSector(),
@@ -149,6 +149,9 @@ public class AwardService {
 		try {
 			log.info("inside process Bulk Awards db");
 			String awardStatus = "Published";
+			SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
+			Date date = new Date();
+			String publishDate = formatter.format(date);
 			Beneficiary beneficiary = new Beneficiary();
 			beneficiary.setBeneficiaryName(award.getBeneficiaryName());
 			beneficiary.setBeneficiaryType("Individual");
@@ -172,6 +175,7 @@ public class AwardService {
 
 			if ("Granting Authority Encoder".equals(role.trim())) {
 				awardStatus = "Awaiting Approval";
+				publishDate = "1-1-1970";
 			}
 
 			Award saveAward = new Award(null, beneficiary, getGrantingAuthority(tempAward),
@@ -181,7 +185,7 @@ public class AwardService {
 					((award.getSubsidyObjective().equalsIgnoreCase("Other")) ? "Other - "+award.getSubsidyObjectiveOther()
 							: award.getSubsidyObjective()),
 					award.getGoodsOrServices(), convertToDateSingleUpload(award.getLegalGrantingDate()),
-					convertToDateSingleUpload(award.getLegalGrantingDate()), award.getSpendingRegion(),
+					convertToDateSingleUpload(publishDate), award.getSpendingRegion(),
 					((award.getSubsidyInstrument().equalsIgnoreCase("Other")) ? "Other - "+award.getSubsidyInstrumentOther()
 							: award.getSubsidyInstrument()),
 					award.getSpendingSector(), "SYSTEM", "SYSTEM", awardStatus, null,LocalDate.now(), LocalDate.now());
@@ -208,6 +212,13 @@ public class AwardService {
 			}
 
 			award.setStatus(awardUpdateRequest.getStatus());
+
+			SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+			if (formatter.format(award.getPublishedAwardDate()).equals("01-01-1970")) {
+				Date date = new Date();
+				String publishDate = formatter.format(date);
+				award.setPublishedAwardDate(convertToDateSingleUpload(publishDate));
+			}
 
 			award.setLastModifiedTimestamp(LocalDate.now());
 			if (!StringUtils.isEmpty(awardUpdateRequest.getSubsidyAmountExact())) {
