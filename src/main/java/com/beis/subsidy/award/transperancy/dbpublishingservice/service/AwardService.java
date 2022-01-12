@@ -115,7 +115,7 @@ public class AwardService {
 						( (bulkaward.getSubsidyAmountExact() != null) ? new BigDecimal(bulkaward.getSubsidyAmountExact()) : BigDecimal.ZERO),  
 						((bulkaward.getSubsidyObjective().equalsIgnoreCase("Other"))? "Other - "+bulkaward.getSubsidyObjectiveOther():bulkaward.getSubsidyObjective()), bulkaward.getGoodsOrServices(),
 						convertToDate(bulkaward.getLegalGrantingDate()),
-						convertToDate(bulkaward.getPublishedAwardDate()),
+						addPublishedDate(role),
 						bulkaward.getSpendingRegion(), 
 						((bulkaward.getSubsidyInstrument().equalsIgnoreCase("Other"))? "Other - "+bulkaward.getSubsidyInstrumentOther():bulkaward.getSubsidyInstrument()),
 						bulkaward.getSpendingSector(),
@@ -144,14 +144,21 @@ public class AwardService {
 		return awardStatus;
 	}
 
+	private Date addPublishedDate(String role) {
+		String publishDateStr = "01-01-1970";
+		SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
+		if (!"Granting Authority Encoder".equals(role.trim())) {
+			Date date = new Date();
+			publishDateStr = formatter.format(date);
+		}
+		return convertToDateSingleUpload(publishDateStr);
+	}
+
 	@Transactional
 	public Award createAward(SingleAward award, String role) {
 		try {
 			log.info("inside process Bulk Awards db");
 			String awardStatus = "Published";
-			SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
-			Date date = new Date();
-			String publishDate = formatter.format(date);
 			Beneficiary beneficiary = new Beneficiary();
 			beneficiary.setBeneficiaryName(award.getBeneficiaryName());
 			beneficiary.setBeneficiaryType("Individual");
@@ -175,7 +182,6 @@ public class AwardService {
 
 			if ("Granting Authority Encoder".equals(role.trim())) {
 				awardStatus = "Awaiting Approval";
-				publishDate = "1-1-1970";
 			}
 
 			Award saveAward = new Award(null, beneficiary, getGrantingAuthority(tempAward),
@@ -185,7 +191,7 @@ public class AwardService {
 					((award.getSubsidyObjective().equalsIgnoreCase("Other")) ? "Other - "+award.getSubsidyObjectiveOther()
 							: award.getSubsidyObjective()),
 					award.getGoodsOrServices(), convertToDateSingleUpload(award.getLegalGrantingDate()),
-					convertToDateSingleUpload(publishDate), award.getSpendingRegion(),
+					addPublishedDate(role), award.getSpendingRegion(),
 					((award.getSubsidyInstrument().equalsIgnoreCase("Other")) ? "Other - "+award.getSubsidyInstrumentOther()
 							: award.getSubsidyInstrument()),
 					award.getSpendingSector(), "SYSTEM", "SYSTEM", awardStatus, null,LocalDate.now(), LocalDate.now());
