@@ -115,7 +115,7 @@ public class AwardService {
 						( (bulkaward.getSubsidyAmountExact() != null) ? new BigDecimal(bulkaward.getSubsidyAmountExact()) : BigDecimal.ZERO),  
 						((bulkaward.getSubsidyObjective().equalsIgnoreCase("Other"))? "Other - "+bulkaward.getSubsidyObjectiveOther():bulkaward.getSubsidyObjective()), bulkaward.getGoodsOrServices(),
 						convertToDate(bulkaward.getLegalGrantingDate()),
-						convertToDate(bulkaward.getLegalGrantingDate()),
+						addPublishedDate(role),
 						bulkaward.getSpendingRegion(), 
 						((bulkaward.getSubsidyInstrument().equalsIgnoreCase("Other"))? "Other - "+bulkaward.getSubsidyInstrumentOther():bulkaward.getSubsidyInstrument()),
 						bulkaward.getSpendingSector(),
@@ -142,6 +142,16 @@ public class AwardService {
 			awardStatus = "Awaiting Approval";
 		}
 		return awardStatus;
+	}
+
+	private Date addPublishedDate(String role) {
+		String publishDateStr = "01-01-1970";
+		SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
+		if (!"Granting Authority Encoder".equals(role.trim())) {
+			Date date = new Date();
+			publishDateStr = formatter.format(date);
+		}
+		return convertToDateSingleUpload(publishDateStr);
 	}
 
 	@Transactional
@@ -181,7 +191,7 @@ public class AwardService {
 					((award.getSubsidyObjective().equalsIgnoreCase("Other")) ? "Other - "+award.getSubsidyObjectiveOther()
 							: award.getSubsidyObjective()),
 					award.getGoodsOrServices(), convertToDateSingleUpload(award.getLegalGrantingDate()),
-					convertToDateSingleUpload(award.getLegalGrantingDate()), award.getSpendingRegion(),
+					addPublishedDate(role), award.getSpendingRegion(),
 					((award.getSubsidyInstrument().equalsIgnoreCase("Other")) ? "Other - "+award.getSubsidyInstrumentOther()
 							: award.getSubsidyInstrument()),
 					award.getSpendingSector(), "SYSTEM", "SYSTEM", awardStatus, null,LocalDate.now(), LocalDate.now());
@@ -208,6 +218,13 @@ public class AwardService {
 			}
 
 			award.setStatus(awardUpdateRequest.getStatus());
+
+			SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+			if (formatter.format(award.getPublishedAwardDate()).equals("01-01-1970")) {
+				Date date = new Date();
+				String publishDate = formatter.format(date);
+				award.setPublishedAwardDate(convertToDateSingleUpload(publishDate));
+			}
 
 			award.setLastModifiedTimestamp(LocalDate.now());
 			if (!StringUtils.isEmpty(awardUpdateRequest.getSubsidyAmountExact())) {
