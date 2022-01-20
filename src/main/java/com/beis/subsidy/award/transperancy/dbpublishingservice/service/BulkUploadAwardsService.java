@@ -464,20 +464,26 @@ public class BulkUploadAwardsService {
 
 		List<SubsidyMeasure> smList = awardService.getAllSubsidyMeasures();
 
-		List<BulkUploadAwards> subsidyControlNumberExistsList = bulkUploadAwards.stream()
+		List<BulkUploadAwards> subsidyControlNumberOrTitleExistsList = bulkUploadAwards.stream()
 				.filter(requestAward -> !StringUtils.isEmpty(requestAward.getSubsidyControlNumber())
-						&& !StringUtils.isEmpty(requestAward.getSubsidyControlTitle()))
+						|| !StringUtils.isEmpty(requestAward.getSubsidyControlTitle()))
 				.collect(Collectors.toList());
 
 		SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
 
-		List<BulkUploadAwards> legalGrantingDateWithinMeasureDateErrorRecordsList = subsidyControlNumberExistsList.stream()
+		List<BulkUploadAwards> legalGrantingDateWithinMeasureDateErrorRecordsList = subsidyControlNumberOrTitleExistsList.stream()
 				.filter(award -> smList.stream().anyMatch(
 						sm -> {
 							try {
-								return (award.getSubsidyControlNumber().equals(sm.getScNumber()) &&
-										(sdf.parse(award.getLegalGrantingDate()).after(sm.getEndDate()) ||
-										sdf.parse(award.getLegalGrantingDate()).before(sm.getStartDate())));
+								if (!StringUtils.isEmpty(award.getSubsidyControlNumber())) {
+									return ((award.getSubsidyControlNumber().equals(sm.getScNumber())) &&
+											(sdf.parse(award.getLegalGrantingDate()).after(sm.getEndDate()) ||
+													sdf.parse(award.getLegalGrantingDate()).before(sm.getStartDate())));
+								} else {
+									return ((award.getSubsidyControlTitle().equals(sm.getSubsidyMeasureTitle())) &&
+											(sdf.parse(award.getLegalGrantingDate()).after(sm.getEndDate()) ||
+													sdf.parse(award.getLegalGrantingDate()).before(sm.getStartDate())));
+								}
 							} catch (ParseException e) {
 								return true;
 							}
