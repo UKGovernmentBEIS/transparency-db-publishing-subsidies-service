@@ -464,34 +464,51 @@ public class BulkUploadAwardsService {
 
 		List<SubsidyMeasure> smList = awardService.getAllSubsidyMeasures();
 
-		List<BulkUploadAwards> subsidyControlNumberOrTitleExistsList = bulkUploadAwards.stream()
-				.filter(requestAward -> !StringUtils.isEmpty(requestAward.getSubsidyControlNumber())
-						|| !StringUtils.isEmpty(requestAward.getSubsidyControlTitle()))
+		List<BulkUploadAwards> subsidyControlNumberExistsList = bulkUploadAwards.stream()
+				.filter(requestAward -> !StringUtils.isEmpty(requestAward.getSubsidyControlNumber()))
+				.collect(Collectors.toList());
+
+		List<BulkUploadAwards> subsidyControlTitleExistsNoNumberList = bulkUploadAwards.stream()
+				.filter(requestAward -> StringUtils.isEmpty(requestAward.getSubsidyControlNumber())
+						&& !StringUtils.isEmpty(requestAward.getSubsidyControlTitle()))
 				.collect(Collectors.toList());
 
 		SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
 
-		List<BulkUploadAwards> legalGrantingDateWithinMeasureDateErrorRecordsList = subsidyControlNumberOrTitleExistsList.stream()
+		List<BulkUploadAwards> legalGrantingDateWithinMeasureDateNumberErrorRecordsList = subsidyControlNumberExistsList.stream()
 				.filter(award -> smList.stream().anyMatch(
 						sm -> {
 							try {
-								if (!StringUtils.isEmpty(award.getSubsidyControlNumber())) {
-									return ((award.getSubsidyControlNumber().equals(sm.getScNumber())) &&
-											(sdf.parse(award.getLegalGrantingDate()).after(sm.getEndDate()) ||
-													sdf.parse(award.getLegalGrantingDate()).before(sm.getStartDate())));
-								} else {
-									return ((award.getSubsidyControlTitle().equals(sm.getSubsidyMeasureTitle())) &&
-											(sdf.parse(award.getLegalGrantingDate()).after(sm.getEndDate()) ||
-													sdf.parse(award.getLegalGrantingDate()).before(sm.getStartDate())));
-								}
+								return ((award.getSubsidyControlNumber().equals(sm.getScNumber())) &&
+										(sdf.parse(award.getLegalGrantingDate()).after(sm.getEndDate()) ||
+												sdf.parse(award.getLegalGrantingDate()).before(sm.getStartDate())));
 							} catch (ParseException e) {
 								return true;
 							}
 						}
 				)).collect(Collectors.toList());
-		validationlegalGrantingDateErrorListResultList.addAll(legalGrantingDateWithinMeasureDateErrorRecordsList.stream()
+
+		List<BulkUploadAwards> legalGrantingDateWithinMeasureDateTitleNoNumberErrorRecordsList = subsidyControlTitleExistsNoNumberList.stream()
+				.filter(award -> smList.stream().anyMatch(
+						sm -> {
+							try {
+								return ((award.getSubsidyControlTitle().equals(sm.getSubsidyMeasureTitle())) &&
+										(sdf.parse(award.getLegalGrantingDate()).after(sm.getEndDate()) ||
+												sdf.parse(award.getLegalGrantingDate()).before(sm.getStartDate())));
+							} catch (ParseException e) {
+								return true;
+							}
+						}
+				)).collect(Collectors.toList());
+
+		validationlegalGrantingDateErrorListResultList.addAll(legalGrantingDateWithinMeasureDateNumberErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "N",
 						"The legal granting date of the subsidy award must be within the start and end dates of the associated subsidy scheme."))
+				.collect(Collectors.toList()));
+
+		validationlegalGrantingDateErrorListResultList.addAll(legalGrantingDateWithinMeasureDateTitleNoNumberErrorRecordsList.stream()
+				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "N",
+						"The legal granting date of the subsidy award must be within the start and end dates of the associated subsidy scheme. Please add the SC number for this scheme as there may be multiple schemes with this title."))
 				.collect(Collectors.toList()));
 
 
