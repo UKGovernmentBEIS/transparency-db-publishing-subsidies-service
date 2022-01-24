@@ -8,8 +8,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,6 +53,8 @@ public class BulkUploadAwardsServiceTest {
 
 	String path = "src/test/resource/Bulk_upload_Awards_Template_local_success v1.9.xlsx";
 	String path_error = "src/test/resource/Bulk_upload_Awards_Template_local_errors v1.9.xlsx";
+
+	SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
 
 	private InputStream inputStream;
 
@@ -106,6 +111,13 @@ public class BulkUploadAwardsServiceTest {
 		SubsidyMeasure sub = new SubsidyMeasure();
 		sub.setSubsidyMeasureTitle("AHDB Generic Promotional Measures scheme");
 		sub.setScNumber("SC10000");
+
+		Date startDate = formatter.parse("01-01-1999");
+		Date endDate = formatter.parse("31-12-1999");
+
+		sub.setStartDate(startDate);
+		sub.setEndDate(endDate);
+
 		smList.add(sub);
 		GrantingAuthority ga = new GrantingAuthority();
 		ga.setGaId(Long.valueOf(1));
@@ -129,6 +141,8 @@ public class BulkUploadAwardsServiceTest {
 		SubsidyMeasure subsidy = new SubsidyMeasure();
 		subsidy.setSubsidyMeasureTitle("AHDB Generic Promotional Measures scheme");
 		subsidy.setScNumber("SC10000");
+		subsidy.setStartDate(startDate);
+		subsidy.setEndDate(endDate);
 		submList.add(subsidy);
 		String role = "Granting Authority Administrator";
 		when(adServiceMock.getAllSubsidyMeasures()).thenReturn(submList);
