@@ -276,19 +276,17 @@ public class ExcelHelper {
 	return date;
 	}
 	
-	public static boolean containsValue(Row row)
-	{
-	    boolean flag = true;
-	   if(row.getCell(0).getCellType()==CellType.BLANK && row.getCell(1).getCellType()==CellType.BLANK &&
-			   row.getCell(2).getCellType()==CellType.BLANK) {
-		   return false;
-	   }
+	public static boolean containsValue(Row row){
+		boolean flag = true;
+		if(row.getCell(0).getCellType()==CellType.BLANK && row.getCell(1).getCellType()==CellType.BLANK &&
+				row.getCell(2).getCellType()==CellType.BLANK) {
+			return false;
+		}
 	    if ((StringUtils.isEmpty(String.valueOf(row.getCell(0))) == true && 
 	    		StringUtils.isEmpty(String.valueOf(row.getCell(1))) == true &&
 				StringUtils.isEmpty(String.valueOf(row.getCell(2))) == true  ) ||
 				(String.valueOf(row.getCell(0))==null && String.valueOf(row.getCell(1))==null &&
-				String.valueOf(row.getCell(2))==null ) && row.getCell(2).getCellType()==CellType.BLANK)
-	    {
+				String.valueOf(row.getCell(2))==null ) && row.getCell(2).getCellType()==CellType.BLANK){
 			flag = false;
 	    }
 	 	return flag;
