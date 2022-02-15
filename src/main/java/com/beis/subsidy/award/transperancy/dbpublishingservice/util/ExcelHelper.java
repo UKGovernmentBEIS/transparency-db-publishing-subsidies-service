@@ -284,9 +284,9 @@ public class ExcelHelper {
 				row.getCell(2, policy).getCellType()==CellType.BLANK) {
 			return false;
 		}
-	    if ((StringUtils.isEmpty(String.valueOf(row.getCell(0, policy))) == true &&
-	    		StringUtils.isEmpty(String.valueOf(row.getCell(1, policy))) == true &&
-				StringUtils.isEmpty(String.valueOf(row.getCell(2, policy))) == true  ) ||
+	    if ((StringUtils.isEmpty(String.valueOf(row.getCell(0, policy))) &&
+				StringUtils.isEmpty(String.valueOf(row.getCell(1, policy))) &&
+				StringUtils.isEmpty(String.valueOf(row.getCell(2, policy)))) ||
 				(String.valueOf(row.getCell(0, policy))==null && String.valueOf(row.getCell(1, policy))==null &&
 				String.valueOf(row.getCell(2, policy))==null ) && row.getCell(2, policy).getCellType()==CellType.BLANK){
 			flag = false;
