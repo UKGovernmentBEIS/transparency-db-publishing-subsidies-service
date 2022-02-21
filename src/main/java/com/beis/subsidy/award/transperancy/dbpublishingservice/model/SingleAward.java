@@ -29,4 +29,5 @@ public class SingleAward {
 	private String subsidyObjectiveOther;
 	private String subsidyInstrumentOther;
 	private String status;
+	private String reason;
 }
