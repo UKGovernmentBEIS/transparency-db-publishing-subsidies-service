@@ -191,6 +191,8 @@ public class AddAwardController {
 							.append(" deleted with parent scheme, ").append(scNumber);
 					ExcelHelper.saveAuditLogForUpdate(userPrincipleObj, "Update Award", award.getAwardNumber().toString()
 							,eventMsg.toString(),auditLogsRepository);
+					// remove subsidy measure from award to prevent stack overflow when serializing
+					award.setSubsidyMeasure(null);
 					deletedAwardsList.add(award);
 				}
 			}
