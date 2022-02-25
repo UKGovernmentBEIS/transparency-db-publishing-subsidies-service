@@ -191,11 +191,11 @@ public class AddAwardController {
 							.append(" deleted with parent scheme, ").append(scNumber);
 					ExcelHelper.saveAuditLogForUpdate(userPrincipleObj, "Update Award", award.getAwardNumber().toString()
 							,eventMsg.toString(),auditLogsRepository);
-					// remove subsidy measure from award to prevent stack overflow when serializing
-					award.setSubsidyMeasure(null);
 					deletedAwardsList.add(award);
 				}
 			}
+			// remove subsidy measure from award to prevent stack overflow when serializing
+			for(Award award:deletedAwardsList){award.setSubsidyMeasure(null);}
 			deletedAwardsResponse.setAwardList(deletedAwardsList);
 			return ResponseEntity.status(HttpStatus.OK).body(deletedAwardsResponse);
 		} catch (Exception e) {
