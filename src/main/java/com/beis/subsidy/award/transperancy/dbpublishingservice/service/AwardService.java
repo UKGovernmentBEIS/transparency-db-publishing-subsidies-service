@@ -258,6 +258,9 @@ public class AwardService {
 				award.setLegalGrantingDate(convertToDateSingleUpload(awardUpdateRequest.getLegalGrantingDate().trim()));
 			}
 
+			if(!StringUtils.isEmpty(awardUpdateRequest.getReason())){
+				award.setReason(awardUpdateRequest.getReason());
+			}
 
 			SubsidyMeasure measure = award.getSubsidyMeasure();
 
@@ -334,6 +337,11 @@ public class AwardService {
 		
 		log.info("Returning from getGrantingAuthorityId.. = " + gaOptional.get().getGaId());
 		return ((gaOptional != null) ? gaOptional.get() : null);
+	}
+
+	public List<Award> getAwardsByScNumber(String scNumber){
+		SubsidyMeasure sm = smRepository.findByScNumber(scNumber);
+		return awardRepository.findBySubsidyMeasure(sm);
 	}
 
 	public List<SubsidyMeasure> getAllSubsidyMeasures() {
