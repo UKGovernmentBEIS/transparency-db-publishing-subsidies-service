@@ -344,7 +344,8 @@ public class BulkUploadAwardsService {
 						"For non-tax measure subsidies, enter 'N/A' in column G. You can enter the exact subsidy amount in column H."))
 				.collect(Collectors.toList());
 		List<BulkUploadAwards> subsidyAmountFormatErrorRecordsList = bulkUploadAwards.stream().filter(
-				award -> (((award.getSubsidyInstrument()!=null && !award.getSubsidyInstrument().startsWith("Tax"))&& (award.getSubsidyAmountExact()!=null && award.getSubsidyAmountExact().matches("[a-zA-Z]+")))))
+				award -> (((award.getSubsidyInstrument()!=null && !award.getSubsidyInstrument().startsWith("Tax"))&&
+						(award.getSubsidyAmountExact()!=null && !ExcelHelper.isNumeric(award.getSubsidyAmountExact()) ))))
 				.collect(Collectors.toList());
 
 		if(subsidyAmountFormatErrorRecordsList.size()>0) {
