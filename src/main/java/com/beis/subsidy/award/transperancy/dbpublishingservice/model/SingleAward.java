@@ -21,6 +21,7 @@ public class SingleAward {
 	private String subsidyAmountRange;
 	private String subsidyAmountExact;
 	private String legalGrantingDate;
+	private String publishedAwardDate;
 	private String grantingAuthorityName;
 	private String goodsOrServices;
 	private String spendingRegion;
@@ -28,4 +29,5 @@ public class SingleAward {
 	private String subsidyObjectiveOther;
 	private String subsidyInstrumentOther;
 	private String status;
+	private String reason;
 }

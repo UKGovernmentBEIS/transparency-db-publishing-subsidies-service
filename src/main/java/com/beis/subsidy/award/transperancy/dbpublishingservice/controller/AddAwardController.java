@@ -160,6 +160,51 @@ public class AddAwardController {
 		}
 	}
 
+	/**
+	 * Get the scheme input from the UI and delete any associated awards
+	 *
+	 * @return ResponseEntity - Return response status and description
+	 */
+	@PutMapping("award/deletescheme/{scNumber}")
+	public ResponseEntity<DeletedAwardsResponse> deleteAwardsAssociatedToDeletedScheme(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
+																						@PathVariable("scNumber") String scNumber) {
+		DeletedAwardsResponse deletedAwardsResponse = new DeletedAwardsResponse();
+		List<Award> deletedAwardsList = new ArrayList<>();
+		UserPrinciple userPrincipleObj;
+		try {
+			String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
+			userPrincipleObj = objectMapper.readValue(userPrincipleStr, UserPrinciple.class);
+
+			List<Award> awardList = awardService.getAwardsByScNumber(scNumber);
+			SingleAward updateAward = new SingleAward();
+
+			updateAward.setStatus("Deleted");
+			updateAward.setReason("Parent scheme \"" + scNumber + "\" deleted.");
+			updateAward.setStatus("Deleted");
+
+			for (Award award:awardList) {
+				String status = award.getStatus().toLowerCase();
+				if (status.equals("published") || status.equals("awaiting approval")){
+					awardService.updateAward(award.getAwardNumber(), updateAward, "");
+					//Audit entry
+					StringBuilder eventMsg = new StringBuilder("Award ").append(award.getAwardNumber())
+							.append(" deleted with parent scheme, ").append(scNumber);
+					ExcelHelper.saveAuditLogForUpdate(userPrincipleObj, "Update Award", award.getAwardNumber().toString()
+							,eventMsg.toString(),auditLogsRepository);
+					deletedAwardsList.add(award);
+				}
+			}
+			// remove subsidy measure from award to prevent stack overflow when serializing
+			for(Award award:deletedAwardsList){award.setSubsidyMeasure(null);}
+			deletedAwardsResponse.setAwardList(deletedAwardsList);
+			return ResponseEntity.status(HttpStatus.OK).body(deletedAwardsResponse);
+		} catch (Exception e) {
+			// 2.0 - CatchException and return errors
+			log.error("{} :: Exception block in deleteAwardsAssociatedToDeletedScheme", loggingComponentName,e);
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(deletedAwardsResponse);
+		}
+	}
+
 	public String getBearerToken() {
 
 		MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
