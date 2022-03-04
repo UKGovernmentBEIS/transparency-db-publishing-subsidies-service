@@ -346,7 +346,7 @@ public class AddAwardService {
 		}
 		
 		if((award.getSubsidyInstrument()!=null && !award.getSubsidyInstrument().startsWith("Tax"))&&
-				(!award.getSubsidyAmountExact().matches("((\\d+)((\\.\\d{1,2})?))$"))) {
+				(!award.getSubsidyAmountExact().matches("[0-9]+"))) {
 
 			validationSubsidyAmountExactErrorResultList.add(new SingleAwardValidationResult("subsidyAmountExact",
 					"Subsidy Element Full Amount is invalid."));
@@ -355,7 +355,7 @@ public class AddAwardService {
 		if((!StringUtils.isEmpty(award.getSubsidyControlTitle())||!StringUtils.isEmpty(award.getSubsidyControlNumber()))
 				&& (!StringUtils.isEmpty(award.getSubsidyInstrument())
 				&& !award.getSubsidyInstrument().startsWith("Tax")) &&
-				(award.getSubsidyAmountExact().matches("((\\d+)((\\.\\d{1,2})?))$"))) {
+				(award.getSubsidyAmountExact().matches("[0-9]+"))) {
 
 			SubsidyMeasure subsidyMeasure = getSubsidyMeasureByScNumberOrMeasureTitle(award);
 			if (Objects.nonNull(subsidyMeasure) && validateBudget(subsidyMeasure.getBudget(), award.getSubsidyAmountExact())) {
