@@ -415,4 +415,8 @@ public class AddAwardServiceTest {
 
 	}
 
+	@Test
+	public void failTest(){
+		assertThat(true).isFalse();
+	}
 }
