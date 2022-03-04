@@ -386,7 +386,7 @@ public class AddAwardService {
 	private boolean validateBudget(String budget, String subsidyAmountExact) {
 		boolean isError = false;
 		if(!StringUtils.isEmpty(budget) &&
-				Long.valueOf(subsidyAmountExact.trim()) > Long.valueOf(budget.trim())) {
+				Double.valueOf(subsidyAmountExact.trim()) > Double.valueOf(budget.trim())) {
 
 			isError = true;
 		}
