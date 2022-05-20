@@ -318,6 +318,8 @@ public class AwardService {
 
 		} else if (!StringUtils.isEmpty(award.getSubsidyControlTitle())){
 			log.info("inside else title");
+			//TODO: Check if there is more than one item returned before returning anything. If not, return null?
+			// Shouldn't happen though.
 			smOptional = smList.stream()
 					.filter(sm -> sm.getSubsidyMeasureTitle().equals(award.getSubsidyControlTitle())).findAny();
 		}
