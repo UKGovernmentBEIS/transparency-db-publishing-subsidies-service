@@ -312,14 +312,14 @@ public class AwardService {
 		log.info("Inside getSubsidyControlId..." + award.getSubsidyControlTitle());
 		List<SubsidyMeasure> smList = smRepository.findAll();
 		Optional<SubsidyMeasure> smOptional = null;
-		if (!StringUtils.isEmpty(award.getSubsidyControlTitle())) {
-
-			smOptional = smList.stream()
-					.filter(sm -> sm.getSubsidyMeasureTitle().equals(award.getSubsidyControlTitle())).findAny();
-		} else {
-			log.info("inside else title");
+		if (!StringUtils.isEmpty(award.getSubsidyControlNumber())) {
 			smOptional = smList.stream().filter(sm -> sm.getScNumber().equals(award.getSubsidyControlNumber()))
 					.findAny();
+
+		} else {
+			log.info("inside else title");
+			smOptional = smList.stream()
+					.filter(sm -> sm.getSubsidyMeasureTitle().equals(award.getSubsidyControlTitle())).findAny();
 		}
 
 		return ((smOptional != null) ? smOptional.get() : null);
