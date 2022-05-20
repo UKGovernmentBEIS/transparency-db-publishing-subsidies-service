@@ -316,7 +316,7 @@ public class AwardService {
 			smOptional = smList.stream().filter(sm -> sm.getScNumber().equals(award.getSubsidyControlNumber()))
 					.findAny();
 
-		} else {
+		} else if (!StringUtils.isEmpty(award.getSubsidyControlTitle())){
 			log.info("inside else title");
 			smOptional = smList.stream()
 					.filter(sm -> sm.getSubsidyMeasureTitle().equals(award.getSubsidyControlTitle())).findAny();
