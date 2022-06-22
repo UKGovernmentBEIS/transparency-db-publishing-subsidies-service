@@ -164,7 +164,7 @@ public class BulkUploadAwardsServiceTest {
 		List<SubsidyMeasure> smList = new ArrayList<>();
 		List<BulkUploadAwards> awardList = new ArrayList<>();
 		bulkUploadAward.setLegalGrantingDate("10-12-1999");
-		bulkUploadAward.setSubsidyControlNumber("SC1000000");
+		bulkUploadAward.setSubsidyControlNumber("SC10000");
 		bulkUploadAward.setNationalId("abc123456");
 
 		ValidationResult result = new ValidationResult();

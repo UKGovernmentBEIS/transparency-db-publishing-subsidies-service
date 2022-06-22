@@ -157,7 +157,7 @@ public class AwardServiceTest {
 		List<SubsidyMeasure> smList = new ArrayList<>();
 		List<BulkUploadAwards> awardList = new ArrayList<>();
 		bulkUploadAward.setLegalGrantingDate("10-12-1999");
-		bulkUploadAward.setSubsidyControlNumber("SC1000000");
+		bulkUploadAward.setSubsidyControlNumber("SC10000");
 
 		String role = "Granting Authority Administrator";
 		awardList.add(bulkUploadAward);
