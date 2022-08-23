@@ -6,6 +6,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -478,28 +480,14 @@ public class BulkUploadAwardsService {
 
 		List<BulkUploadAwards> legalGrantingDateWithinMeasureDateNumberErrorRecordsList = subsidyControlNumberExistsList.stream()
 				.filter(award -> smList.stream().anyMatch(
-						sm -> {
-							try {
-								return ((award.getSubsidyControlNumber().equals(sm.getScNumber())) &&
-										(sdf.parse(award.getLegalGrantingDate()).after(sm.getEndDate()) ||
-												sdf.parse(award.getLegalGrantingDate()).before(sm.getStartDate())));
-							} catch (ParseException e) {
-								return true;
-							}
-						}
+						sm -> ((award.getSubsidyControlNumber().equals(sm.getScNumber())) &&
+								(!isLegalGrantingDateWithinSchemeDate(award,sm)))
 				)).collect(Collectors.toList());
 
 		List<BulkUploadAwards> legalGrantingDateWithinMeasureDateTitleNoNumberErrorRecordsList = subsidyControlTitleExistsNoNumberList.stream()
 				.filter(award -> smList.stream().anyMatch(
-						sm -> {
-							try {
-								return ((award.getSubsidyControlTitle().equals(sm.getSubsidyMeasureTitle())) &&
-										(sdf.parse(award.getLegalGrantingDate()).after(sm.getEndDate()) ||
-												sdf.parse(award.getLegalGrantingDate()).before(sm.getStartDate())));
-							} catch (ParseException e) {
-								return true;
-							}
-						}
+						sm -> ((award.getSubsidyControlTitle().equals(sm.getSubsidyMeasureTitle())) &&
+								(!isLegalGrantingDateWithinSchemeDate(award,sm)))
 				)).collect(Collectors.toList());
 
 		validationlegalGrantingDateErrorListResultList.addAll(legalGrantingDateWithinMeasureDateNumberErrorRecordsList.stream()
@@ -532,7 +520,6 @@ public class BulkUploadAwardsService {
 				.filter(award -> award.getSubsidyControlNumber() != null
 						&& !subsidyControlNumberTitleList.contains(award.getSubsidyControlNumber()))
 				.collect(Collectors.toList());
-
 
 
 		// validation scnumber with sctitle.
@@ -846,5 +833,21 @@ public class BulkUploadAwardsService {
 		} else {
 			return true;
 		}
+	}
+
+	private boolean isLegalGrantingDateWithinSchemeDate (BulkUploadAwards award, SubsidyMeasure sm){
+		SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
+		boolean legalGrantingDateWithinSchemeDate = false;
+
+		try {
+			if (award.getLegalGrantingDate() == null) {
+				return false;
+			}
+			legalGrantingDateWithinSchemeDate = !(sdf.parse(award.getLegalGrantingDate()).after(sm.getEndDate()) ||
+							sdf.parse(award.getLegalGrantingDate()).before(sm.getStartDate()));
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return legalGrantingDateWithinSchemeDate;
 	}
 }
