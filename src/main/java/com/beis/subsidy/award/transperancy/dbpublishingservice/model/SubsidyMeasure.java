@@ -97,4 +97,7 @@ public class SubsidyMeasure {
 	@Column(name = "HAS_NO_END_DATE")
 	private boolean hasNoEndDate;
 
+	@Column(name = "CONFIRMATION_DATE")
+	private Date confirmationDate;
+
 }
