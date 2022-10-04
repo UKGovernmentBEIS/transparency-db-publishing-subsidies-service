@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.UserPrinciple;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -52,12 +53,13 @@ public class AddAwardServiceTest {
 	public void setUp() throws Exception {
 
 		awardInputRequest = new SingleAward();
+		awardInputRequest.setStandaloneAward("No");
 		awardInputRequest.setSubsidyControlNumber("SC10000");
 		awardInputRequest.setSubsidyControlTitle("AHDB Generic Promotional Measures scheme");
 		awardInputRequest.setSubsidyObjective("SME support");
 		awardInputRequest.setSubsidyInstrument("Loan");
 		awardInputRequest.setSubsidyAmountRange("500000 - 1000000");
-		awardInputRequest.setSubsidyAmountExact("99.0");
+		awardInputRequest.setSubsidyAmountExact("99");
 		awardInputRequest.setNationalIdType("Company Registration Number");
 		awardInputRequest.setNationalId("ab123456");
 		awardInputRequest.setBeneficiaryName("pvk");
@@ -99,7 +101,7 @@ public class AddAwardServiceTest {
 		when(smRepository.findAll()).thenReturn(smList);
 
 		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
-		expectedResult.setTotalErrors(2);
+		expectedResult.setTotalErrors(1);
 		expectedResult.setMessage("Award not saved in Database");
 
 		when(awardServiceMock.getAllSubsidyMeasures()).thenReturn(submList);
@@ -145,7 +147,7 @@ public class AddAwardServiceTest {
 		when(smRepository.findAll()).thenReturn(smList);
 
 		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
-		expectedResult.setTotalErrors(2);
+		expectedResult.setTotalErrors(1);
 		expectedResult.setMessage("Award saved in Database");
 		String role = "Granting Authority Administrator";
 		when(awardServiceMock.getAllSubsidyMeasures()).thenReturn(submList);
@@ -245,7 +247,7 @@ public class AddAwardServiceTest {
 		when(smRepository.findAll()).thenReturn(smList);
 
 		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
-		expectedResult.setTotalErrors(3);
+		expectedResult.setTotalErrors(2);
 		expectedResult.setMessage("Award saved in Database");
 
 		when(awardServiceMock.getAllSubsidyMeasures()).thenReturn(submList);
@@ -296,7 +298,7 @@ public class AddAwardServiceTest {
 		when(smRepository.findAll()).thenReturn(smList);
 
 		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
-		expectedResult.setTotalErrors(3);
+		expectedResult.setTotalErrors(2);
 		expectedResult.setMessage("Award saved in Database");
 
 		when(awardServiceMock.getAllSubsidyMeasures()).thenReturn(submList);
@@ -348,7 +350,7 @@ public class AddAwardServiceTest {
 		when(smRepository.findAll()).thenReturn(smList);
 
 		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
-		expectedResult.setTotalErrors(3);
+		expectedResult.setTotalErrors(2);
 		expectedResult.setMessage("Award saved in Database");
 		String role = "Granting Authority Administrator";
 
@@ -402,7 +404,7 @@ public class AddAwardServiceTest {
 		when(smRepository.findAll()).thenReturn(smList);
 		when(upMock.getUserName()).thenReturn("Granting Authority Approver");
 		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
-		expectedResult.setTotalErrors(3);
+		expectedResult.setTotalErrors(2);
 		expectedResult.setMessage("Award saved in Database");
 
 		when(awardServiceMock.getAllSubsidyMeasures()).thenReturn(submList);
@@ -413,6 +415,163 @@ public class AddAwardServiceTest {
 
 		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
 
+	}
+
+	@Test
+	public void testStandaloneAwardMissingErrors() throws ParseException{
+		Beneficiary beneficiary = mock(Beneficiary.class);
+		UserPrinciple upMock = mock(UserPrinciple.class);
+		List<GrantingAuthority> gaList = new ArrayList<GrantingAuthority>();
+		List<SubsidyMeasure> smList = new ArrayList<>();
+		List<BulkUploadAwards> awardList = new ArrayList<>();
+		awardInputRequest.setStandaloneAward(null);
+
+		List<SubsidyMeasure> submList = new ArrayList<>();
+		SubsidyMeasure sub = new SubsidyMeasure();
+		sub.setSubsidyMeasureTitle("AHDB Generic Promotional Measures scheme");
+		sub.setScNumber("SC10000");
+		smList.add(sub);
+		SubsidyMeasure subsidy = new SubsidyMeasure();
+		subsidy.setSubsidyMeasureTitle("AHDB Generic Promotional Measures scheme");
+		subsidy.setScNumber("SC10000");
+		submList.add(subsidy);
+		GrantingAuthority ga = new GrantingAuthority();
+		ga.setGaId(Long.valueOf(1));
+		ga.setGrantingAuthorityName("BEIS");
+		ga.setStatus("Active");
+		gaList.add(ga);
+		Award expectedAward = new Award();
+		Award saveAward = new Award();
+		beneficiary.setBeneficiaryName("testName");
+		expectedAward.setApprovedBy("test");
+		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
+		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
+		when(gRepo.findByGrantingAuthorityName(anyString())).thenReturn(ga);
+		when(smRepository.findAll()).thenReturn(smList);
+
+		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
+		expectedResult.setTotalErrors(1);
+		expectedResult.setMessage("validation error");
+		String role = "Granting Authority Administrator";
+		when(awardServiceMock.getAllSubsidyMeasures()).thenReturn(submList);
+
+		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
+
+		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest,upMock,"role");
+
+		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
+		assertThat(results.getMessage()).isEqualTo(expectedResult.getMessage());
+		for (int i = 0; i < expectedResult.getTotalErrors(); i++){
+			assertThat(results.getValidationErrorResult().get(i).getColumn()).isEqualTo("standaloneAward");
+			assertThat(results.getValidationErrorResult().get(i).getMessage()).isEqualTo("You must specify the standalone status of the subsidy award.");
+		}
+	}
+
+	@Test
+	public void testStandaloneAwardDescriptionMissingErrors() throws ParseException{
+		Beneficiary beneficiary = mock(Beneficiary.class);
+		UserPrinciple upMock = mock(UserPrinciple.class);
+		List<GrantingAuthority> gaList = new ArrayList<GrantingAuthority>();
+		List<SubsidyMeasure> smList = new ArrayList<>();
+		List<BulkUploadAwards> awardList = new ArrayList<>();
+		awardInputRequest.setStandaloneAward("Yes");
+		awardInputRequest.setSubsidyAwardDescription("");
+
+		List<SubsidyMeasure> submList = new ArrayList<>();
+		SubsidyMeasure sub = new SubsidyMeasure();
+		sub.setSubsidyMeasureTitle("AHDB Generic Promotional Measures scheme");
+		sub.setScNumber("SC10000");
+		smList.add(sub);
+		SubsidyMeasure subsidy = new SubsidyMeasure();
+		subsidy.setSubsidyMeasureTitle("AHDB Generic Promotional Measures scheme");
+		subsidy.setScNumber("SC10000");
+		submList.add(subsidy);
+		GrantingAuthority ga = new GrantingAuthority();
+		ga.setGaId(Long.valueOf(1));
+		ga.setGrantingAuthorityName("BEIS");
+		ga.setStatus("Active");
+		gaList.add(ga);
+		Award expectedAward = new Award();
+		Award saveAward = new Award();
+		beneficiary.setBeneficiaryName("testName");
+		expectedAward.setApprovedBy("test");
+		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
+		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
+		when(gRepo.findByGrantingAuthorityName(anyString())).thenReturn(ga);
+		when(smRepository.findAll()).thenReturn(smList);
+
+		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
+		expectedResult.setTotalErrors(1);
+		expectedResult.setMessage("validation error");
+		String role = "Granting Authority Administrator";
+		when(awardServiceMock.getAllSubsidyMeasures()).thenReturn(submList);
+
+		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
+
+		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest,upMock,"role");
+
+		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
+		assertThat(results.getMessage()).isEqualTo(expectedResult.getMessage());
+		for (int i = 0; i < expectedResult.getTotalErrors(); i++){
+			assertThat(results.getValidationErrorResult().get(i).getColumn()).isEqualTo("subsidyAwardDescription");
+			assertThat(results.getValidationErrorResult().get(i).getMessage()).isEqualTo("You must provide the description for a standalone award.");
+		}
+	}
+
+	@Test
+	public void testStandaloneAwardDescriptionLengthErrors() throws ParseException{
+		Beneficiary beneficiary = mock(Beneficiary.class);
+		UserPrinciple upMock = mock(UserPrinciple.class);
+		List<GrantingAuthority> gaList = new ArrayList<GrantingAuthority>();
+		List<SubsidyMeasure> smList = new ArrayList<>();
+		List<BulkUploadAwards> awardList = new ArrayList<>();
+
+		Integer stringLength = 2001;
+
+		String longString = StringUtils.repeat("a", stringLength);
+
+		awardInputRequest.setStandaloneAward("Yes");
+		awardInputRequest.setSubsidyAwardDescription(longString);
+
+		List<SubsidyMeasure> submList = new ArrayList<>();
+		SubsidyMeasure sub = new SubsidyMeasure();
+		sub.setSubsidyMeasureTitle("AHDB Generic Promotional Measures scheme");
+		sub.setScNumber("SC10000");
+		smList.add(sub);
+		SubsidyMeasure subsidy = new SubsidyMeasure();
+		subsidy.setSubsidyMeasureTitle("AHDB Generic Promotional Measures scheme");
+		subsidy.setScNumber("SC10000");
+		submList.add(subsidy);
+		GrantingAuthority ga = new GrantingAuthority();
+		ga.setGaId(Long.valueOf(1));
+		ga.setGrantingAuthorityName("BEIS");
+		ga.setStatus("Active");
+		gaList.add(ga);
+		Award expectedAward = new Award();
+		Award saveAward = new Award();
+		beneficiary.setBeneficiaryName("testName");
+		expectedAward.setApprovedBy("test");
+		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
+		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
+		when(gRepo.findByGrantingAuthorityName(anyString())).thenReturn(ga);
+		when(smRepository.findAll()).thenReturn(smList);
+
+		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
+		expectedResult.setTotalErrors(1);
+		expectedResult.setMessage("validation error");
+		String role = "Granting Authority Administrator";
+		when(awardServiceMock.getAllSubsidyMeasures()).thenReturn(submList);
+
+		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
+
+		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest,upMock,"role");
+
+		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
+		assertThat(results.getMessage()).isEqualTo(expectedResult.getMessage());
+		for (int i = 0; i < expectedResult.getTotalErrors(); i++){
+			assertThat(results.getValidationErrorResult().get(i).getColumn()).isEqualTo("subsidyAwardDescription");
+			assertThat(results.getValidationErrorResult().get(i).getMessage()).isEqualTo("The subsidy award description must be 2000 characters or less.");
+		}
 	}
 
 }

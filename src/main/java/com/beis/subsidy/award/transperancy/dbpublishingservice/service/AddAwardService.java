@@ -67,6 +67,11 @@ public class AddAwardService {
 
 		    log.info("{} :: Inside validateAward Award", loggingComponentName);
 
+			// Validate standalone award status
+			List<SingleAwardValidationResult> standaloneAwardStatusMissingList = validateStandaloneAwardStatus(award);
+
+			List<SingleAwardValidationResult> validateSubsidyAwardDescription = validateSubsidyAwardDescription(award);
+
 			// Validation National Id length check
 			List<SingleAwardValidationResult> nationalIdMissingList = validateNationalIdAwards(award);
 
@@ -81,12 +86,9 @@ public class AddAwardService {
 			 */
 			List<SingleAwardValidationResult> scNumberNameCheckList = validateScNumberScTitle(award);
 
+			List<SingleAwardValidationResult> subsidyControlNumberMismatchList = validateSubsidyControlNumber(award);
 
-			List<SingleAwardValidationResult> subsidyControlNumberMismatchList = validateSubsidyControlNumber(
-					award);
-
-			List<SingleAwardValidationResult> subsidyMeasureTitleNameLengthList = validateSubsidyMeasureNameLength(
-					award);
+			List<SingleAwardValidationResult> subsidyMeasureTitleNameLengthList = validateSubsidyMeasureNameLength(award);
 
 			List<SingleAwardValidationResult> subsidyPurposeCheckList = validateSubsidyPurpose(award);
 
@@ -155,7 +157,8 @@ public class AddAwardService {
 			// Merge lists of Validation Errors
 			List<SingleAwardValidationResult> validationErrorResultList = Stream
 					.of(scNumberNameCheckList, subsidyMeasureTitleNameLengthList, subsidyPurposeCheckList,
-							nationalIdTypeMissingList, nationalIdMissingList, beneficiaryNameErrorList,
+							nationalIdTypeMissingList, standaloneAwardStatusMissingList, validateSubsidyAwardDescription,
+							nationalIdMissingList, beneficiaryNameErrorList,
 							beneficiaryMissingList, subsidyControlNumberMismatchList,
 							grantingAuthorityNameErrorList, grantingAuthorityErrorList, sizeOfOrgErrorList,
 							spendingRegionErrorList, spendingSectorErrorList, goodsOrServiceErrorList,
@@ -212,6 +215,36 @@ public class AddAwardService {
 			return validationResult;
 	}
 
+	private List<SingleAwardValidationResult> validateStandaloneAwardStatus(SingleAward award) {
+		/*
+		 * Validation that standalone award exists
+		 */
+		List<SingleAwardValidationResult> errorList = new ArrayList<>();
+		if(StringUtils.isEmpty(award.getStandaloneAward()) || award.getStandaloneAward() == null ||
+				(!award.getStandaloneAward().equalsIgnoreCase("yes")) && !award.getStandaloneAward().equalsIgnoreCase("no")){
+			errorList.add(new SingleAwardValidationResult("standaloneAward","You must specify the standalone status of the subsidy award."));
+		}
+		return errorList;
+	}
+
+	private List<SingleAwardValidationResult> validateSubsidyAwardDescription(SingleAward award) {
+		/*
+		 * Validation that subsidy award description exists
+		 */
+		List<SingleAwardValidationResult> errorList = new ArrayList<>();
+		if(award.getStandaloneAward() != null && award.getStandaloneAward().equalsIgnoreCase("yes") &&
+				(StringUtils.isEmpty(award.getSubsidyAwardDescription()) || award.getSubsidyAwardDescription() == null)){
+			errorList.add(new SingleAwardValidationResult("subsidyAwardDescription","You must provide the description for a standalone award."));
+		}
+
+		if(award.getStandaloneAward() != null && award.getStandaloneAward().equalsIgnoreCase("yes") &&
+				(award.getSubsidyAwardDescription() != null) && award.getSubsidyAwardDescription().length() > 2000){
+			errorList.add(new SingleAwardValidationResult("subsidyAwardDescription","The subsidy award description must be 2000 characters or less."));
+		}
+
+		return errorList;
+	}
+
 	/*
 	 * 
 	 * the below method validate either SC number or Sc Title exist in the file.
@@ -223,13 +256,15 @@ public class AddAwardService {
 		 */
 		
 		List<SingleAwardValidationResult> validationScNumberScTitleResultList = new ArrayList<>();
-		if(StringUtils.isEmpty(award.getSubsidyControlNumber()) && StringUtils.isEmpty(award.getSubsidyControlTitle())){
-			validationScNumberScTitleResultList.add(new SingleAwardValidationResult("subsidyControlNumber or subsidyControlTitle",
-					"Either Subsidy Control number or Subsidy title field is mandatory."));
-		}
+		if (award.getStandaloneAward() == null || !award.getStandaloneAward().equalsIgnoreCase("yes")) {
+			if (StringUtils.isEmpty(award.getSubsidyControlNumber()) && StringUtils.isEmpty(award.getSubsidyControlTitle())) {
+				validationScNumberScTitleResultList.add(new SingleAwardValidationResult("subsidyControlNumber or subsidyControlTitle",
+						"Either Subsidy Control number or Subsidy title field is mandatory."));
+			}
 
-		log.info("{} ::Validation Result Error list - Either Subsidy Control number or Subsidy title should enter = {}",
-				loggingComponentName,validationScNumberScTitleResultList);
+			log.info("{} ::Validation Result Error list - Either Subsidy Control number or Subsidy title should enter = {}",
+					loggingComponentName, validationScNumberScTitleResultList);
+		}
 
 		return validationScNumberScTitleResultList;
 	}
@@ -505,42 +540,45 @@ public class AddAwardService {
 
 		log.info("Calling awardService.getAllSubsidyMeasures()... - start");
 
-		List<SubsidyMeasure> smList = awardService.getAllSubsidyMeasures();
-
-		log.info("Calling process Service proxy.getAllSubsidyMeasures()... - end");
-
-		List<String> subsidyControlNumberTitleList = smList.stream().map(sm -> sm.getScNumber())
-				.collect(Collectors.toList());
-
-		log.info("subsidyControlNumberTitleList - String list " + subsidyControlNumberTitleList);
-
 		List<SingleAwardValidationResult> validationScNumberResultList = new ArrayList<>();
 
-		if (!StringUtils.isEmpty(award.getSubsidyControlNumber())  &&
-				award.getSubsidyControlNumber().length() > 7) {
-			validationScNumberResultList.add(new SingleAwardValidationResult("subsidyControlNumber",
-					"The subsidy control number must start with SC, followed by 6 digits."));
-		
-		} else if (award.getSubsidyControlNumber() != null && !StringUtils.isEmpty(award.getSubsidyControlNumber())
-				&& !subsidyControlNumberTitleList.contains(award.getSubsidyControlNumber())) {
-			validationScNumberResultList
-					.add(new SingleAwardValidationResult("subsidyControlNumber",
-							"The subsidy control number does not match an existing subsidy scheme."));
+		if (award.getStandaloneAward() == null || !award.getStandaloneAward().equalsIgnoreCase("yes")) {
 
-		} else if ((!StringUtils.isEmpty(award.getSubsidyControlNumber())&& !StringUtils.isEmpty(award.getSubsidyControlTitle())) && smList.stream()
-				.noneMatch(bulkAward -> ((bulkAward.getScNumber().trim().equals(award.getSubsidyControlNumber()))
-						&& (bulkAward.getSubsidyMeasureTitle().trim().equals(award.getSubsidyControlTitle()))))) {
-			validationScNumberResultList.add(new SingleAwardValidationResult("subsidyControlNumber",
-					"The subsidy control number does not match with the title."));
+			List<SubsidyMeasure> smList = awardService.getAllSubsidyMeasures();
 
-		} else if(isScNumberStatusActive(smList,award.getSubsidyControlNumber())){
+			log.info("Calling process Service proxy.getAllSubsidyMeasures()... - end");
 
-			validationScNumberResultList.add(new SingleAwardValidationResult("subsidyControlNumber",
-					"Subsidy control number is in Inactive status."));
+			List<String> subsidyControlNumberTitleList = smList.stream().map(sm -> sm.getScNumber())
+					.collect(Collectors.toList());
+
+			log.info("subsidyControlNumberTitleList - String list " + subsidyControlNumberTitleList);
+
+			if (!StringUtils.isEmpty(award.getSubsidyControlNumber()) &&
+					award.getSubsidyControlNumber().length() > 7) {
+				validationScNumberResultList.add(new SingleAwardValidationResult("subsidyControlNumber",
+						"The subsidy control number must start with SC, followed by 6 digits."));
+
+			} else if (award.getSubsidyControlNumber() != null && !StringUtils.isEmpty(award.getSubsidyControlNumber())
+					&& !subsidyControlNumberTitleList.contains(award.getSubsidyControlNumber())) {
+				validationScNumberResultList
+						.add(new SingleAwardValidationResult("subsidyControlNumber",
+								"The subsidy control number does not match an existing subsidy scheme."));
+
+			} else if ((!StringUtils.isEmpty(award.getSubsidyControlNumber()) && !StringUtils.isEmpty(award.getSubsidyControlTitle())) && smList.stream()
+					.noneMatch(bulkAward -> ((bulkAward.getScNumber().trim().equals(award.getSubsidyControlNumber()))
+							&& (bulkAward.getSubsidyMeasureTitle().trim().equals(award.getSubsidyControlTitle()))))) {
+				validationScNumberResultList.add(new SingleAwardValidationResult("subsidyControlNumber",
+						"The subsidy control number does not match with the title."));
+
+			} else if (isScNumberStatusActive(smList, award.getSubsidyControlNumber())) {
+
+				validationScNumberResultList.add(new SingleAwardValidationResult("subsidyControlNumber",
+						"Subsidy control number is in Inactive status."));
+			}
+
+			log.info("Validation Result Error list - Subsidy Measure Number mismatch error size = {} ",
+					validationScNumberResultList.size());
 		}
-
-		log.info("Validation Result Error list - Subsidy Measure Number mismatch error size = {} ",
-				validationScNumberResultList.size());
 
 		return validationScNumberResultList;
 	}
