@@ -19,8 +19,8 @@ public final class MFAGroupingSpecificaionUtils {
                 builder.lower(builder.literal(status.trim())));
     }
 
-    public static Specification<MFAGrouping> grantingAuthorityName(String searchName) {
-        return (root, query, builder) -> builder.like(builder.lower(root.get("grantingAuthority").get("grantingAuthorityName")),
-                builder.lower(builder.literal("%" + searchName.trim() + "%")));
+    public static Specification<MFAGrouping> grantingAuthorityNameEqual(String searchName) {
+        return (root, query, builder) -> builder.equal(builder.lower(root.get("grantingAuthority").get("grantingAuthorityName")),
+                builder.lower(builder.literal(searchName.trim())));
     }
 }

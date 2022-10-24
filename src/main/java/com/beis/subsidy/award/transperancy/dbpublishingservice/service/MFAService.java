@@ -5,6 +5,7 @@ import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.respon
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.UserPrinciple;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.exception.InvalidRequestException;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.exception.SearchResultNotFoundException;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.exception.UnauthorisedAccessException;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.GrantingAuthority;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.MFAGrouping;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.GrantingAuthorityRepository;
@@ -94,12 +95,28 @@ public class MFAService {
                 totalMfaGroupingsList = mfaGroupingRepository.findAll();
             }
         }else{
-            //TODO: ensure that non-BEIS Admin users can only see grouping that belong to their GA
-//            mfaGroupingSpecifications.and(mfaGroupingByGaId((long) userPriniciple.getGrantingAuthorityGroupId()));
-//            mfaGroupingSpecificationsWithout.and(mfaGroupingByGaId((long) userPriniciple.getGrantingAuthorityGroupId()));
+            if (!StringUtils.isEmpty(searchInput.getSearchName())
+                    || !StringUtils.isEmpty(searchInput.getStatus())) {
+
+                mfaGroupingSpecifications = getSpecificationMfaGroupingsForGARoles(searchInput,userPriniciple.getGrantingAuthorityGroupName());
+                pageMfaGroupings = mfaGroupingRepository.findAll(mfaGroupingSpecifications, pagingSortMfaGroupings);
+
+                mfaGroupingResults = pageMfaGroupings.getContent();
+                totalMfaGroupingsList = mfaGroupingRepository.findAll(mfaGroupingSpecifications);
+
+            } else {
+
+                Long gaId = getGrantingAuthorityIdByName(userPriniciple.getGrantingAuthorityGroupName());
+                if(gaId == null || gaId <= 0){
+                    throw new UnauthorisedAccessException("Invalid granting authority name");
+                }
+                pageMfaGroupings = mfaGroupingRepository.
+                        findAll(mfaGroupingByGrantingAuthority(gaId),pagingSortMfaGroupings);
+                mfaGroupingResults = pageMfaGroupings.getContent();
+                totalMfaGroupingsList = mfaGroupingRepository.findAll(mfaGroupingByGrantingAuthority(gaId));
+
+            }
         }
-
-
 
         if (!mfaGroupingResults.isEmpty()) {
             mfaGroupingsResponse = new MFAGroupingsResponse(mfaGroupingResults, pageMfaGroupings.getTotalElements(),
@@ -125,7 +142,7 @@ public class MFAService {
                                 .or(SearchUtils.checkNullOrEmptyString(searchName)
                                         ? null : MFAGroupingSpecificaionUtils.mfaGroupingNumberEquals(searchName.trim()))
                                 .or(SearchUtils.checkNullOrEmptyString(searchName)
-                                        ? null :MFAGroupingSpecificaionUtils.grantingAuthorityName(searchName.trim()))
+                                        ? null :MFAGroupingSpecificaionUtils.grantingAuthorityNameEqual(searchName.trim()))
                 );
 
         if (withStatus) {
@@ -182,5 +199,40 @@ public class MFAService {
 
     public  Specification<MFAGrouping> mfaGroupingByGaId(Long gaId) {
         return (root, query, builder) -> builder.equal(root.get("gaId"), gaId);
+    }
+
+    public Specification<MFAGrouping>  getSpecificationMfaGroupingsForGARoles(MfaGroupingSearchInput searchInput, String gaName) {
+        String searchName = searchInput.getSearchName();
+        Specification<MFAGrouping> mfaGroupingSpecification = Specification
+                .where(
+                        SearchUtils.checkNullOrEmptyString(searchName)
+                                ? null : MFAGroupingSpecificaionUtils.mfaGroupingNameLike(searchName.trim())
+                                .or(SearchUtils.checkNullOrEmptyString(searchName)
+                                        ? null : MFAGroupingSpecificaionUtils.mfaGroupingNumberEquals(searchName.trim()))
+                                .or(SearchUtils.checkNullOrEmptyString(searchName)
+                                        ? null :MFAGroupingSpecificaionUtils.grantingAuthorityNameEqual(searchName.trim()))
+
+                )
+                .and(SearchUtils.checkNullOrEmptyString(gaName)
+                        ? null :MFAGroupingSpecificaionUtils.grantingAuthorityNameEqual(gaName.trim()))
+                .and(SearchUtils.checkNullOrEmptyString(searchInput.getStatus())
+                        ? null :MFAGroupingSpecificaionUtils.mfaGroupingByStatus(searchInput.getStatus().trim()));
+        return mfaGroupingSpecification;
+    }
+
+    private Specification<MFAGrouping> mfaGroupingByGrantingAuthority(Long gaId) {
+        return Specification.where(mfaGroupingByGa(gaId));
+    }
+
+    public  Specification<MFAGrouping> mfaGroupingByGa(Long gaId) {
+        return (root, query, builder) -> builder.equal(root.get("gaId"), gaId);
+    }
+
+    private Long getGrantingAuthorityIdByName(String gaName){
+        GrantingAuthority gaObj = gaRepository.findByGrantingAuthorityName(gaName);
+        if(gaObj != null){
+            return gaObj.getGaId();
+        }
+        return null;
     }
 }
