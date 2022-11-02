@@ -69,6 +69,12 @@ public class MFAController {
         UserPrinciple userPrincipleObj = objectMapper.readValue(userPrincipleStr, UserPrinciple.class);
         String mfaGroupingNumber = mfaService.addMfaGrouping(mfaGroupingRequest, userPrincipleObj);
 
+        if (mfaGroupingNumber != null && mfaGroupingNumber != ""){
+            StringBuilder eventMsg = new StringBuilder("MFA grouping ").append(mfaGroupingNumber).append(" has been created.");
+
+            ExcelHelper.saveAuditLogForUpdate(userPrincipleObj, "Update MFA Grouping", mfaGroupingNumber
+                    ,eventMsg.toString(),auditLogsRepository);
+        }
         return mfaGroupingNumber;
     }
 
