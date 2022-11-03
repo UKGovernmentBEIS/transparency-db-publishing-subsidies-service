@@ -1,5 +1,6 @@
 package com.beis.subsidy.award.transperancy.dbpublishingservice.controller;
 
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.MFAAwardsResponse;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.MFAGroupingResponse;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.MFAGroupingsResponse;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.UserPrinciple;
@@ -7,7 +8,9 @@ import com.beis.subsidy.award.transperancy.dbpublishingservice.exception.Invalid
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.MFAGrouping;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AuditLogsRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.MFAGroupingRepository;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.request.MFAAwardRequest;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.request.MFAGroupingRequest;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.request.MfaAwardSearchInput;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.request.MfaGroupingSearchInput;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.service.MFAService;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.util.AccessManagementConstant;
@@ -56,6 +59,43 @@ public class MFAController {
     @GetMapping("/health")
     public ResponseEntity<String> getHealth() {
         return new ResponseEntity<>("Successful health check - MFA API", HttpStatus.OK);
+    }
+
+    @PostMapping(
+            value = "/award/add"
+    )
+    public String addMfaAward(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
+                                 @Valid @RequestBody MFAAwardRequest mfaAwardRequest) throws JsonProcessingException {
+        log.info("{} :: inside addSchemeDetails method",loggingComponentName);
+
+        String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
+        UserPrinciple userPrincipleObj = objectMapper.readValue(userPrincipleStr, UserPrinciple.class);
+        String mfaAwardNumber = mfaService.addMfaAward(mfaAwardRequest, userPrincipleObj);
+
+        if (mfaAwardNumber != null && mfaAwardNumber != ""){
+            StringBuilder eventMsg = new StringBuilder("MFA award ").append(mfaAwardNumber).append(" has been created.");
+
+            ExcelHelper.saveAuditLogForUpdate(userPrincipleObj, "Update MFA Award", mfaAwardNumber
+                    ,eventMsg.toString(),auditLogsRepository);
+        }
+        return mfaAwardNumber;
+    }
+
+    @PostMapping(
+            value = "/award/search",
+            produces = APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<MFAAwardsResponse> findMfaAwards(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
+                                                                 @Valid @RequestBody MfaAwardSearchInput searchInput){
+        UserPrinciple userPrinicipleResp = SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"find Subsidy Schema");
+        if(searchInput.getTotalRecordsPerPage() == null){
+            searchInput.setTotalRecordsPerPage(10);
+        }
+        if(searchInput.getPageNumber() == null) {
+            searchInput.setPageNumber(1);
+        }
+        MFAAwardsResponse searchResults = mfaService.findMatchingMfaAwardDetails(searchInput,userPrinicipleResp);
+        return new ResponseEntity<MFAAwardsResponse>(searchResults, HttpStatus.NOT_FOUND);
     }
 
     @PostMapping(

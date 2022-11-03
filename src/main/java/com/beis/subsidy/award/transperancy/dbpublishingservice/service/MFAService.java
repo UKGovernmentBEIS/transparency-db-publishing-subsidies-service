@@ -1,8 +1,6 @@
 package com.beis.subsidy.award.transperancy.dbpublishingservice.service;
 
-import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.MFAGroupingResponse;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.MFAGroupingsResponse;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.UserPrinciple;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.*;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.exception.InvalidRequestException;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.exception.SearchResultNotFoundException;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.exception.UnauthorisedAccessException;
@@ -10,7 +8,9 @@ import com.beis.subsidy.award.transperancy.dbpublishingservice.model.GrantingAut
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.MFAGrouping;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.GrantingAuthorityRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.MFAGroupingRepository;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.request.MFAAwardRequest;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.request.MFAGroupingRequest;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.request.MfaAwardSearchInput;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.request.MfaGroupingSearchInput;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.util.AccessManagementConstant;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.util.MFAGroupingSpecificaionUtils;
@@ -72,6 +72,10 @@ public class MFAService {
         return savedMfaGrouping.getMfaGroupingNumber();
     }
 
+    public String addMfaAward(MFAAwardRequest mfaAwardRequest, UserPrinciple userPrincipleObj) {
+        return "";
+    }
+
     public MFAGroupingsResponse findMatchingMfaGroupingDetails(MfaGroupingSearchInput searchInput, UserPrinciple userPriniciple) {
         Specification<MFAGrouping> mfaGroupingSpecifications = getSpecificationMFAGroupingDetails(searchInput, true);
         Specification<MFAGrouping> mfaGroupingSpecificationsWithout = getSpecificationMFAGroupingDetails(searchInput, false);
@@ -126,6 +130,10 @@ public class MFAService {
             throw new SearchResultNotFoundException("MFA Grouping Results NotFound");
         }
         return mfaGroupingsResponse;
+    }
+
+    public MFAAwardsResponse findMatchingMfaAwardDetails(MfaAwardSearchInput searchInput, UserPrinciple userPrinicipleResp) {
+        return null;
     }
 
     public MFAGroupingResponse findSubsidySchemeById(String mfaGroupingNumber) {
