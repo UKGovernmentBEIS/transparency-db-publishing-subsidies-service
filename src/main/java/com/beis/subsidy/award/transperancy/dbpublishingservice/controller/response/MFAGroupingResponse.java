@@ -38,6 +38,12 @@ public class MFAGroupingResponse {
     @JsonProperty
     private String deletedBy;
 
+    @JsonProperty
+    private boolean canEdit;
+
+    @JsonProperty
+    private boolean canDelete;
+
     public MFAGroupingResponse(MFAGrouping mfaGrouping){
         this.mfaGroupingNumber = mfaGrouping.getMfaGroupingNumber();
         this.mfaGroupingName = mfaGrouping.getMfaGroupingName();
@@ -52,5 +58,7 @@ public class MFAGroupingResponse {
         if(mfaGrouping.getDeletedTimestamp() != null) {
             this.deletedTimestamp = SearchUtils.dateTimeToFullMonthNameInDate(mfaGrouping.getDeletedTimestamp());
         }
+        this.canEdit = false;
+        this.canDelete = false;
     }
 }

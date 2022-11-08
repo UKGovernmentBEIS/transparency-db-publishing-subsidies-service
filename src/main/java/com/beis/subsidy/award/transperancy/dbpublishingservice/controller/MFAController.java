@@ -146,6 +146,15 @@ public class MFAController {
             throw new InvalidRequestException("Bad Request SC Number is null");
         }
         MFAGroupingResponse mfaGroupingById = mfaService.findSubsidySchemeById(mfaGroupingNumber);
+        MFAGrouping mfaGrouping = mfaGroupingRepository.findByMfaGroupingNumber(mfaGroupingById.getMfaGroupingNumber());
+
+        if (PermissionUtils.userHasRole(userPrincipleObj, AccessManagementConstant.BEIS_ADMIN_ROLE) ||
+                (PermissionUtils.userHasRole(userPrincipleObj, AccessManagementConstant.GA_ADMIN_ROLE) && PermissionUtils.userPrincipleContainsId(userPrinciple, mfaGrouping.getGrantingAuthority().getAzureGroupId()))
+            ){
+            mfaGroupingById.setCanDelete(true);
+            mfaGroupingById.setCanEdit(true);
+        }
+
         return new ResponseEntity<MFAGroupingResponse>(mfaGroupingById, HttpStatus.OK);
     }
 
