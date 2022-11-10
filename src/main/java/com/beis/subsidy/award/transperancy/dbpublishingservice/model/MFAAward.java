@@ -82,4 +82,10 @@ public class MFAAward {
     @UpdateTimestamp
     @Column(name = "LAST_MODIFIED_TIMESTAMP")
     private LocalDateTime lastModifiedTimestamp;
+
+    @Column(name = "DELETED_BY")
+    private String deletedBy;
+
+    @Column(name = "DELETED_TIMESTAMP")
+    private LocalDateTime deletedTimestamp;
 }

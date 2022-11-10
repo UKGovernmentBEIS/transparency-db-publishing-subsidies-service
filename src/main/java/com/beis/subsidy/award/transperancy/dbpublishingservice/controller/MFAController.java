@@ -94,15 +94,15 @@ public class MFAController {
     )
     public ResponseEntity<MFAAwardsResponse> findMfaAwards(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
                                                                  @Valid @RequestBody MfaAwardSearchInput searchInput){
-        UserPrinciple userPrinicipleResp = SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"find Subsidy Schema");
+        UserPrinciple userPrincipleResp = SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"find Subsidy Schema");
         if(searchInput.getTotalRecordsPerPage() == null){
             searchInput.setTotalRecordsPerPage(10);
         }
         if(searchInput.getPageNumber() == null) {
             searchInput.setPageNumber(1);
         }
-        MFAAwardsResponse searchResults = mfaService.findMatchingMfaAwardDetails(searchInput,userPrinicipleResp);
-        return new ResponseEntity<MFAAwardsResponse>(searchResults, HttpStatus.NOT_FOUND);
+        MFAAwardsResponse searchResults = mfaService.findMatchingMfaAwardDetails(searchInput,userPrincipleResp);
+        return new ResponseEntity<MFAAwardsResponse>(searchResults, HttpStatus.OK);
     }
 
     @PostMapping(

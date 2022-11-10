@@ -18,7 +18,11 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MFAAwardsResponse {
-    private long activeMfaAwards;
+    private long publishedMfaAwards;
+
+    private long awaitingMfaAwards;
+    private long rejectedMfaAwards;
+
     private long deletedMfaAwards;
     private long allMfaAwards;
     public long totalSearchResults;
@@ -28,15 +32,17 @@ public class MFAAwardsResponse {
     public List<MFAAwardResponse> mfaAwards;
 
     public MFAAwardsResponse(List<MFAAward> mfaAwards, long totalSearchResults,
-                             int currentPage, int totalPages, Map<String, Long> mfaGroupingsCounts) {
+                             int currentPage, int totalPages, Map<String, Long> mfaAwardCounts) {
         this.mfaAwards = mfaAwards.stream().map(mfaAward ->
                 new MFAAwardResponse(mfaAward)).collect(Collectors.toList());
         this.totalSearchResults = totalSearchResults;
         this.currentPage = currentPage;
         this.totalPages = totalPages;
 
-        this.activeMfaAwards = mfaGroupingsCounts.get("activeMfaGroupings");
-        this.deletedMfaAwards = mfaGroupingsCounts.get("deletedMfaGroupings");
-        this.allMfaAwards = mfaGroupingsCounts.get("allMfaGroupings");
+        this.publishedMfaAwards = mfaAwardCounts.get("publishedMfaAwards");
+        this.awaitingMfaAwards = mfaAwardCounts.get("awaitingMfaAwards");
+        this.rejectedMfaAwards = mfaAwardCounts.get("rejectedMfaAwards");
+        this.deletedMfaAwards = mfaAwardCounts.get("deletedMfaAwards");
+        this.allMfaAwards = mfaAwardCounts.get("allMfaAwards");
     }
 }

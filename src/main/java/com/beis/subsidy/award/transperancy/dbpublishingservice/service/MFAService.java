@@ -14,10 +14,7 @@ import com.beis.subsidy.award.transperancy.dbpublishingservice.request.MFAAwardR
 import com.beis.subsidy.award.transperancy.dbpublishingservice.request.MFAGroupingRequest;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.request.MfaAwardSearchInput;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.request.MfaGroupingSearchInput;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.util.AccessManagementConstant;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.util.MFAGroupingSpecificaionUtils;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.util.PermissionUtils;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.util.SearchUtils;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -153,7 +150,7 @@ public class MFAService {
         return savedMfaAward.getMfaAwardNumber();
     }
 
-    public MFAGroupingsResponse findMatchingMfaGroupingDetails(MfaGroupingSearchInput searchInput, UserPrinciple userPriniciple) {
+    public MFAGroupingsResponse findMatchingMfaGroupingDetails(MfaGroupingSearchInput searchInput, UserPrinciple userPrinciple) {
         Specification<MFAGrouping> mfaGroupingSpecifications = getSpecificationMFAGroupingDetails(searchInput, true);
         Specification<MFAGrouping> mfaGroupingSpecificationsWithout = getSpecificationMFAGroupingDetails(searchInput, false);
         List<MFAGrouping> totalMfaGroupingsList = new ArrayList<>();
@@ -166,7 +163,7 @@ public class MFAService {
         Pageable pagingSortMfaGroupings = PageRequest.of(searchInput.getPageNumber() - 1,
                 searchInput.getTotalRecordsPerPage(), Sort.by(orders));
 
-        if (AccessManagementConstant.BEIS_ADMIN_ROLE.equals(userPriniciple.getRole().trim())) {
+        if (AccessManagementConstant.BEIS_ADMIN_ROLE.equals(userPrinciple.getRole().trim())) {
             pageMfaGroupings = mfaGroupingRepository.findAll(mfaGroupingSpecifications, pagingSortMfaGroupings);
             mfaGroupingResults = pageMfaGroupings.getContent();
 
@@ -179,7 +176,7 @@ public class MFAService {
             if (!StringUtils.isEmpty(searchInput.getSearchName())
                     || !StringUtils.isEmpty(searchInput.getStatus())) {
 
-                mfaGroupingSpecifications = getSpecificationMfaGroupingsForGARoles(searchInput,userPriniciple.getGrantingAuthorityGroupName());
+                mfaGroupingSpecifications = getSpecificationMfaGroupingsForGARoles(searchInput,userPrinciple.getGrantingAuthorityGroupName());
                 pageMfaGroupings = mfaGroupingRepository.findAll(mfaGroupingSpecifications, pagingSortMfaGroupings);
 
                 mfaGroupingResults = pageMfaGroupings.getContent();
@@ -187,7 +184,7 @@ public class MFAService {
 
             } else {
 
-                Long gaId = getGrantingAuthorityIdByName(userPriniciple.getGrantingAuthorityGroupName());
+                Long gaId = getGrantingAuthorityIdByName(userPrinciple.getGrantingAuthorityGroupName());
                 if(gaId == null || gaId <= 0){
                     throw new UnauthorisedAccessException("Invalid granting authority name");
                 }
@@ -209,8 +206,58 @@ public class MFAService {
         return mfaGroupingsResponse;
     }
 
-    public MFAAwardsResponse findMatchingMfaAwardDetails(MfaAwardSearchInput searchInput, UserPrinciple userPrinicipleResp) {
-        return null;
+    public MFAAwardsResponse findMatchingMfaAwardDetails(MfaAwardSearchInput searchInput, UserPrinciple userPrinciple) {
+        Specification<MFAAward> mfaAwardSpecifications = getSpecificationMFAAwardDetails(searchInput, true);
+        Specification<MFAAward> mfaAwardSpecificationsWithout = getSpecificationMFAAwardDetails(searchInput, false);
+        List<MFAAward> totalMfaAwardsList = new ArrayList<>();
+        List<MFAAward> mfaAwardResults = null;
+        Page<MFAAward> pageMfaAwards = null;
+        MFAAwardsResponse mfaAwardsResponse = new MFAAwardsResponse();
+
+        List<Sort.Order> orders = SearchUtils.getOrderByCondition(searchInput.getSortBy());
+
+        Pageable pagingSortMfaAwards = PageRequest.of(searchInput.getPageNumber() - 1,
+                searchInput.getTotalRecordsPerPage(), Sort.by(orders));
+
+        if (AccessManagementConstant.BEIS_ADMIN_ROLE.equals(userPrinciple.getRole().trim())) {
+            pageMfaAwards = mfaAwardRepository.findAll(mfaAwardSpecifications, pagingSortMfaAwards);
+            mfaAwardResults = pageMfaAwards.getContent();
+
+            if (!StringUtils.isEmpty(searchInput.getSearchName())) {
+                totalMfaAwardsList = mfaAwardRepository.findAll(mfaAwardSpecificationsWithout);
+            } else {
+                totalMfaAwardsList = mfaAwardRepository.findAll();
+            }
+        }else{
+            if (!StringUtils.isEmpty(searchInput.getSearchName())
+                    || !StringUtils.isEmpty(searchInput.getStatus())) {
+
+                mfaAwardSpecifications = getSpecificationMfaAwardsForGARoles(searchInput,userPrinciple.getGrantingAuthorityGroupName());
+                pageMfaAwards = mfaAwardRepository.findAll(mfaAwardSpecifications, pagingSortMfaAwards);
+
+                mfaAwardResults = pageMfaAwards.getContent();
+                totalMfaAwardsList = mfaAwardRepository.findAll(mfaAwardSpecifications);
+
+            } else {
+                Long gaId = getGrantingAuthorityIdByName(userPrinciple.getGrantingAuthorityGroupName());
+                if(gaId == null || gaId <= 0){
+                    throw new UnauthorisedAccessException("Invalid granting authority name");
+                }
+                pageMfaAwards = mfaAwardRepository.
+                        findAll(mfaAwardByGrantingAuthority(gaId),pagingSortMfaAwards);
+                mfaAwardResults = pageMfaAwards.getContent();
+                totalMfaAwardsList = mfaAwardRepository.findAll(mfaAwardByGrantingAuthority(gaId));
+            }
+        }
+
+        if (!mfaAwardResults.isEmpty()) {
+            mfaAwardsResponse = new MFAAwardsResponse(mfaAwardResults, pageMfaAwards.getTotalElements(),
+                    pageMfaAwards.getNumber() + 1, pageMfaAwards.getTotalPages(), mfaAwardCounts(totalMfaAwardsList));
+        } else {
+            log.info("{}::MFA Award results not found");
+            throw new SearchResultNotFoundException("MFA Award Results NotFound");
+        }
+        return mfaAwardsResponse;
     }
 
     public MFAGroupingResponse findSubsidySchemeById(String mfaGroupingNumber) {
@@ -237,6 +284,27 @@ public class MFAService {
         return mfaGroupingSpecifications;
     }
 
+    private Specification<MFAAward> getSpecificationMFAAwardDetails(MfaAwardSearchInput searchInput, boolean withStatus) {
+        String searchName = searchInput.getSearchName();
+        Specification<MFAAward> mfaAwardSpecifications = Specification
+                .where(
+                        SearchUtils.checkNullOrEmptyString(searchName)
+                                ? null : MFAAwardSpecificaionUtils.mfaGroupingNameLike(searchName.trim())
+                                .or(SearchUtils.checkNullOrEmptyString(searchName)
+                                        ? null : MFAAwardSpecificaionUtils.mfaAwardNumberEquals(searchName.trim()))
+                                .or(SearchUtils.checkNullOrEmptyString(searchName)
+                                        ? null :MFAAwardSpecificaionUtils.grantingAuthorityNameEqual(searchName.trim()))
+                                .or(SearchUtils.checkNullOrEmptyString(searchName)
+                                        ? null :MFAAwardSpecificaionUtils.mfaGroupingNumberEquals(searchName.trim()))
+                );
+
+        if (withStatus) {
+            mfaAwardSpecifications = mfaAwardSpecifications.and(SearchUtils.checkNullOrEmptyString(searchInput.getStatus())
+                    ? null : MFAAwardSpecificaionUtils.mfaGroupingByStatus(searchInput.getStatus().trim()));
+        }
+        return mfaAwardSpecifications;
+    }
+
     private Map<String, Long> mfaGroupingCounts(List<MFAGrouping> mfaGroupingsList) {
         long allMfaGroupings = mfaGroupingsList.size();
         long activeMfaGroupings = 0;
@@ -256,6 +324,39 @@ public class MFAService {
         smUserActivityCount.put("allMfaGroupings", allMfaGroupings);
         smUserActivityCount.put("activeMfaGroupings", activeMfaGroupings);
         smUserActivityCount.put("deletedMfaGroupings", deletedMfaGroupings);
+        return smUserActivityCount;
+    }
+
+    private Map<String, Long> mfaAwardCounts(List<MFAAward> mfaAwardList) {
+        long allMfaAwards = mfaAwardList.size();
+        long publishedMfaAwards = 0;
+        long deletedMfaAwards = 0;
+        long rejectedMfaAwards = 0;
+        long awaitingMfaAwards = 0;
+
+        if (mfaAwardList != null && mfaAwardList.size() > 0) {
+            for (MFAAward mfaAward : mfaAwardList) {
+                if (mfaAward.getStatus().equalsIgnoreCase(AccessManagementConstant.PUBLISHED)) {
+                    publishedMfaAwards++;
+                }
+                if (mfaAward.getStatus().equalsIgnoreCase(AccessManagementConstant.DELETED)) {
+                    deletedMfaAwards++;
+                }
+                if (mfaAward.getStatus().equalsIgnoreCase(AccessManagementConstant.REJECTED)) {
+                    rejectedMfaAwards++;
+                }
+                if (mfaAward.getStatus().equalsIgnoreCase(AccessManagementConstant.AWAITING_APPROVAL)) {
+                    awaitingMfaAwards++;
+                }
+            }
+        }
+        Map<String, Long> smUserActivityCount = new HashMap<>();
+        smUserActivityCount.put("allMfaAwards", allMfaAwards);
+        smUserActivityCount.put("publishedMfaAwards", publishedMfaAwards);
+        smUserActivityCount.put("deletedMfaAwards", deletedMfaAwards);
+        smUserActivityCount.put("rejectedMfaAwards", rejectedMfaAwards);
+        smUserActivityCount.put("awaitingMfaAwards", awaitingMfaAwards);
+
         return smUserActivityCount;
     }
 
@@ -286,6 +387,27 @@ public class MFAService {
         return (root, query, builder) -> builder.equal(root.get("gaId"), gaId);
     }
 
+    public Specification<MFAAward>  getSpecificationMfaAwardsForGARoles(MfaAwardSearchInput searchInput, String gaName) {
+        String searchName = searchInput.getSearchName();
+        Specification<MFAAward> mfaAwardSpecification = Specification
+                .where(
+                        SearchUtils.checkNullOrEmptyString(searchName)
+                                ? null : MFAAwardSpecificaionUtils.mfaGroupingNameLike(searchName.trim())
+                                .or(SearchUtils.checkNullOrEmptyString(searchName)
+                                        ? null : MFAAwardSpecificaionUtils.mfaAwardNumberEquals(searchName.trim()))
+                                .or(SearchUtils.checkNullOrEmptyString(searchName)
+                                        ? null :MFAAwardSpecificaionUtils.grantingAuthorityNameEqual(searchName.trim()))
+                                .or(SearchUtils.checkNullOrEmptyString(searchName)
+                                        ? null :MFAAwardSpecificaionUtils.mfaGroupingNumberEquals(searchName.trim()))
+
+                )
+                .and(SearchUtils.checkNullOrEmptyString(gaName)
+                        ? null :MFAAwardSpecificaionUtils.grantingAuthorityNameEqual(gaName.trim()))
+                .and(SearchUtils.checkNullOrEmptyString(searchInput.getStatus())
+                        ? null :MFAAwardSpecificaionUtils.mfaGroupingByStatus(searchInput.getStatus().trim()));
+        return mfaAwardSpecification;
+    }
+
     public Specification<MFAGrouping>  getSpecificationMfaGroupingsForGARoles(MfaGroupingSearchInput searchInput, String gaName) {
         String searchName = searchInput.getSearchName();
         Specification<MFAGrouping> mfaGroupingSpecification = Specification
@@ -310,6 +432,14 @@ public class MFAService {
     }
 
     public  Specification<MFAGrouping> mfaGroupingByGa(Long gaId) {
+        return (root, query, builder) -> builder.equal(root.get("gaId"), gaId);
+    }
+
+    private Specification<MFAAward> mfaAwardByGrantingAuthority(Long gaId) {
+        return Specification.where(mfaAwardByGa(gaId));
+    }
+
+    public  Specification<MFAAward> mfaAwardByGa(Long gaId) {
         return (root, query, builder) -> builder.equal(root.get("gaId"), gaId);
     }
 
