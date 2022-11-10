@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -15,11 +16,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MFAAward {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "mfa_award_read_seq")
-    @Column(name="MFA_AWARD_NUMBER")
-    private Long mfaAwardNumber;
 
     @ManyToOne(fetch= FetchType.EAGER)
     @JoinColumn(name = "GA_ID", nullable = false, insertable = false, updatable = false)
@@ -33,17 +29,51 @@ public class MFAAward {
     @JsonIgnore
     private MFAGrouping mfaGrouping;
 
-    @Column(name = "GA_ID")
-    private Long gaId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "mfa_award_read_seq")
+    @SequenceGenerator(name = "mfa_award_read_seq", sequenceName = "mfa_award_read_seq",
+            allocationSize = 1)
+    @Column(name="MFA_AWARD_NUMBER")
+    private Long mfaAwardNumber;
+
+    @Column(name = "IS_SPEI")
+    private boolean isSPEI;
+
+    @Column(name = "HAS_MFA_GROUPING")
+    private boolean mfaGroupingPresent;
 
     @Column(name="MFA_GROUPING_NUMBER")
     private String mfaGroupingNumber;
 
-    @Column(name = "CREATED_BY")
-    private String createdBy;
+    @Column(name = "AWARD_AMOUNT")
+    private BigDecimal awardAmount;
+
+    @Column(name = "CONFIRMATION_DATE")
+    private LocalDate confirmationDate;
+
+    @Column(name = "GA_ID")
+    private Long gaId;
+
+    @Column(name = "RECIPIENT_NAME")
+    private String recipientName;
+
+    @Column(name = "RECIPIENT_ID_TYPE")
+    private String recipientIdType;
+
+    @Column(name = "RECIPIENT_ID")
+    private String recipientId;
 
     @Column(name = "STATUS")
     private String status;
+
+    @Column(name = "CREATED_BY")
+    private String createdBy;
+
+    @Column(name = "APPROVED_BY")
+    private String approvedBy;
+
+    @Column(name = "REASON")
+    private String reason;
 
     @CreationTimestamp
     @Column(name = "CREATED_TIMESTAMP")
@@ -52,13 +82,4 @@ public class MFAAward {
     @UpdateTimestamp
     @Column(name = "LAST_MODIFIED_TIMESTAMP")
     private LocalDateTime lastModifiedTimestamp;
-
-    @Column(name = "DELETED_BY")
-    private String deletedBy;
-
-    @Column(name = "DELETED_TIMESTAMP")
-    private LocalDateTime deletedTimestamp;
-
-    @Column(name = "CONFIRMATION_DATE")
-    private LocalDate confirmationDate;
 }

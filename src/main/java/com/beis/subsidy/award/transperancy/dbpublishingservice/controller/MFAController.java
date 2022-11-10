@@ -64,18 +64,25 @@ public class MFAController {
     @PostMapping(
             value = "/award/add"
     )
-    public String addMfaAward(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
+    public Long addMfaAward(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
                                  @Valid @RequestBody MFAAwardRequest mfaAwardRequest) throws JsonProcessingException {
         log.info("{} :: inside addSchemeDetails method",loggingComponentName);
 
         String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
         UserPrinciple userPrincipleObj = objectMapper.readValue(userPrincipleStr, UserPrinciple.class);
-        String mfaAwardNumber = mfaService.addMfaAward(mfaAwardRequest, userPrincipleObj);
 
-        if (mfaAwardNumber != null && mfaAwardNumber != ""){
+        if(PermissionUtils.userHasRole(userPrincipleObj, AccessManagementConstant.GA_ENCODER_ROLE)){
+            mfaAwardRequest.setStatus("Awaiting Approval");
+        }else{
+            mfaAwardRequest.setStatus("Published");
+        }
+
+        Long mfaAwardNumber = mfaService.addMfaAward(mfaAwardRequest, userPrincipleObj);
+
+        if (mfaAwardNumber != null){
             StringBuilder eventMsg = new StringBuilder("MFA award ").append(mfaAwardNumber).append(" has been created.");
 
-            ExcelHelper.saveAuditLogForUpdate(userPrincipleObj, "Update MFA Award", mfaAwardNumber
+            ExcelHelper.saveAuditLogForUpdate(userPrincipleObj, "Update MFA Award", String.valueOf(mfaAwardNumber)
                     ,eventMsg.toString(),auditLogsRepository);
         }
         return mfaAwardNumber;

@@ -5,8 +5,10 @@ import com.beis.subsidy.award.transperancy.dbpublishingservice.exception.Invalid
 import com.beis.subsidy.award.transperancy.dbpublishingservice.exception.SearchResultNotFoundException;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.exception.UnauthorisedAccessException;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.GrantingAuthority;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.model.MFAAward;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.MFAGrouping;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.GrantingAuthorityRepository;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.MFAAwardRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.MFAGroupingRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.request.MFAAwardRequest;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.request.MFAGroupingRequest;
@@ -14,10 +16,12 @@ import com.beis.subsidy.award.transperancy.dbpublishingservice.request.MfaAwardS
 import com.beis.subsidy.award.transperancy.dbpublishingservice.request.MfaGroupingSearchInput;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.util.AccessManagementConstant;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.util.MFAGroupingSpecificaionUtils;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.util.PermissionUtils;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.util.SearchUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +29,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Slf4j
@@ -36,7 +42,17 @@ public class MFAService {
     private MFAGroupingRepository mfaGroupingRepository;
 
     @Autowired
+    private MFAAwardRepository mfaAwardRepository;
+
+    @Autowired
     private GrantingAuthorityRepository gaRepository;
+
+    @Value("${loggingComponentName}")
+    private String loggingComponentName;
+
+    private LocalDate convertToLocalDate(String incomingDate) {
+        return LocalDate.parse(incomingDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+    }
 
     public String addMfaGrouping(MFAGroupingRequest mfaGroupingRequest, UserPrinciple userPrinciple) {
         MFAGrouping mfaGroupingToSave = new MFAGrouping();
@@ -72,8 +88,69 @@ public class MFAService {
         return savedMfaGrouping.getMfaGroupingNumber();
     }
 
-    public String addMfaAward(MFAAwardRequest mfaAwardRequest, UserPrinciple userPrincipleObj) {
-        return "";
+    public Long addMfaAward(MFAAwardRequest mfaAwardRequest, UserPrinciple userPrinciple) {
+        MFAAward mfaAwardToSave = new MFAAward();
+
+        mfaAwardToSave.setSPEI(mfaAwardRequest.isSpeiAssistance());
+        mfaAwardToSave.setMfaGroupingPresent(mfaAwardRequest.isMfaGroupingPresent());
+
+        if(mfaAwardRequest.isMfaGroupingPresent() && !StringUtils.isEmpty(mfaAwardRequest.getMfaGroupingId())){
+            mfaAwardToSave.setMfaGroupingNumber(mfaAwardRequest.getMfaGroupingId());
+            MFAGrouping mfaGrouping = mfaGroupingRepository.findByMfaGroupingNumber(mfaAwardRequest.getMfaGroupingId());
+            if(mfaGrouping != null){
+                mfaAwardToSave.setMfaGrouping(mfaGrouping);
+            }
+        }
+
+        if(mfaAwardRequest.getAwardFullAmount() != null){
+            mfaAwardToSave.setAwardAmount(mfaAwardRequest.getAwardFullAmount());
+        }
+
+        if(!StringUtils.isEmpty(mfaAwardRequest.getConfirmationDate()) && mfaAwardRequest.getConfirmationDate() != null){
+            mfaAwardToSave.setConfirmationDate(convertToLocalDate(mfaAwardRequest.getConfirmationDate()));
+        }
+
+        if (!StringUtils.isEmpty(mfaAwardRequest.getGrantingAuthorityName())) {
+            GrantingAuthority grantingAuthority = gaRepository.findByGrantingAuthorityName(mfaAwardRequest.getGrantingAuthorityName().trim());
+
+            log.error("{} :: Granting Authority and GAName ::{}", grantingAuthority, mfaAwardRequest.getGrantingAuthorityName());
+
+            if (Objects.isNull(grantingAuthority) ||
+                    "Inactive".equals(grantingAuthority.getStatus())) {
+
+                log.error("{} :: Granting Authority is Inactive for the scheme");
+                throw new InvalidRequestException("Granting Authority is Inactive");
+            }
+            mfaAwardToSave.setGaId(grantingAuthority.getGaId());
+        }
+
+        if(!StringUtils.isEmpty(mfaAwardRequest.getBeneficiaryName()) && mfaAwardRequest.getBeneficiaryName() != null){
+            mfaAwardToSave.setRecipientName(mfaAwardRequest.getBeneficiaryName());
+        }
+
+        if(!StringUtils.isEmpty(mfaAwardRequest.getNationalIdType()) && mfaAwardRequest.getNationalIdType() != null){
+            mfaAwardToSave.setRecipientIdType(mfaAwardRequest.getNationalIdType());
+        }
+
+        if(!StringUtils.isEmpty(mfaAwardRequest.getNationalIdNumber()) && mfaAwardRequest.getNationalIdNumber() != null){
+            mfaAwardToSave.setRecipientId(mfaAwardRequest.getNationalIdNumber());
+        }
+
+        if (!StringUtils.isEmpty(mfaAwardRequest.getStatus())) {
+            mfaAwardToSave.setStatus(mfaAwardRequest.getStatus());
+        }
+
+        if(!PermissionUtils.userHasRole(userPrinciple, AccessManagementConstant.GA_ENCODER_ROLE)){
+            mfaAwardToSave.setApprovedBy(userPrinciple.getUserName());
+        }
+
+        mfaAwardToSave.setCreatedBy(userPrinciple.getUserName());
+        mfaAwardToSave.setCreatedTimestamp(LocalDateTime.now());
+        mfaAwardToSave.setLastModifiedTimestamp(LocalDateTime.now());
+
+        MFAAward savedMfaAward = mfaAwardRepository.save(mfaAwardToSave);
+
+        return savedMfaAward.getMfaAwardNumber();
     }
 
     public MFAGroupingsResponse findMatchingMfaGroupingDetails(MfaGroupingSearchInput searchInput, UserPrinciple userPriniciple) {
