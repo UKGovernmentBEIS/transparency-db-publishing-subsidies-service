@@ -468,57 +468,6 @@ public class AddAwardServiceTest {
 	}
 
 	@Test
-	public void testStandaloneAwardDescriptionMissingErrors() throws ParseException{
-		Beneficiary beneficiary = mock(Beneficiary.class);
-		UserPrinciple upMock = mock(UserPrinciple.class);
-		List<GrantingAuthority> gaList = new ArrayList<GrantingAuthority>();
-		List<SubsidyMeasure> smList = new ArrayList<>();
-		List<BulkUploadAwards> awardList = new ArrayList<>();
-		awardInputRequest.setStandaloneAward("Yes");
-		awardInputRequest.setSubsidyAwardDescription("");
-
-		List<SubsidyMeasure> submList = new ArrayList<>();
-		SubsidyMeasure sub = new SubsidyMeasure();
-		sub.setSubsidyMeasureTitle("AHDB Generic Promotional Measures scheme");
-		sub.setScNumber("SC10000");
-		smList.add(sub);
-		SubsidyMeasure subsidy = new SubsidyMeasure();
-		subsidy.setSubsidyMeasureTitle("AHDB Generic Promotional Measures scheme");
-		subsidy.setScNumber("SC10000");
-		submList.add(subsidy);
-		GrantingAuthority ga = new GrantingAuthority();
-		ga.setGaId(Long.valueOf(1));
-		ga.setGrantingAuthorityName("BEIS");
-		ga.setStatus("Active");
-		gaList.add(ga);
-		Award expectedAward = new Award();
-		Award saveAward = new Award();
-		beneficiary.setBeneficiaryName("testName");
-		expectedAward.setApprovedBy("test");
-		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
-		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
-		when(gRepo.findByGrantingAuthorityName(anyString())).thenReturn(ga);
-		when(smRepository.findAll()).thenReturn(smList);
-
-		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
-		expectedResult.setTotalErrors(1);
-		expectedResult.setMessage("validation error");
-		String role = "Granting Authority Administrator";
-		when(awardServiceMock.getAllSubsidyMeasures()).thenReturn(submList);
-
-		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
-
-		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest,upMock,"role");
-
-		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
-		assertThat(results.getMessage()).isEqualTo(expectedResult.getMessage());
-		for (int i = 0; i < expectedResult.getTotalErrors(); i++){
-			assertThat(results.getValidationErrorResult().get(i).getColumn()).isEqualTo("subsidyAwardDescription");
-			assertThat(results.getValidationErrorResult().get(i).getMessage()).isEqualTo("You must provide the description for a standalone award.");
-		}
-	}
-
-	@Test
 	public void testStandaloneAwardDescriptionLengthErrors() throws ParseException{
 		Beneficiary beneficiary = mock(Beneficiary.class);
 		UserPrinciple upMock = mock(UserPrinciple.class);
