@@ -233,11 +233,6 @@ public class AddAwardService {
 		 */
 		List<SingleAwardValidationResult> errorList = new ArrayList<>();
 		if(award.getStandaloneAward() != null && award.getStandaloneAward().equalsIgnoreCase("yes") &&
-				(StringUtils.isEmpty(award.getSubsidyAwardDescription()) || award.getSubsidyAwardDescription() == null)){
-			errorList.add(new SingleAwardValidationResult("subsidyAwardDescription","You must provide the description for a standalone award."));
-		}
-
-		if(award.getStandaloneAward() != null && award.getStandaloneAward().equalsIgnoreCase("yes") &&
 				(award.getSubsidyAwardDescription() != null) && award.getSubsidyAwardDescription().length() > 2000){
 			errorList.add(new SingleAwardValidationResult("subsidyAwardDescription","The subsidy award description must be 2000 characters or less."));
 		}
