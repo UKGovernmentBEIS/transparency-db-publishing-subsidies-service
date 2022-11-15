@@ -25,8 +25,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.util.NumberUtils;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -366,8 +364,9 @@ public class MFAService {
     }
 
     public String updateMfaGrouping(MFAGroupingRequest mfaGroupingRequest, String mfaGroupingNumber, UserPrinciple userPrincipleObj) {
-        log.info("Inside updateMfaGrouping method - group number " + mfaGroupingRequest.getMfaGroupingNumber());
+        log.info("Inside updateMfaGrouping method - group number " + mfaGroupingNumber);
         MFAGrouping mfaGroupingById = mfaGroupingRepository.findById(mfaGroupingNumber).get();
+        Boolean isBeingDeleted = false;
 
         if(!StringUtils.isEmpty(mfaGroupingRequest.getMfaGroupingName())){
             mfaGroupingById.setMfaGroupingName(mfaGroupingRequest.getMfaGroupingName());
@@ -378,17 +377,45 @@ public class MFAService {
             if(mfaGroupingRequest.getStatus().equalsIgnoreCase("deleted")){
                 mfaGroupingById.setDeletedBy(userPrincipleObj.getUserName());
                 mfaGroupingById.setDeletedTimestamp(LocalDateTime.now());
+                isBeingDeleted = true;
             }
         }
 
         mfaGroupingById.setLastModifiedTimestamp(LocalDateTime.now());
 
         MFAGrouping updatedMfaGrouping = mfaGroupingRepository.save(mfaGroupingById);
+        if(isBeingDeleted){
+            // remove mfa grouping association from mfa awards
+            List<String> mfaAwardList = removeMfaGroupingAssociation(mfaGroupingNumber);
+            String message = "";
+            if(mfaAwardList.size() == 0){
+                message = "No MFA grouping associations found to remove for MFA Grouping " + mfaGroupingNumber;
+            }else{
+                message = "Removed MFA Grouping " + mfaGroupingNumber + " from the following awards: " + mfaAwardList.toString();
+            }
+            log.info(message);
+        }
         log.info("Updated successfully : ");
         return updatedMfaGrouping.getMfaGroupingNumber();
     }
 
-    public  Specification<MFAGrouping> mfaGroupingByGaId(Long gaId) {
+    private List<String> removeMfaGroupingAssociation(String mfaGroupNumber){
+        List<MFAAward> mfaAwards = mfaAwardRepository.findByMfaGroupingNumber(mfaGroupNumber);
+        List<String> mfaAwardList = new ArrayList<>();
+
+        mfaAwards.forEach(mfaAward -> {
+            mfaAward.setMfaGroupingNumber(null);
+            mfaAward.setMfaGroupingPresent(false);
+            mfaAwardList.add(mfaAward.getMfaAwardNumber().toString());
+        });
+
+        if(mfaAwards.size() > 0){
+            mfaAwardRepository.saveAll(mfaAwards);
+        }
+        return mfaAwardList;
+    }
+
+    public Specification<MFAGrouping> mfaGroupingByGaId(Long gaId) {
         return (root, query, builder) -> builder.equal(root.get("gaId"), gaId);
     }
 
