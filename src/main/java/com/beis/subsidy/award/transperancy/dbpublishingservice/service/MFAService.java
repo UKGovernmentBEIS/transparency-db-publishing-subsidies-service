@@ -25,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.NumberUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -139,6 +140,10 @@ public class MFAService {
 
         if(!PermissionUtils.userHasRole(userPrinciple, AccessManagementConstant.GA_ENCODER_ROLE)){
             mfaAwardToSave.setApprovedBy(userPrinciple.getUserName());
+        }
+
+        if(mfaAwardToSave.getStatus().equalsIgnoreCase("published")){
+            mfaAwardToSave.setPublishedDate(LocalDate.now());
         }
 
         mfaAwardToSave.setCreatedBy(userPrinciple.getUserName());
@@ -260,7 +265,7 @@ public class MFAService {
         return mfaAwardsResponse;
     }
 
-    public MFAGroupingResponse findSubsidySchemeById(String mfaGroupingNumber) {
+    public MFAGroupingResponse findMfaGroupingById(String mfaGroupingNumber) {
         MFAGrouping mfaGrouping = mfaGroupingRepository.findById(mfaGroupingNumber).get();
         return new MFAGroupingResponse(mfaGrouping);
     }
@@ -361,7 +366,7 @@ public class MFAService {
     }
 
     public String updateMfaGrouping(MFAGroupingRequest mfaGroupingRequest, String mfaGroupingNumber, UserPrinciple userPrincipleObj) {
-        log.info("Inside updateSubsidySchemeDetails method - sc number " + mfaGroupingRequest.getMfaGroupingNumber());
+        log.info("Inside updateMfaGrouping method - group number " + mfaGroupingRequest.getMfaGroupingNumber());
         MFAGrouping mfaGroupingById = mfaGroupingRepository.findById(mfaGroupingNumber).get();
 
         if(!StringUtils.isEmpty(mfaGroupingRequest.getMfaGroupingName())){
@@ -449,5 +454,89 @@ public class MFAService {
             return gaObj.getGaId();
         }
         return null;
+    }
+
+    public MFAAwardResponse findMfaAwardById(Long mfaAwardNumber) {
+        MFAAward mfaAward = mfaAwardRepository.findByMfaAwardNumber(mfaAwardNumber);
+        return new MFAAwardResponse(mfaAward);
+    }
+
+    public Long updateMfaAward(MFAAwardRequest mfaAwardRequest, Long awardNumber, UserPrinciple userPrinciple) {
+        log.info("Inside updateMfaAward method - award number " + mfaAwardRequest.getMfaAwardNumber());
+        MFAAward mfaAwardById = mfaAwardRepository.findByMfaAwardNumber(awardNumber);
+
+        mfaAwardById.setSPEI(mfaAwardRequest.isSpeiAssistance());
+
+        mfaAwardById.setMfaGroupingPresent(mfaAwardRequest.isMfaGroupingPresent());
+
+        if(mfaAwardRequest.isMfaGroupingPresent()){
+            if(!StringUtils.isEmpty(mfaAwardRequest.getMfaGroupingId())){
+                mfaAwardById.setMfaGroupingNumber(mfaAwardRequest.getMfaGroupingId());
+                MFAGrouping mfaGrouping = mfaGroupingRepository.findByMfaGroupingNumber(mfaAwardRequest.getMfaGroupingId());
+                if(mfaGrouping != null){
+                    mfaAwardById.setMfaGrouping(mfaGrouping);
+                }
+            }
+        }
+
+        if(mfaAwardRequest.getAwardFullAmount() != null){
+            mfaAwardById.setAwardAmount(mfaAwardRequest.getAwardFullAmount());
+        }
+
+        if(!StringUtils.isEmpty(mfaAwardRequest.getConfirmationDate()) && mfaAwardRequest.getConfirmationDate() != null){
+            mfaAwardById.setConfirmationDate(convertToLocalDate(mfaAwardRequest.getConfirmationDate()));
+        }
+
+        if (!StringUtils.isEmpty(mfaAwardRequest.getGrantingAuthorityName())) {
+            GrantingAuthority grantingAuthority = gaRepository.findByGrantingAuthorityName(mfaAwardRequest.getGrantingAuthorityName().trim());
+
+            log.error("{} :: Granting Authority and GAName ::{}", grantingAuthority, mfaAwardRequest.getGrantingAuthorityName());
+
+            if (Objects.isNull(grantingAuthority) ||
+                    "Inactive".equals(grantingAuthority.getStatus())) {
+
+                log.error("{} :: Granting Authority is Inactive for the scheme");
+                throw new InvalidRequestException("Granting Authority is Inactive");
+            }
+            mfaAwardById.setGaId(grantingAuthority.getGaId());
+        }
+
+        if(!StringUtils.isEmpty(mfaAwardRequest.getBeneficiaryName()) && mfaAwardRequest.getBeneficiaryName() != null){
+            mfaAwardById.setRecipientName(mfaAwardRequest.getBeneficiaryName());
+        }
+
+        if(!StringUtils.isEmpty(mfaAwardRequest.getNationalIdType()) && mfaAwardRequest.getNationalIdType() != null){
+            mfaAwardById.setRecipientIdType(mfaAwardRequest.getNationalIdType());
+        }
+
+        if(!StringUtils.isEmpty(mfaAwardRequest.getNationalIdNumber()) && mfaAwardRequest.getNationalIdNumber() != null){
+            mfaAwardById.setRecipientId(mfaAwardRequest.getNationalIdNumber());
+        }
+
+        // only update the status if it's changed
+        if (!StringUtils.isEmpty(mfaAwardRequest.getStatus()) && !mfaAwardRequest.getStatus().equalsIgnoreCase(mfaAwardById.getStatus())) {
+            if(mfaAwardRequest.getStatus().equalsIgnoreCase("published") && mfaAwardById.getStatus().equalsIgnoreCase("awaiting approval")){
+                mfaAwardById.setApprovedBy(userPrinciple.getUserName());
+                mfaAwardById.setPublishedDate(LocalDate.now());
+            }
+            mfaAwardById.setStatus(mfaAwardRequest.getStatus());
+
+            if(mfaAwardRequest.getStatus().equalsIgnoreCase("deleted")){
+                mfaAwardById.setDeletedBy(userPrinciple.getUserName());
+                mfaAwardById.setDeletedTimestamp(LocalDateTime.now());
+            }
+
+            if (!StringUtils.isEmpty(mfaAwardRequest.getStatus())
+                    && (mfaAwardRequest.getStatus().equalsIgnoreCase("rejected") || mfaAwardRequest.getStatus().equalsIgnoreCase("deleted"))
+                    && !StringUtils.isEmpty(mfaAwardRequest.getReason())){
+                mfaAwardById.setReason(mfaAwardRequest.getReason());
+            }
+        }
+
+        mfaAwardById.setLastModifiedTimestamp(LocalDateTime.now());
+
+        MFAAward updatedMfaAward = mfaAwardRepository.save(mfaAwardById);
+        log.info("Updated successfully : ");
+        return updatedMfaAward.getMfaAwardNumber();
     }
 }

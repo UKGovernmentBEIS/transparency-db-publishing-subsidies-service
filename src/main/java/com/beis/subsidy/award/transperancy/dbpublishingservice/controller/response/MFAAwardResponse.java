@@ -6,12 +6,14 @@ import com.beis.subsidy.award.transperancy.dbpublishingservice.util.SearchUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MFAAwardResponse {
 
@@ -34,7 +36,13 @@ public class MFAAwardResponse {
     private String awardAmount;
 
     @JsonProperty
+    private String awardAmountFormatted;
+
+    @JsonProperty
     private String confirmationDate;
+
+    @JsonProperty
+    private String publishedDate;
 
     @JsonProperty
     private String grantingAuthorityName;
@@ -72,6 +80,9 @@ public class MFAAwardResponse {
     @JsonProperty
     private String deletedTimestamp;
 
+    @JsonProperty
+    private Boolean canApprove;
+
     public MFAAwardResponse(MFAAward mfaAward){
         this.mfaAwardNumber = mfaAward.getMfaAwardNumber();
         this.isSpeiAssistance = mfaAward.isSPEI() ? "Yes" : "No";
@@ -79,8 +90,11 @@ public class MFAAwardResponse {
         if (mfaAward.isMfaGroupingPresent()){
             this.mfaGroupingNumber = mfaAward.getMfaGroupingNumber();
             this.mfaGroupingResponse = new MFAGroupingResponse(mfaAward.getMfaGrouping());
+        }else{
+            this.mfaGroupingNumber = "NA";
         }
-        this.awardAmount = SearchUtils.decimalNumberFormat(mfaAward.getAwardAmount());
+        this.awardAmount = mfaAward.getAwardAmount().toString();
+        this.awardAmountFormatted = SearchUtils.decimalNumberFormat(mfaAward.getAwardAmount());
         this.confirmationDate = SearchUtils.dateToFullMonthNameInDate(mfaAward.getConfirmationDate());
         this.grantingAuthorityName = mfaAward.getGrantingAuthority().getGrantingAuthorityName();
         this.recipientName = mfaAward.getRecipientName();
@@ -96,5 +110,11 @@ public class MFAAwardResponse {
         if(mfaAward.getDeletedTimestamp() != null) {
             this.deletedTimestamp = SearchUtils.dateTimeToFullMonthNameInDate(mfaAward.getDeletedTimestamp());
         }
+        if ("Awaiting Approval".equals(this.status)) {
+            this.publishedDate = "Awaiting Approval";
+        } else {
+            this.publishedDate = SearchUtils.dateToFullMonthNameInDate(mfaAward.getPublishedDate());
+        }
+        this.canApprove = false;
     }
 }

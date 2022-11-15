@@ -20,4 +20,5 @@ public class MFAAwardRequest {
     private String nationalIdType;
     private String nationalIdNumber;
     private String status;
+    private String reason;
 }

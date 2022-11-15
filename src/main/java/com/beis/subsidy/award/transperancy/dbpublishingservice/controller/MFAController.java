@@ -1,12 +1,11 @@
 package com.beis.subsidy.award.transperancy.dbpublishingservice.controller;
 
-import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.MFAAwardsResponse;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.MFAGroupingResponse;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.MFAGroupingsResponse;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.UserPrinciple;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.*;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.exception.InvalidRequestException;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.model.MFAAward;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.MFAGrouping;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AuditLogsRepository;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.MFAAwardRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.MFAGroupingRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.request.MFAAwardRequest;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.request.MFAGroupingRequest;
@@ -49,6 +48,9 @@ public class MFAController {
     private MFAGroupingRepository mfaGroupingRepository;
 
     @Autowired
+    private MFAAwardRepository mfaAwardRepository;
+
+    @Autowired
     AuditLogsRepository auditLogsRepository;
 
     @Autowired
@@ -86,6 +88,92 @@ public class MFAController {
                     ,eventMsg.toString(),auditLogsRepository);
         }
         return mfaAwardNumber;
+    }
+
+    @GetMapping(
+            value = "/award/{mfaAwardNumber}",
+            produces = APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<MFAAwardResponse> findMfaAward(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
+                                                         @PathVariable("mfaAwardNumber") String mfaAwardNumber) {
+        UserPrinciple userPrincipleObj = SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"find MFA award");
+        if (StringUtils.isEmpty(mfaAwardNumber)) {
+            throw new InvalidRequestException("Bad Request MFA Award is null");
+        }
+
+        if(!ExcelHelper.isNumeric(mfaAwardNumber)){
+            return new ResponseEntity<MFAAwardResponse>(new MFAAwardResponse(), HttpStatus.NOT_FOUND);
+        }
+
+        Long awardNumber = Long.parseLong(mfaAwardNumber);
+
+        MFAAwardResponse mfaAwardById = mfaService.findMfaAwardById(awardNumber);
+        MFAAward mfaAward = mfaAwardRepository.findByMfaAwardNumber(mfaAwardById.getMfaAwardNumber());
+
+        if (PermissionUtils.userHasRole(userPrincipleObj, AccessManagementConstant.BEIS_ADMIN_ROLE) ||
+                (PermissionUtils.userHasRole(userPrincipleObj, AccessManagementConstant.GA_ADMIN_ROLE) && PermissionUtils.userPrincipleContainsId(userPrinciple, mfaAward.getGrantingAuthority().getAzureGroupId()))
+        ){
+            mfaAwardById.setCanApprove(true);
+        }
+
+        return new ResponseEntity<MFAAwardResponse>(mfaAwardById, HttpStatus.OK);
+    }
+
+    @PutMapping(
+            value="/award/update/{mfaAwardNumber}"
+    )
+    public String updateMfaAwardDetails(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
+                                      @RequestBody MFAAwardRequest mfaAwardRequest,
+                                      @PathVariable("mfaAwardNumber") String mfaAwardNumber,
+                                      HttpServletResponse response) {
+
+        log.info("{} ::Before calling updateMfaGrouping", loggingComponentName);
+        if(Objects.isNull(mfaAwardRequest)|| StringUtils.isEmpty(mfaAwardNumber)) {
+            throw new InvalidRequestException("schemeReq is empty or scNumber");
+        }
+
+        if(!ExcelHelper.isNumeric(mfaAwardNumber)){
+            throw new InvalidRequestException("award number should be numeric");
+        }
+
+        Long awardNumber = Long.parseLong(mfaAwardNumber);
+
+        UserPrinciple userPrincipleObj = SearchUtils.isAllRolesValidation(objectMapper, userPrinciple,"update MFA award");
+        MFAAward mfaAward = mfaAwardRepository.findByMfaAwardNumber(awardNumber);
+        // if user not BEIS Admin then ensure that they belong to the GA that owns the MFA Grouping;
+        if (!PermissionUtils.userHasRole(userPrincipleObj, AccessManagementConstant.BEIS_ADMIN_ROLE)) {
+            if(!PermissionUtils.userPrincipleContainsId(userPrinciple, mfaAward.getGrantingAuthority().getAzureGroupId())){
+                response.setStatus(403);
+                log.error("User " + userPrincipleObj.getUserName() + " does not have the rights to update MFA award: " + awardNumber);
+                return null;
+            }
+        }
+
+        StringBuilder eventMsg = new StringBuilder("");
+
+        // if the mfa award status has changed.
+        if(!mfaAwardRequest.getStatus().equalsIgnoreCase(mfaAward.getStatus())){
+            eventMsg = new StringBuilder("MFA award ").append(awardNumber).append(" is updated to ")
+                    .append(mfaAwardRequest.getStatus());
+            if(mfaAwardRequest.getStatus().equalsIgnoreCase("deleted")) {
+                if (!PermissionUtils.userHasRole(userPrincipleObj, AccessManagementConstant.BEIS_ADMIN_ROLE)
+                        && !PermissionUtils.userHasRole(userPrincipleObj, AccessManagementConstant.GA_ADMIN_ROLE)) {
+                    response.setStatus(403);
+                    log.error("User " + userPrincipleObj.getUserName() + " does not have the rights to delete MFA grouping: " + awardNumber);
+                    return null;
+                }
+            }
+        }else{
+            eventMsg = new StringBuilder("MFA award ").append(awardNumber).append(" has been updated.");
+        }
+
+        Long mfaAwardUpdateResponse = mfaService.updateMfaAward(mfaAwardRequest, awardNumber, userPrincipleObj);
+
+        ExcelHelper.saveAuditLogForUpdate(userPrincipleObj, "Update MFA Award", mfaAwardUpdateResponse.toString()
+                ,eventMsg.toString(),auditLogsRepository);
+        log.info("{} ::end of calling updateMfaGrouping", loggingComponentName);
+
+        return mfaAwardUpdateResponse.toString();
     }
 
     @PostMapping(
@@ -152,7 +240,7 @@ public class MFAController {
         if (StringUtils.isEmpty(mfaGroupingNumber)) {
             throw new InvalidRequestException("Bad Request SC Number is null");
         }
-        MFAGroupingResponse mfaGroupingById = mfaService.findSubsidySchemeById(mfaGroupingNumber);
+        MFAGroupingResponse mfaGroupingById = mfaService.findMfaGroupingById(mfaGroupingNumber);
         MFAGrouping mfaGrouping = mfaGroupingRepository.findByMfaGroupingNumber(mfaGroupingById.getMfaGroupingNumber());
 
         if (PermissionUtils.userHasRole(userPrincipleObj, AccessManagementConstant.BEIS_ADMIN_ROLE) ||
@@ -168,7 +256,7 @@ public class MFAController {
     @PutMapping(
             value="/grouping/update/{mfaGroupingNumber}"
     )
-    public String updateSchemeDetails(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
+    public String updateMfaGroupingDetails(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
                                       @RequestBody MFAGroupingRequest mfaGroupingRequest,
                                       @PathVariable("mfaGroupingNumber") String mfaGroupingNumber,
                                       HttpServletResponse response) {

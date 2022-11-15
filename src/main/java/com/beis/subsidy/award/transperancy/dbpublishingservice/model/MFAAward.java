@@ -51,6 +51,9 @@ public class MFAAward {
     @Column(name = "CONFIRMATION_DATE")
     private LocalDate confirmationDate;
 
+    @Column(name = "PUBLISHED_DATE")
+    private LocalDate publishedDate;
+
     @Column(name = "GA_ID")
     private Long gaId;
 
