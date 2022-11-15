@@ -7,6 +7,7 @@ import com.beis.subsidy.award.transperancy.dbpublishingservice.exception.Unautho
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.GrantingAuthority;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.MFAAward;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.MFAGrouping;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AuditLogsRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.GrantingAuthorityRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.MFAAwardRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.MFAGroupingRepository;
@@ -39,6 +40,9 @@ public class MFAService {
 
     @Autowired
     private MFAAwardRepository mfaAwardRepository;
+
+    @Autowired
+    AuditLogsRepository auditLogsRepository;
 
     @Autowired
     private GrantingAuthorityRepository gaRepository;
@@ -391,7 +395,9 @@ public class MFAService {
             if(mfaAwardList.size() == 0){
                 message = "No MFA grouping associations found to remove for MFA Grouping " + mfaGroupingNumber;
             }else{
-                message = "Removed MFA Grouping " + mfaGroupingNumber + " from the following awards: " + mfaAwardList.toString();
+                message = "Grouping " + mfaGroupingNumber + " removed from:" + mfaAwardList.toString();
+                ExcelHelper.saveAuditLogForUpdate(userPrincipleObj, "Update MFA Award", mfaGroupingNumber
+                        ,message,auditLogsRepository);
             }
             log.info(message);
         }
