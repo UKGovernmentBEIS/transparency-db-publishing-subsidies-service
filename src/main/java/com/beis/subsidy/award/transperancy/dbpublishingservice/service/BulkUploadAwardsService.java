@@ -4,10 +4,8 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.List;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -129,14 +127,16 @@ public class BulkUploadAwardsService {
 			 */
 
 			List<ValidationErrorResult> SubsidyInstrumentErrorList = validateSubsidyInstrument(bulkUploadAwards);
-			
+
+			List<ValidationErrorResult> SubsidyTaxRangeAmountErrorList = validateSubsidyAmountRange(bulkUploadAwards);
+
 			// Merge lists of Validation Errors
 			List<ValidationErrorResult> validationErrorResultList = Stream
 					.of(scNumberNameCheckList, subsidyMeasureTitleNameLengthList, subsidyPurposeCheckList,
 							nationalIdTypeMissingList, nationalIdMissingList, beneficiaryNameErrorList,
 							subsidyControlNumberLengthList, subsidyControlNumberMismatchList,
 							grantingAuthorityNameErrorList, grantingAuthorityErrorList, sizeOfOrgErrorList,
-							spendingRegionErrorList, spendingSectorErrorList, goodsOrServiceErrorList,SubsidyInstrumentErrorList,legalGrantingDateErrorList,SubsidyElementFullAmountErrorList)
+							spendingRegionErrorList, spendingSectorErrorList, goodsOrServiceErrorList,SubsidyInstrumentErrorList,SubsidyTaxRangeAmountErrorList,legalGrantingDateErrorList,SubsidyElementFullAmountErrorList)
 					.flatMap(x -> x.stream()).collect(Collectors.toList());
 
 			log.info("Final validation errors list ...printing list of errors - start");
@@ -399,17 +399,74 @@ public class BulkUploadAwardsService {
 				.collect(Collectors.toList());
 		}
 		List<BulkUploadAwards> SubsidyInstrumentTaxErrorRecordsList = bulkUploadAwards.stream()
-				.filter(award -> ((award.getSubsidyInstrument()!=null && award.getSubsidyInstrument().startsWith("Tax"))&&
-						(award.getSubsidyAmountRange()==null || StringUtils.isEmpty(award.getSubsidyAmountRange())))).collect(Collectors.toList());
+				.filter(award -> ((award.getSubsidyInstrument()!=null && award.getSubsidyInstrument().startsWith("Tax"))&& (award.getSubsidyAmountRange()==null ||
+						StringUtils.isEmpty(award.getSubsidyAmountRange())) && (award.getSubsidyAmountExact()!=null ||
+						!StringUtils.isEmpty(award.getSubsidyAmountExact())))).collect(Collectors.toList());
 		
 		if(SubsidyInstrumentTaxErrorRecordsList.size() > 0) {
 		validationSubsidyInstrumentErrorListResultList = SubsidyInstrumentTaxErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "G",
-						"For tax measure subsidies, the amount must be 0. You can select a subsidy range instead in column G."))
+						"For tax measure subsidies, the full element amount must be 0. You can input a subsidy range instead in column G."))
 				.collect(Collectors.toList());
 		}
 
 		return validationSubsidyInstrumentErrorListResultList;
+	}
+
+
+	private List<ValidationErrorResult> validateSubsidyAmountRange(List<BulkUploadAwards> bulkUploadAwards){
+
+		List<ValidationErrorResult> validationTaxRangeAmountErrorResultList = new ArrayList<>();
+
+		List<BulkUploadAwards> SubsidyTaxRangeAmountErrorList = bulkUploadAwards.stream()
+				.filter(award -> ((award.getSubsidyInstrument()!=null && award.getSubsidyInstrument().startsWith("Tax"))&&
+						(award.getSubsidyAmountRange() == null || StringUtils.isEmpty(award.getSubsidyAmountRange()))&&
+						(award.getSubsidyAmountExact() == null || StringUtils.isEmpty(award.getSubsidyAmountExact())))).collect(Collectors.toList());
+
+		if(SubsidyTaxRangeAmountErrorList.size() > 0) {
+			validationTaxRangeAmountErrorResultList = SubsidyTaxRangeAmountErrorList.stream()
+					.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "G",
+							"For tax measure subsidies, the tax range amount is mandatory"))
+					.collect(Collectors.toList());
+		}
+
+		List<BulkUploadAwards> SubsidyInstrumentTaxAmountRangeNotNumericError = bulkUploadAwards.stream()
+				.filter(award -> (award.getSubsidyAmountRange() == null ||
+						(((!ExcelHelper.isNumeric(award.getSubsidyAmountRange().split("-")[0]) ||
+								!ExcelHelper.isNumeric(award.getSubsidyAmountRange().split("-")[1])))
+						))).collect(Collectors.toList());
+
+		if(SubsidyInstrumentTaxAmountRangeNotNumericError.size() > 0) {
+			validationTaxRangeAmountErrorResultList = SubsidyInstrumentTaxAmountRangeNotNumericError.stream()
+					.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "G",
+							"For tax measure subsidies, the tax range amount must be in the format of a number range. The values must be numeric and separated by a '-'"))
+					.collect(Collectors.toList());
+		}
+
+		List<BulkUploadAwards> SubsidyInstrumentTaxAmountRangeError = bulkUploadAwards.stream()
+				.filter(award -> (award.getSubsidyAmountRange() == null || (((award.getSubsidyAmountRange()).split("-")).length) != 2)).collect(Collectors.toList());
+
+		if(SubsidyInstrumentTaxAmountRangeError.size() > 0) {
+			validationTaxRangeAmountErrorResultList = SubsidyInstrumentTaxAmountRangeError.stream()
+					.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "G",
+							"For tax measure subsidies, the tax range amount must be in the format of a number range. For example, 0-100000 or 100001-300000"))
+					.collect(Collectors.toList());
+		}
+
+		List<BulkUploadAwards> SubsidyInstrumentTaxAmountRangeInvalidError = bulkUploadAwards.stream()
+				.filter(award -> (award.getSubsidyAmountRange() == null ||
+						(((Integer.parseInt(award.getSubsidyAmountRange().split("-")[0]) >
+								Integer.parseInt(award.getSubsidyAmountRange().split("-")[1])))
+						))).collect(Collectors.toList());
+
+		if(SubsidyInstrumentTaxAmountRangeInvalidError.size() > 0) {
+			validationTaxRangeAmountErrorResultList = SubsidyInstrumentTaxAmountRangeInvalidError.stream()
+					.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "G",
+							"STOP MESSING THINGS UP"))
+					.collect(Collectors.toList());
+		}
+
+		return validationTaxRangeAmountErrorResultList;
 	}
  
 	/*
