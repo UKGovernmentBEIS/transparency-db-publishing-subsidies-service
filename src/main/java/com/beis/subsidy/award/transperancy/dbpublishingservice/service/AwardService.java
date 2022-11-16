@@ -121,7 +121,7 @@ public class AwardService {
 						bulkaward.getSpendingSector(),
 						"SYSTEM", 
 						"SYSTEM",
-						addAwardStatus(role),null,LocalDate.now(), LocalDate.now())
+						addAwardStatus(role),null,LocalDate.now(), LocalDate.now(), "No", "")
 				
 					)
 				.collect(Collectors.toList());
@@ -194,7 +194,7 @@ public class AwardService {
 					addPublishedDate(role), award.getSpendingRegion(),
 					((award.getSubsidyInstrument().equalsIgnoreCase("Other")) ? "Other - "+award.getSubsidyInstrumentOther()
 							: award.getSubsidyInstrument()),
-					award.getSpendingSector(), "SYSTEM", "SYSTEM", awardStatus, null,LocalDate.now(), LocalDate.now());
+					award.getSpendingSector(), "SYSTEM", "SYSTEM", awardStatus, null,LocalDate.now(), LocalDate.now(), award.getStandaloneAward(), award.getSubsidyAwardDescription());
 
 			Award savedAwards = awardRepository.save(saveAward);
 			log.info("{} :: End process Bulk Awards db");
@@ -262,12 +262,18 @@ public class AwardService {
 				award.setReason(awardUpdateRequest.getReason());
 			}
 
-			SubsidyMeasure measure = award.getSubsidyMeasure();
+			if(!awardUpdateRequest.getStandaloneAward().equalsIgnoreCase("yes")) {
+				SubsidyMeasure measure = award.getSubsidyMeasure();
 
-			if (!StringUtils.isEmpty(awardUpdateRequest.getSubsidyControlTitle())) {
-				measure.setSubsidyMeasureTitle(awardUpdateRequest.getSubsidyControlTitle().trim());
+				if (!StringUtils.isEmpty(awardUpdateRequest.getSubsidyControlTitle())) {
+					measure.setSubsidyMeasureTitle(awardUpdateRequest.getSubsidyControlTitle().trim());
+				}
+				award.setSubsidyMeasure(measure);
+			}else if(awardUpdateRequest.getStandaloneAward().equalsIgnoreCase("yes")){
+				if(!StringUtils.isEmpty(awardUpdateRequest.getSubsidyAwardDescription())){
+					award.setSubsidyAwardDescription(awardUpdateRequest.getSubsidyAwardDescription().trim());
+				}
 			}
-			award.setSubsidyMeasure(measure);
 			Beneficiary beneficiaryDtls = award.getBeneficiary();
 			if (!StringUtils.isEmpty(awardUpdateRequest.getNationalId())) {
 				beneficiaryDtls.setNationalId(awardUpdateRequest.getNationalId().trim());
