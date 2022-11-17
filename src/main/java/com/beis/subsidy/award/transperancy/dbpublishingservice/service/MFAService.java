@@ -59,6 +59,9 @@ public class MFAService {
 
         if (!StringUtils.isEmpty(mfaGroupingRequest.getMfaGroupingName())) {
             mfaGroupingToSave.setMfaGroupingName(mfaGroupingRequest.getMfaGroupingName().trim());
+        }else{
+            log.error("{} :: MFA Grouping Name is required");
+            return null;
         }
 
         if (!StringUtils.isEmpty(mfaGroupingRequest.getGrantingAuthorityName())) {

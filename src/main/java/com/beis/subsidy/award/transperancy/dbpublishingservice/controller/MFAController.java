@@ -197,7 +197,8 @@ public class MFAController {
             value = "/grouping/add"
     )
     public String addMfaGrouping(@RequestHeader("userPrinciple") HttpHeaders userPrinciple,
-                                   @Valid @RequestBody MFAGroupingRequest mfaGroupingRequest) throws JsonProcessingException {
+                                   @Valid @RequestBody MFAGroupingRequest mfaGroupingRequest,
+                                 HttpServletResponse response) throws JsonProcessingException {
         log.info("{} :: inside addSchemeDetails method",loggingComponentName);
 
         String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
@@ -209,6 +210,9 @@ public class MFAController {
 
             ExcelHelper.saveAuditLogForUpdate(userPrincipleObj, "Update MFA Grouping", mfaGroupingNumber
                     ,eventMsg.toString(),auditLogsRepository);
+        }else{
+            response.setStatus(998);
+            return "Error;";
         }
         return mfaGroupingNumber;
     }
