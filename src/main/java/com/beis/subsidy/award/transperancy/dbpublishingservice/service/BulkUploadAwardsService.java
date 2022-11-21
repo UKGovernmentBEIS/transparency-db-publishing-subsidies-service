@@ -151,6 +151,10 @@ public class BulkUploadAwardsService {
 			 */
 
 			List<ValidationErrorResult> SubsidyInstrumentErrorList = validateSubsidyInstrument(bulkUploadAwards);
+
+			List<ValidationErrorResult> StandaloneAwardErrorList = validateStandaloneAward(bulkUploadAwards);
+
+			List<ValidationErrorResult> SubsidyDescriptionErrorList = validateSubsidyDescription(bulkUploadAwards);
 			
 			// Merge lists of Validation Errors
 			List<ValidationErrorResult> validationErrorResultList = Stream
@@ -158,7 +162,8 @@ public class BulkUploadAwardsService {
 							nationalIdTypeMissingList, nationalIdMissingList, beneficiaryNameErrorList,
 							subsidyControlNumberLengthList, subsidyControlNumberMismatchList,
 							grantingAuthorityNameErrorList, grantingAuthorityErrorList, sizeOfOrgErrorList,
-							spendingRegionErrorList, spendingSectorErrorList, goodsOrServiceErrorList,SubsidyInstrumentErrorList,legalGrantingDateErrorList,SubsidyElementFullAmountErrorList)
+							spendingRegionErrorList, spendingSectorErrorList, goodsOrServiceErrorList,SubsidyInstrumentErrorList,
+							legalGrantingDateErrorList,SubsidyElementFullAmountErrorList, StandaloneAwardErrorList, SubsidyDescriptionErrorList)
 					.flatMap(x -> x.stream()).collect(Collectors.toList());
 
 			log.info("Final validation errors list ...printing list of errors - start");
@@ -190,6 +195,41 @@ public class BulkUploadAwardsService {
 			throw new RuntimeException("Fail to store data : " + e.getMessage());
 		}
 
+	}
+
+	private List<ValidationErrorResult> validateSubsidyDescription(List<BulkUploadAwards> bulkUploadAwards) {
+		List<BulkUploadAwards> subsidyDescriptionErrorRecordsList = bulkUploadAwards.stream()
+				.filter(award -> (
+							award.getSubsidyDescription() != null && award.getSubsidyDescription().length() > 2000)
+					)
+				.collect(Collectors.toList());
+
+		List<ValidationErrorResult> validationSubsidyDescriptionResultList = new ArrayList<>();
+		validationSubsidyDescriptionResultList = subsidyDescriptionErrorRecordsList.stream()
+				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Description"),
+						"The subsidy award description must be 2000 characters or less."))
+				.collect(Collectors.toList());
+
+		return validationSubsidyDescriptionResultList;
+	}
+
+	private List<ValidationErrorResult> validateStandaloneAward(List<BulkUploadAwards> bulkUploadAwards) {
+		List<BulkUploadAwards> standaloneAwardErrorRecordsList = bulkUploadAwards.stream()
+				.filter(
+						award -> (
+								((award.getStandaloneAward() == null || StringUtils.isEmpty(award.getStandaloneAward()))
+										|| !(!award.getStandaloneAward().equalsIgnoreCase("yes") || !award.getStandaloneAward().equalsIgnoreCase("no")))
+						)
+					)
+				.collect(Collectors.toList());
+
+		List<ValidationErrorResult> validationStandaloneAwardResultList = new ArrayList<>();
+		validationStandaloneAwardResultList = standaloneAwardErrorRecordsList.stream()
+				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Standalone"),
+						"You must provide the standalone status of the award. This must be 'Yes' or 'No'."))
+				.collect(Collectors.toList());
+
+		return validationStandaloneAwardResultList;
 	}
 
 	/*

@@ -98,6 +98,16 @@ public class ExcelHelper {
 					break;
 
 				  case 2:
+					  bulkUploadAwards.setStandaloneAward(currentCell.getStringCellValue());
+
+					  break;
+
+				  case 3:
+					  bulkUploadAwards.setSubsidyDescription(currentCell.getStringCellValue());
+
+					  break;
+
+				  case 4:
 					 if(currentCell.getCellType()==CellType.BLANK) {
 						 bulkUploadAwards.setSubsidyObjective(null);
 					 }else {
@@ -106,7 +116,7 @@ public class ExcelHelper {
 
 					break;
 
-				  case 3:
+				  case 5:
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setSubsidyObjectiveOther(null);
 					  }else {
@@ -115,7 +125,7 @@ public class ExcelHelper {
 
 					break;
 
-				  case 4:
+				  case 6:
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setSubsidyInstrument(null);
 					  }else {
@@ -123,7 +133,7 @@ public class ExcelHelper {
 					  }
 					  break;
 
-				  case 5:
+				  case 7:
 					  if(currentCell.getCellType()==CellType.BLANK) {	
 					  bulkUploadAwards.setSubsidyInstrumentOther(null);
 					  }else {
@@ -132,13 +142,13 @@ public class ExcelHelper {
 
 					  break;
 
-				  case 6:
+				  case 8:
 
 					  bulkUploadAwards.setSubsidyAmountRange( (currentCell == null || currentCell.getCellType() == CellType.BLANK || (currentCell.getCellType().equals(CellType.STRING) && currentCell.getStringCellValue().trim().isEmpty())) ? null : currentCell.getStringCellValue() );
 
 					break;
 
-				  case 7:
+				  case 9:
 					  if (currentCell.getCellType() == CellType.STRING) {
 					  bulkUploadAwards.setSubsidyAmountExact((currentCell.getStringCellValue()));
 					  }else if (currentCell.getCellType() == CellType.NUMERIC) {
@@ -147,7 +157,7 @@ public class ExcelHelper {
 
 					  break;
 
-				  case 8:
+				  case 10:
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setNationalIdType(null);
 					  }else {
@@ -156,7 +166,7 @@ public class ExcelHelper {
 
 					break;
 
-				  case 9:
+				  case 11:
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setNationalId(null);
 					  }else {
@@ -167,7 +177,7 @@ public class ExcelHelper {
 
 					break;
 
-				  case 10:
+				  case 12:
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setBeneficiaryName(null);
 					  }else {
@@ -176,7 +186,7 @@ public class ExcelHelper {
 
 					break;
 
-				  case 11:
+				  case 13:
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setOrgSize(null);
 					  }else {
@@ -185,7 +195,7 @@ public class ExcelHelper {
 
 					break;
 
-				  case 12:
+				  case 14:
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setGrantingAuthorityName(null);
 					  }else {
@@ -194,7 +204,7 @@ public class ExcelHelper {
 
 					break;
 
-				  case 13:
+				  case 15:
 					 
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setLegalGrantingDate(null);
@@ -208,7 +218,7 @@ public class ExcelHelper {
 
 					break;
 
-				  case 14:
+				  case 16:
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setGoodsOrServices(null);
 					  }else {
@@ -217,7 +227,7 @@ public class ExcelHelper {
 
 					break;
 
-				  case 15:
+				  case 17:
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setSpendingRegion(null);
 					  }else {
@@ -226,7 +236,7 @@ public class ExcelHelper {
 
 					break;
 
-				  case 16:
+				  case 18:
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setSpendingSector(null);
 					  }else {
