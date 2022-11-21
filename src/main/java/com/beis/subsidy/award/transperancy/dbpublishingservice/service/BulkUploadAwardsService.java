@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -60,6 +61,23 @@ public class BulkUploadAwardsService {
 	public ValidationResult validateFile(MultipartFile file, String role) {
 
 		try {
+
+			Boolean isLatestVersion = ExcelHelper.validateColumnCount(file.getInputStream());
+
+			if(!isLatestVersion){
+				ValidationResult validationResult = new ValidationResult();
+
+				ValidationErrorResult validationErrorResult = new ValidationErrorResult();
+				validationErrorResult.setRow("All");
+				validationErrorResult.setColumns("All");
+				validationErrorResult.setErrorMessages("The version of the template being used is not up to date. Please re-download and use the latest version.");
+
+				validationResult.setTotalRows(1);
+				validationResult.setErrorRows(1);
+				validationResult.setValidationErrorResult(Arrays.asList(validationErrorResult));
+
+				return validationResult;
+			}
 
 			// Read Excel file
 			List<BulkUploadAwards> bulkUploadAwards = ExcelHelper.excelToAwards(file.getInputStream());

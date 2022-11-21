@@ -31,6 +31,8 @@ import lombok.extern.slf4j.Slf4j;
 public class ExcelHelper {
 	
 	public static String TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+	public final static int EXPECTED_COLUMN_COUNT = 19;
 	
 	public  final static String SHEET = "Upload Template";
 
@@ -356,5 +358,21 @@ public class ExcelHelper {
 			return false;
 		}
 		return true;
+	}
+
+	public static Boolean validateColumnCount(InputStream is) {
+		Workbook workbook = null;
+		try {
+			workbook = new XSSFWorkbook(is);
+			Sheet sheet = workbook.getSheet(SHEET);
+
+			int headerColumnCount = sheet.getRow(0).getLastCellNum();
+			if (headerColumnCount == EXPECTED_COLUMN_COUNT){
+				return true;
+			}
+		} catch (IOException e) {
+			throw new RuntimeException("fail to read Excel file: " + e);
+		}
+		return false;
 	}
 }
