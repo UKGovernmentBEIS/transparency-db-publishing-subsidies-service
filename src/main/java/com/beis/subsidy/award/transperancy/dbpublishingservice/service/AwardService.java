@@ -121,7 +121,9 @@ public class AwardService {
 						bulkaward.getSpendingSector(),
 						"SYSTEM", 
 						"SYSTEM",
-						addAwardStatus(role),null,LocalDate.now(), LocalDate.now(), "No", "")
+						addAwardStatus(role),null,LocalDate.now(), LocalDate.now(),
+						StringUtils.capitalize(StringUtils.lowerCase(bulkaward.getStandaloneAward())),
+						bulkaward.getSubsidyDescription())
 				
 					)
 				.collect(Collectors.toList());
