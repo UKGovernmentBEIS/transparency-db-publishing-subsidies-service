@@ -100,4 +100,6 @@ public class SubsidyMeasure {
 	@Column(name = "CONFIRMATION_DATE")
 	private Date confirmationDate;
 
+	@Column(name = "SPENDING_SECTORS")
+	private String spendingSectors;
 }

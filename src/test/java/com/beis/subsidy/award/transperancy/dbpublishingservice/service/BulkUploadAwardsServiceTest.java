@@ -51,8 +51,8 @@ public class BulkUploadAwardsServiceTest {
 
 	BulkUploadAwards bulkUploadAward;
 
-	String path = "src/test/resource/Bulk_upload_Awards_Template_local_success v1.9.xlsx";
-	String path_error = "src/test/resource/Bulk_upload_Awards_Template_local_errors v1.9.xlsx";
+	String path = "src/test/resource/Bulk_upload_Awards_Template_local_success v1.10.xlsx";
+	String path_error = "src/test/resource/Bulk_upload_Awards_Template_local_errors v1.10.xlsx";
 
 	SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
 
@@ -70,6 +70,8 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setRow(2);
 		bulkUploadAward.setSubsidyControlNumber("SC10000");
 		bulkUploadAward.setSubsidyControlTitle("AHDB Generic Promotional Measures scheme");
+		bulkUploadAward.setStandaloneAward("No");
+		bulkUploadAward.setSubsidyDescription("A description");
 		bulkUploadAward.setSubsidyObjective("SME support");
 		bulkUploadAward.setSubsidyInstrument("Loan");
 		bulkUploadAward.setSubsidyAmountRange("500000 - 1000000");
