@@ -427,7 +427,7 @@ public class BulkUploadAwardsService {
 		List<ValidationErrorResult> validationSubsidyAmountExactErrorResultList = new ArrayList<>();
 		validationSubsidyAmountExactErrorResultList = subsidyAmountExactErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Full Exact"),
-						"For non-tax measure subsidies, enter 'N/A' in column G. You can enter the exact subsidy amount in column H."))
+						"For non-tax measure subsidies, enter 'N/A' in column " + columnMapping.get("Full Range") + ". You can enter the exact subsidy amount in column " + columnMapping.get("Full Exact") + "."))
 				.collect(Collectors.toList());
 		List<BulkUploadAwards> subsidyAmountFormatErrorRecordsList = bulkUploadAwards.stream().filter(
 				award -> (((award.getSubsidyInstrument()!=null && !award.getSubsidyInstrument().startsWith("Tax"))&&
@@ -490,7 +490,7 @@ public class BulkUploadAwardsService {
 		if(SubsidyInstrumentTaxErrorRecordsList.size() > 0) {
 		validationSubsidyInstrumentErrorListResultList = SubsidyInstrumentTaxErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Full Range"),
-						"For tax measure subsidies, the amount must be 0. You can select a subsidy range instead in column G."))
+						"For tax measure subsidies, the amount must be 0. You can select a subsidy range instead in column " + columnMapping.get("Full Range") + "."))
 				.collect(Collectors.toList());
 		}
 
@@ -502,51 +502,53 @@ public class BulkUploadAwardsService {
 
 		List<ValidationErrorResult> validationTaxRangeAmountErrorResultList = new ArrayList<>();
 
-		List<BulkUploadAwards> SubsidyTaxRangeAmountErrorList = bulkUploadAwards.stream()
-				.filter(award -> ((award.getSubsidyInstrument()!=null && award.getSubsidyInstrument().startsWith("Tax"))&&
-						(award.getSubsidyAmountRange() == null || StringUtils.isEmpty(award.getSubsidyAmountRange()))&&
+		List<BulkUploadAwards> taxBulkUploadAwards = bulkUploadAwards.stream()
+				.filter(award -> (award.getSubsidyInstrument()!=null && award.getSubsidyInstrument().startsWith("Tax"))).collect(Collectors.toList());
+
+		List<BulkUploadAwards> SubsidyTaxRangeAmountErrorList = taxBulkUploadAwards.stream()
+				.filter(award -> ((award.getSubsidyAmountRange() == null || StringUtils.isEmpty(award.getSubsidyAmountRange()))&&
 						(award.getSubsidyAmountExact() == null || StringUtils.isEmpty(award.getSubsidyAmountExact())))).collect(Collectors.toList());
 
 		if(SubsidyTaxRangeAmountErrorList.size() > 0) {
 			validationTaxRangeAmountErrorResultList = SubsidyTaxRangeAmountErrorList.stream()
-					.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "G",
+					.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Full Range"),
 							"For tax measure subsidies, the tax range amount is mandatory"))
 					.collect(Collectors.toList());
 		}
 
-		List<BulkUploadAwards> SubsidyInstrumentTaxAmountRangeNotNumericError = bulkUploadAwards.stream()
-				.filter(award -> (award.getSubsidyAmountRange() == null ||
+		List<BulkUploadAwards> SubsidyInstrumentTaxAmountRangeNotNumericError = taxBulkUploadAwards.stream()
+				.filter(award -> (award.getSubsidyAmountRange() != null && (((award.getSubsidyAmountRange()).split("-")).length) == 2) &&
 						(((!ExcelHelper.isNumeric(award.getSubsidyAmountRange().split("-")[0]) ||
 								!ExcelHelper.isNumeric(award.getSubsidyAmountRange().split("-")[1])))
-						))).collect(Collectors.toList());
+						)).collect(Collectors.toList());
 
 		if(SubsidyInstrumentTaxAmountRangeNotNumericError.size() > 0) {
 			validationTaxRangeAmountErrorResultList = SubsidyInstrumentTaxAmountRangeNotNumericError.stream()
-					.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "G",
+					.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Full Range"),
 							"For tax measure subsidies, the tax range amount must be in the format of a number range. The values must be numeric and separated by a '-'"))
 					.collect(Collectors.toList());
 		}
 
-		List<BulkUploadAwards> SubsidyInstrumentTaxAmountRangeError = bulkUploadAwards.stream()
+		List<BulkUploadAwards> SubsidyInstrumentTaxAmountRangeError = taxBulkUploadAwards.stream()
 				.filter(award -> (award.getSubsidyAmountRange() == null || (((award.getSubsidyAmountRange()).split("-")).length) != 2)).collect(Collectors.toList());
 
 		if(SubsidyInstrumentTaxAmountRangeError.size() > 0) {
 			validationTaxRangeAmountErrorResultList = SubsidyInstrumentTaxAmountRangeError.stream()
-					.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "G",
+					.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Full Range"),
 							"For tax measure subsidies, the tax range amount must be in the format of a number range. For example, 0-100000 or 100001-300000"))
 					.collect(Collectors.toList());
 		}
 
-		List<BulkUploadAwards> SubsidyInstrumentTaxAmountRangeInvalidError = bulkUploadAwards.stream()
-				.filter(award -> (award.getSubsidyAmountRange() == null ||
-						(((Integer.parseInt(award.getSubsidyAmountRange().split("-")[0]) >
+		List<BulkUploadAwards> SubsidyInstrumentTaxAmountRangeInvalidError = taxBulkUploadAwards.stream()
+				.filter(award -> ((award.getSubsidyAmountRange() != null && (((award.getSubsidyAmountRange()).split("-")).length) == 2) &&
+						(((Integer.parseInt(award.getSubsidyAmountRange().split("-")[0]) >=
 								Integer.parseInt(award.getSubsidyAmountRange().split("-")[1])))
 						))).collect(Collectors.toList());
 
 		if(SubsidyInstrumentTaxAmountRangeInvalidError.size() > 0) {
 			validationTaxRangeAmountErrorResultList = SubsidyInstrumentTaxAmountRangeInvalidError.stream()
-					.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), "G",
-							"STOP MESSING THINGS UP"))
+					.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Full Range"),
+							"Invalid subsidy tax range. The lower bound of the subsidy tax range cannot be larger than or equal to the upper bound"))
 					.collect(Collectors.toList());
 		}
 
