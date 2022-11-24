@@ -67,13 +67,13 @@ public class MFAService {
         if (!StringUtils.isEmpty(mfaGroupingRequest.getGrantingAuthorityName())) {
             GrantingAuthority grantingAuthority = gaRepository.findByGrantingAuthorityName(mfaGroupingRequest.getGrantingAuthorityName().trim());
 
-            log.error("{} :: Granting Authority and GAName ::{}", grantingAuthority, mfaGroupingRequest.getGrantingAuthorityName());
+            log.error("{} :: Public Authority and PAName ::{}", grantingAuthority, mfaGroupingRequest.getGrantingAuthorityName());
 
             if (Objects.isNull(grantingAuthority) ||
                     "Inactive".equals(grantingAuthority.getStatus())) {
 
-                log.error("{} :: Granting Authority is Inactive for the scheme");
-                throw new InvalidRequestException("Granting Authority is Inactive");
+                log.error("{} :: Public Authority is Inactive for the scheme");
+                throw new InvalidRequestException("Public Authority is Inactive");
             }
             mfaGroupingToSave.setGaId(grantingAuthority.getGaId());
         }
@@ -116,13 +116,13 @@ public class MFAService {
         if (!StringUtils.isEmpty(mfaAwardRequest.getGrantingAuthorityName())) {
             GrantingAuthority grantingAuthority = gaRepository.findByGrantingAuthorityName(mfaAwardRequest.getGrantingAuthorityName().trim());
 
-            log.error("{} :: Granting Authority and GAName ::{}", grantingAuthority, mfaAwardRequest.getGrantingAuthorityName());
+            log.error("{} :: Public Authority and PAName ::{}", grantingAuthority, mfaAwardRequest.getGrantingAuthorityName());
 
             if (Objects.isNull(grantingAuthority) ||
                     "Inactive".equals(grantingAuthority.getStatus())) {
 
-                log.error("{} :: Granting Authority is Inactive for the scheme");
-                throw new InvalidRequestException("Granting Authority is Inactive");
+                log.error("{} :: Public Authority is Inactive for the scheme");
+                throw new InvalidRequestException("Public Authority is Inactive");
             }
             mfaAwardToSave.setGaId(grantingAuthority.getGaId());
         }
@@ -196,7 +196,7 @@ public class MFAService {
 
                 Long gaId = getGrantingAuthorityIdByName(userPrinciple.getGrantingAuthorityGroupName());
                 if(gaId == null || gaId <= 0){
-                    throw new UnauthorisedAccessException("Invalid granting authority name");
+                    throw new UnauthorisedAccessException("Invalid public authority name");
                 }
                 pageMfaGroupings = mfaGroupingRepository.
                         findAll(mfaGroupingByGrantingAuthority(gaId),pagingSortMfaGroupings);
@@ -251,7 +251,7 @@ public class MFAService {
             } else {
                 Long gaId = getGrantingAuthorityIdByName(userPrinciple.getGrantingAuthorityGroupName());
                 if(gaId == null || gaId <= 0){
-                    throw new UnauthorisedAccessException("Invalid granting authority name");
+                    throw new UnauthorisedAccessException("Invalid public authority name");
                 }
                 pageMfaAwards = mfaAwardRepository.
                         findAll(mfaAwardByGrantingAuthority(gaId),pagingSortMfaAwards);
@@ -526,13 +526,13 @@ public class MFAService {
         if (!StringUtils.isEmpty(mfaAwardRequest.getGrantingAuthorityName())) {
             GrantingAuthority grantingAuthority = gaRepository.findByGrantingAuthorityName(mfaAwardRequest.getGrantingAuthorityName().trim());
 
-            log.error("{} :: Granting Authority and GAName ::{}", grantingAuthority, mfaAwardRequest.getGrantingAuthorityName());
+            log.error("{} :: Public Authority and PAName ::{}", grantingAuthority, mfaAwardRequest.getGrantingAuthorityName());
 
             if (Objects.isNull(grantingAuthority) ||
                     "Inactive".equals(grantingAuthority.getStatus())) {
 
-                log.error("{} :: Granting Authority is Inactive for the scheme");
-                throw new InvalidRequestException("Granting Authority is Inactive");
+                log.error("{} :: Public Authority is Inactive for the scheme");
+                throw new InvalidRequestException("Public Authority is Inactive");
             }
             mfaAwardById.setGaId(grantingAuthority.getGaId());
         }

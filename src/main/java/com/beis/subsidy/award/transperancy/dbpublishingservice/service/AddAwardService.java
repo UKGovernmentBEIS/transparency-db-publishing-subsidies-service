@@ -647,16 +647,16 @@ public class AddAwardService {
 		
 		if(award.getGrantingAuthorityName()==null) {
 			validationGrantingAuthorityResultList.add(new SingleAwardValidationResult("grantingAuthorityName",
-					"Granting Authority name is Mandatory."));
+					"Public Authority name is Mandatory."));
 		}
 		
 		if(award.getGrantingAuthorityName()!=null && award.getGrantingAuthorityName().length() > 255){
 			validationGrantingAuthorityResultList.add(new SingleAwardValidationResult("grantingAuthorityName",
-					"Granting authority name should be 255 characters or fewer."));
+					"Public authority name should be 255 characters or fewer."));
 		}
 		
 		
-		log.info("Validation Result Error list - Granting Authority missing error = "
+		log.info("Validation Result Error list - Public Authority missing error = "
 				+ validationGrantingAuthorityResultList);
 
 		return validationGrantingAuthorityResultList;
@@ -715,11 +715,11 @@ public class AddAwardService {
 		if (Objects.isNull(grantingAuthority) || "Inactive".equals(grantingAuthority.getStatus().trim())) {
 
 			valGANameResultList.add(new SingleAwardValidationResult("grantingAuthorityName",
-					"Granting authority is either inactive or invalid"));
+					"Public authority is either inactive or invalid"));
 			
 		}
 
-		log.info("{} :: Validation Result Error list - Granting Authority Name error = ", loggingComponentName);
+		log.info("{} :: Validation Result Error list - Public Authority Name error = ", loggingComponentName);
 
 		return valGANameResultList;
 	}
