@@ -923,8 +923,14 @@ public class BulkUploadAwardsService {
 			if (award.getLegalGrantingDate() == null) {
 				return false;
 			}
-			legalGrantingDateWithinSchemeDate = !(sdf.parse(award.getLegalGrantingDate()).after(sm.getEndDate()) ||
-							sdf.parse(award.getLegalGrantingDate()).before(sm.getStartDate()));
+			if (sm.getEndDate() == null && !sdf.parse(award.getLegalGrantingDate()).before(sm.getStartDate())){
+				legalGrantingDateWithinSchemeDate = true;
+			} else if (sm.getEndDate() == null && sdf.parse(award.getLegalGrantingDate()).before(sm.getStartDate())) {
+				legalGrantingDateWithinSchemeDate = false;
+			} else {
+				legalGrantingDateWithinSchemeDate = !(sdf.parse(award.getLegalGrantingDate()).after(sm.getEndDate()) ||
+						sdf.parse(award.getLegalGrantingDate()).before(sm.getStartDate()));
+			}
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
