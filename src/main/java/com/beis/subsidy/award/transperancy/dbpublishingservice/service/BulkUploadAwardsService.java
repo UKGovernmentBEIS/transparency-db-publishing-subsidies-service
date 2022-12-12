@@ -91,7 +91,7 @@ public class BulkUploadAwardsService {
 
 
 			/*
-			 * 3) If incorrect SC number is entered, user system should throw an error
+			 * 3) If incorrect SC number is entered, user system should throw an error
 			 * Validation Error - Row 6 - Incorrect SC Number - Correct one SC10002
 			 */
 			List<ValidationErrorResult> scNumberNameCheckList = validateScNumberScTitle(bulkUploadAwards);
@@ -267,7 +267,7 @@ public class BulkUploadAwardsService {
 				.filter(award -> (((award.getSubsidyControlNumber() == null
 						|| StringUtils.isEmpty(award.getSubsidyControlNumber()))
 						&& (award.getSubsidyControlTitle() == null
-								|| StringUtils.isEmpty(award.getSubsidyControlTitle())))))
+								|| StringUtils.isEmpty(award.getSubsidyControlTitle())) && (!award.getStandaloneAward().equalsIgnoreCase("yes")))))
 				.collect(Collectors.toList());
 
 		List<ValidationErrorResult> validationScNumberScTitlResultList = new ArrayList<>();
@@ -659,8 +659,8 @@ public class BulkUploadAwardsService {
 		log.info("subsidyControlNumber size - String {}:: " , subsidyControlNumberTitleList.size());
 
 		List<BulkUploadAwards> subsidyControlNumberErrorRecordsList = bulkUploadAwards.stream()
-				.filter(award -> award.getSubsidyControlNumber() != null
-						&& !subsidyControlNumberTitleList.contains(award.getSubsidyControlNumber()))
+				.filter(award -> (award.getSubsidyControlNumber() != null
+						&& !subsidyControlNumberTitleList.contains(award.getSubsidyControlNumber())) && (!award.getStandaloneAward().equalsIgnoreCase("yes")))
 				.collect(Collectors.toList());
 
 
