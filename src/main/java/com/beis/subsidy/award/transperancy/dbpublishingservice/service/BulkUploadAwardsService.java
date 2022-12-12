@@ -244,11 +244,28 @@ public class BulkUploadAwardsService {
 					)
 				.collect(Collectors.toList());
 
+		List<BulkUploadAwards> standaloneAwardWithSCErrorRecordsList = bulkUploadAwards.stream()
+				.filter(
+						award -> (
+								(award.getStandaloneAward().equalsIgnoreCase("yes") && (
+										!StringUtils.isEmpty(award.getSubsidyControlNumber()) || !StringUtils.isEmpty(award.getSubsidyControlTitle())
+										))
+						)
+				)
+				.collect(Collectors.toList());
+
 		List<ValidationErrorResult> validationStandaloneAwardResultList = new ArrayList<>();
 		validationStandaloneAwardResultList = standaloneAwardErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Standalone"),
 						"You must provide the standalone status of the award. This must be 'Yes' or 'No'."))
 				.collect(Collectors.toList());
+
+		validationStandaloneAwardResultList.addAll(
+				standaloneAwardWithSCErrorRecordsList.stream()
+						.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Standalone"),
+								"If 'Standalone Award' is 'Yes', you must not provide an SC number or Title"))
+						.collect(Collectors.toList())
+		);
 
 		return validationStandaloneAwardResultList;
 	}
