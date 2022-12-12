@@ -781,7 +781,7 @@ public class BulkUploadAwardsService {
 		List<ValidationErrorResult> validationGrantingAuthorityResultList = new ArrayList<>();
 		validationGrantingAuthorityResultList = validateGrantingAuthorityNameErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("GA Name"),
-						"The granting authority name must be less than 255 characters."))
+						"The public authority name must be less than 255 characters."))
 				.collect(Collectors.toList());
 		
 		List<BulkUploadAwards> validateGrantingAuthorityMissingErrorRecordsList = bulkUploadAwards.stream()
@@ -789,7 +789,7 @@ public class BulkUploadAwardsService {
 		if(validateGrantingAuthorityMissingErrorRecordsList.size()>0) {
 			validationGrantingAuthorityResultList = validateGrantingAuthorityMissingErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("GA Name"),
-						"You must enter the name of the granting authority."))
+						"You must enter the name of the public authority."))
 				.collect(Collectors.toList());
 		}
 
@@ -846,7 +846,7 @@ public class BulkUploadAwardsService {
 		List<String> grantingAuthorityNamesList = grantingAuthorityList.stream()
 				.map(grantingAuthority -> grantingAuthority.getGrantingAuthorityName()).collect(Collectors.toList());
 
-		log.info("Granting Authority - String list size " + grantingAuthorityNamesList.size());
+		log.info("Public Authority - String list size " + grantingAuthorityNamesList.size());
 
 		List<BulkUploadAwards> grantingAuthorityNameErrorRecordsList = bulkUploadAwards.stream()
 				.filter(award -> award.getGrantingAuthorityName() != null
@@ -856,7 +856,7 @@ public class BulkUploadAwardsService {
 		List<ValidationErrorResult> validationGrantingAuthorityNameResultList = new ArrayList<>();
 		validationGrantingAuthorityNameResultList = grantingAuthorityNameErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("GA Name"),
-						"You must enter the name of the granting authority."))
+						"You must enter the name of the public authority."))
 				.collect(Collectors.toList());
 
 		return validationGrantingAuthorityNameResultList;
