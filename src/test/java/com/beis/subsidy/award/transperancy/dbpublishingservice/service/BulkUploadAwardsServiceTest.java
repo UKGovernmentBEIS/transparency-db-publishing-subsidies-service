@@ -51,8 +51,8 @@ public class BulkUploadAwardsServiceTest {
 
 	BulkUploadAwards bulkUploadAward;
 
-	String path = "src/test/resource/Bulk_upload_Awards_Template_local_success v1.10.xlsx";
-	String path_error = "src/test/resource/Bulk_upload_Awards_Template_local_errors v1.10.xlsx";
+	String path = "src/test/resource/Bulk_upload_Awards_Template_local_success v1.11.xlsx";
+	String path_error = "src/test/resource/Bulk_upload_Awards_Template_local_errors v1.11.xlsx";
 
 	SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
 
@@ -96,7 +96,7 @@ public class BulkUploadAwardsServiceTest {
 	public void testValidateAwards() throws ParseException, IOException {
 
 		MockMultipartFile mockMultipartFile = new MockMultipartFile("file",
-				"Bulk_upload_Awards_Template_local_success v1.9.xlsx", "multipart/form-data", inputStream);
+				"Bulk_upload_Awards_Template_local_success v1.11.xlsx", "multipart/form-data", inputStream);
 		ValidationResult result = new ValidationResult();
 		result.setErrorRows(0);
 		result.setTotalRows(1);
@@ -160,7 +160,7 @@ public class BulkUploadAwardsServiceTest {
 	public void testValidateError() throws ParseException, IOException {
 
 		MockMultipartFile mockMultipartFile = new MockMultipartFile("file",
-				"Bulk_upload_Awards_Template_local_success v1.9.xlsx", "multipart/form-data", inputStream);
+				"Bulk_upload_Awards_Template_local_success v1.11.xlsx", "multipart/form-data", inputStream);
 		Beneficiary beneficiary = mock(Beneficiary.class);
 		List<GrantingAuthority> gaList = new ArrayList<GrantingAuthority>();
 		List<SubsidyMeasure> smList = new ArrayList<>();
@@ -170,7 +170,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setNationalId("abc123456");
 
 		ValidationResult result = new ValidationResult();
-		result.setErrorRows(3);
+		result.setErrorRows(4);
 		result.setTotalRows(2);
 		String role = "Granting Authority Administrator";
 		awardList.add(bulkUploadAward);
@@ -200,7 +200,7 @@ public class BulkUploadAwardsServiceTest {
 	public void testValidateBeneficiaryError() throws ParseException, IOException {
 
 		MockMultipartFile mockMultipartFile = new MockMultipartFile("file",
-				"Bulk_upload_Awards_Template_local_success v1.9.xlsx", "multipart/form-data", inputStream);
+				"Bulk_upload_Awards_Template_local_success v1.11.xlsx", "multipart/form-data", inputStream);
 		Beneficiary beneficiary = mock(Beneficiary.class);
 		List<GrantingAuthority> gaList = new ArrayList<GrantingAuthority>();
 		List<SubsidyMeasure> smList = new ArrayList<>();
@@ -210,7 +210,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setNationalId("abc123456");
 		String role = "Granting Authority Administrator";
 		ValidationResult result = new ValidationResult();
-		result.setErrorRows(3);
+		result.setErrorRows(4);
 		result.setTotalRows(2);
 
 		awardList.add(bulkUploadAward);
@@ -240,7 +240,7 @@ public class BulkUploadAwardsServiceTest {
 	public void testValidateVatError() throws ParseException, IOException {
 
 		MockMultipartFile mockMultipartFile = new MockMultipartFile("file",
-				"Bulk_upload_Awards_Template_local_errors v1.9.xslx", "multipart/form-data", inputStreams);
+				"Bulk_upload_Awards_Template_local_errors v1.11.xlsx", "multipart/form-data", inputStreams);
 		Beneficiary beneficiary = mock(Beneficiary.class);
 		List<GrantingAuthority> gaList = new ArrayList<GrantingAuthority>();
 		List<SubsidyMeasure> smList = new ArrayList<>();
@@ -250,7 +250,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setNationalId("123456");
 		String role = "Granting Authority Administrator";
 		ValidationResult result = new ValidationResult();
-		result.setErrorRows(36);
+		result.setErrorRows(38);
 		result.setTotalRows(2);
 
 		awardList.add(bulkUploadAward);
@@ -280,7 +280,7 @@ public class BulkUploadAwardsServiceTest {
 	public void testValidateUTRError() throws ParseException, IOException {
 
 		MockMultipartFile mockMultipartFile = new MockMultipartFile("file",
-				"Bulk_upload_Awards_Template_local_errors v1.9.xslx", "multipart/form-data", inputStreams);
+				"Bulk_upload_Awards_Template_local_errors v1.11.xlsx", "multipart/form-data", inputStreams);
 		Beneficiary beneficiary = mock(Beneficiary.class);
 		List<GrantingAuthority> gaList = new ArrayList<GrantingAuthority>();
 		List<SubsidyMeasure> smList = new ArrayList<>();
@@ -290,7 +290,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setNationalId("123456");
 
 		ValidationResult result = new ValidationResult();
-		result.setErrorRows(36);
+		result.setErrorRows(38);
 		result.setTotalRows(2);
 
 		awardList.add(bulkUploadAward);
@@ -321,7 +321,7 @@ public class BulkUploadAwardsServiceTest {
 	public void testValidateFormatError() throws ParseException, IOException {
 
 		MockMultipartFile mockMultipartFile = new MockMultipartFile("file",
-				"Bulk_upload_Awards_Template_local_errors v1.9.xslx", "multipart/form-data", inputStreams);
+				"Bulk_upload_Awards_Template_local_errors v1.11.xlsx", "multipart/form-data", inputStreams);
 		Beneficiary beneficiary = mock(Beneficiary.class);
 		List<GrantingAuthority> gaList = new ArrayList<GrantingAuthority>();
 		List<SubsidyMeasure> smList = new ArrayList<>();
@@ -331,7 +331,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setNationalId("123456");
 
 		ValidationResult result = new ValidationResult();
-		result.setErrorRows(36);
+		result.setErrorRows(38);
 		result.setTotalRows(2);
 
 		awardList.add(bulkUploadAward);

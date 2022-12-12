@@ -91,7 +91,7 @@ public class BulkUploadAwardsService {
 
 
 			/*
-			 * 3) If incorrect SC number is entered, user system should throw an error
+			 * 3) If incorrect SC number is entered, user system should throw an error
 			 * Validation Error - Row 6 - Incorrect SC Number - Correct one SC10002
 			 */
 			List<ValidationErrorResult> scNumberNameCheckList = validateScNumberScTitle(bulkUploadAwards);
@@ -244,11 +244,28 @@ public class BulkUploadAwardsService {
 					)
 				.collect(Collectors.toList());
 
+		List<BulkUploadAwards> standaloneAwardWithSCErrorRecordsList = bulkUploadAwards.stream()
+				.filter(
+						award -> (
+								(award.getStandaloneAward().equalsIgnoreCase("yes") && (
+										!StringUtils.isEmpty(award.getSubsidyControlNumber()) || !StringUtils.isEmpty(award.getSubsidyControlTitle())
+										))
+						)
+				)
+				.collect(Collectors.toList());
+
 		List<ValidationErrorResult> validationStandaloneAwardResultList = new ArrayList<>();
 		validationStandaloneAwardResultList = standaloneAwardErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Standalone"),
 						"You must provide the standalone status of the award. This must be 'Yes' or 'No'."))
 				.collect(Collectors.toList());
+
+		validationStandaloneAwardResultList.addAll(
+				standaloneAwardWithSCErrorRecordsList.stream()
+						.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Standalone"),
+								"If 'Standalone Award' is 'Yes', you must not provide an SC number or Title"))
+						.collect(Collectors.toList())
+		);
 
 		return validationStandaloneAwardResultList;
 	}
@@ -267,7 +284,7 @@ public class BulkUploadAwardsService {
 				.filter(award -> (((award.getSubsidyControlNumber() == null
 						|| StringUtils.isEmpty(award.getSubsidyControlNumber()))
 						&& (award.getSubsidyControlTitle() == null
-								|| StringUtils.isEmpty(award.getSubsidyControlTitle())))))
+								|| StringUtils.isEmpty(award.getSubsidyControlTitle())) && (!award.getStandaloneAward().equalsIgnoreCase("yes")))))
 				.collect(Collectors.toList());
 
 		List<ValidationErrorResult> validationScNumberScTitlResultList = new ArrayList<>();
@@ -659,8 +676,8 @@ public class BulkUploadAwardsService {
 		log.info("subsidyControlNumber size - String {}:: " , subsidyControlNumberTitleList.size());
 
 		List<BulkUploadAwards> subsidyControlNumberErrorRecordsList = bulkUploadAwards.stream()
-				.filter(award -> award.getSubsidyControlNumber() != null
-						&& !subsidyControlNumberTitleList.contains(award.getSubsidyControlNumber()))
+				.filter(award -> (award.getSubsidyControlNumber() != null
+						&& !subsidyControlNumberTitleList.contains(award.getSubsidyControlNumber())) && (!award.getStandaloneAward().equalsIgnoreCase("yes")))
 				.collect(Collectors.toList());
 
 
