@@ -94,4 +94,16 @@ public class SubsidyMeasure {
 	@Column(name = "LAST_MODIFIED_TIMESTAMP")
 	private LocalDate lastModifiedTimestamp;
 
+	@Column(name = "HAS_NO_END_DATE")
+	private boolean hasNoEndDate;
+
+	@Column (name = "SUBSIDY_SCHEME_DESCRIPTION")
+	private String subsidySchemeDescription;
+
+	@Column(name = "CONFIRMATION_DATE")
+	private Date confirmationDate;
+
+	@Column(name = "SPENDING_SECTORS")
+	private String spendingSectors;
+
 }
