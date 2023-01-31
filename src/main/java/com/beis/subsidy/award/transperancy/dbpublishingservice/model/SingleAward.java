@@ -32,4 +32,5 @@ public class SingleAward {
 	private String subsidyInstrumentOther;
 	private String status;
 	private String reason;
+	private String adminProgramNumber;
 }

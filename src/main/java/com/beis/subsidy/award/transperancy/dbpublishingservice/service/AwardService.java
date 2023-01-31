@@ -11,23 +11,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.GrantingAuthorityRepository;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.SubsidyMeasureRepository;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.model.*;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.Award;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.Beneficiary;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.BulkUploadAwards;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.GrantingAuthority;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SingleAward;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SubsidyMeasure;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AwardRepository;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.BeneficiaryRepository;
 
 import lombok.extern.slf4j.Slf4j;
 @Slf4j
@@ -41,6 +32,9 @@ public class AwardService {
 	
 	@Autowired
 	private BeneficiaryRepository beneficiaryRepository;
+
+	@Autowired
+	private AdminProgramRepository adminProgramRepository;
 	
 	@Autowired
 	private GrantingAuthorityRepository gaRepository;
@@ -123,7 +117,8 @@ public class AwardService {
 						"SYSTEM",
 						addAwardStatus(role),null,LocalDate.now(), LocalDate.now(),
 						StringUtils.capitalize(StringUtils.lowerCase(bulkaward.getStandaloneAward())),
-						bulkaward.getSubsidyDescription())
+						bulkaward.getSubsidyDescription(),
+						null)
 				
 					)
 				.collect(Collectors.toList());
@@ -186,6 +181,8 @@ public class AwardService {
 				awardStatus = "Awaiting Approval";
 			}
 
+			AdminProgram adminProgram = adminProgramRepository.findById(award.getAdminProgramNumber()).orElse(null);
+
 			Award saveAward = new Award(null, beneficiary, getGrantingAuthority(tempAward),
 					getSubsidyMeasure(tempAward), award.getSubsidyAmountRange(),
 					((award.getSubsidyAmountExact() != null) ? new BigDecimal(award.getSubsidyAmountExact())
@@ -196,7 +193,8 @@ public class AwardService {
 					addPublishedDate(role), award.getSpendingRegion(),
 					((award.getSubsidyInstrument().equalsIgnoreCase("Other")) ? "Other - "+award.getSubsidyInstrumentOther()
 							: award.getSubsidyInstrument()),
-					award.getSpendingSector(), "SYSTEM", "SYSTEM", awardStatus, null,LocalDate.now(), LocalDate.now(), award.getStandaloneAward(), award.getSubsidyAwardDescription());
+					award.getSpendingSector(), "SYSTEM", "SYSTEM", awardStatus, null,LocalDate.now(), LocalDate.now(), award.getStandaloneAward(), award.getSubsidyAwardDescription(),
+					adminProgram);
 
 			Award savedAwards = awardRepository.save(saveAward);
 			log.info("{} :: End process Bulk Awards db");
@@ -295,6 +293,10 @@ public class AwardService {
 			if (!StringUtils.isEmpty(awardUpdateRequest.getGrantingAuthorityName())) {
 				grantingAuthority.setGrantingAuthorityName(awardUpdateRequest.getGrantingAuthorityName().trim());
 				award.setGrantingAuthority(grantingAuthority);
+			}
+
+			if(!StringUtils.isEmpty(awardUpdateRequest.getAdminProgramNumber())){
+				award.setAdminProgram(adminProgramRepository.findById(awardUpdateRequest.getAdminProgramNumber()).orElse(null));
 			}
 
 			Award savedAwards = awardRepository.save(award);
