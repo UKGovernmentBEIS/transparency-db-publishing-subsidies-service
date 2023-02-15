@@ -286,21 +286,20 @@ public class ExcelHelper {
 	}
 	
 	public static boolean containsValue(Row row){
-		boolean flag = true;
-		Row.MissingCellPolicy policy = Row.MissingCellPolicy.CREATE_NULL_AS_BLANK; // If the Cell returned doesn't exist, instead of returning null, create a new Cell with a cell type of "blank".
+		StringBuilder data = new StringBuilder();
+		DataFormatter formatter = new DataFormatter();
+		Iterator<Cell> iterator = row.cellIterator();
 
-		if(row.getCell(0, policy).getCellType()==CellType.BLANK && row.getCell(1, policy).getCellType()==CellType.BLANK &&
-				row.getCell(2, policy).getCellType()==CellType.BLANK) {
-			return false;
+		while(iterator.hasNext()){
+			Cell currentCell = iterator.next();
+			data.append(formatter.formatCellValue(currentCell));
 		}
-	    if ((StringUtils.isEmpty(String.valueOf(row.getCell(0, policy))) &&
-				StringUtils.isEmpty(String.valueOf(row.getCell(1, policy))) &&
-				StringUtils.isEmpty(String.valueOf(row.getCell(2, policy)))) ||
-				(String.valueOf(row.getCell(0, policy))==null && String.valueOf(row.getCell(1, policy))==null &&
-				String.valueOf(row.getCell(2, policy))==null ) && row.getCell(2, policy).getCellType()==CellType.BLANK){
-			flag = false;
-	    }
-	 	return flag;
+
+		if(StringUtils.isEmpty(data)){
+			return false;
+		}else{
+			return true;
+		}
 	}
 
 	public static void saveAuditLog(UserPrinciple userPrinciple, String action,String role,
