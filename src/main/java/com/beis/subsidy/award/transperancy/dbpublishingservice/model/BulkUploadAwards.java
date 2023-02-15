@@ -13,6 +13,7 @@ public class BulkUploadAwards {
 	private String column;
 	private String subsidyControlTitle;
 	private String subsidyControlNumber;
+	private String adminProgramNumber;
 	private String nationalIdType;
 	private String nationalId;
 	private String beneficiaryName;

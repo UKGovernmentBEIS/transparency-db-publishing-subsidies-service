@@ -118,7 +118,7 @@ public class AwardService {
 						addAwardStatus(role),null,LocalDate.now(), LocalDate.now(),
 						StringUtils.capitalize(StringUtils.lowerCase(bulkaward.getStandaloneAward())),
 						bulkaward.getSubsidyDescription(),
-						null)
+						getAdminProgram(bulkaward))
 				
 					)
 				.collect(Collectors.toList());
@@ -131,6 +131,10 @@ public class AwardService {
 			log.error("serviceException occured::" , serviceException);
 			return null;
 		}
+	}
+
+	private AdminProgram getAdminProgram(BulkUploadAwards bulkAward) {
+		return adminProgramRepository.findById(bulkAward.getAdminProgramNumber()).orElse(null);
 	}
 
 	private String addAwardStatus(String role) {
@@ -361,8 +365,4 @@ public class AwardService {
 	public List<GrantingAuthority> getAllGrantingAuthorities() {
 		return gaRepository.findAll();
 	}
-
-	
-	
-	
 }

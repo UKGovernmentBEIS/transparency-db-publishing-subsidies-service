@@ -2,6 +2,7 @@ package com.beis.subsidy.award.transperancy.dbpublishingservice.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -9,6 +10,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -20,10 +22,6 @@ import com.beis.subsidy.award.transperancy.dbpublishingservice.model.BulkUploadA
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.GrantingAuthority;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SingleAward;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SubsidyMeasure;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AwardRepository;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.BeneficiaryRepository;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.GrantingAuthorityRepository;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.SubsidyMeasureRepository;
 
 public class AwardServiceTest {
 
@@ -36,6 +34,7 @@ public class AwardServiceTest {
 	private BeneficiaryRepository beneficiaryRepository = mock(BeneficiaryRepository.class);
 	private final GrantingAuthorityRepository grepo = mock(GrantingAuthorityRepository.class);
 	private SubsidyMeasureRepository smRepository = mock(SubsidyMeasureRepository.class);
+	private final AdminProgramRepository adminProgramRepository = mock(AdminProgramRepository.class);
 
 	BulkUploadAwards bulkUploadAward;
 
@@ -112,6 +111,7 @@ public class AwardServiceTest {
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
 		when(grepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
+		when(adminProgramRepository.findById(anyString()).orElse(null)).thenReturn(null);
 		when(awardServiceMock.createAward(awardInputRequest,role)).thenReturn(expectedAward);
 		Award award = awardServiceMock.createAward(awardInputRequest,role);
 		assertNotNull(award);
@@ -144,6 +144,7 @@ public class AwardServiceTest {
 		when(grepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
 		when(awardServiceMock.createAward(awardInputRequest,role)).thenReturn(expectedAward);
+		when(adminProgramRepository.findById(anyString()).orElse(null)).thenReturn(null);
 		List<Award> awards = awardServiceMock.processBulkAwards(awardList,role);
 		assertNotNull(awards);
 
@@ -178,6 +179,7 @@ public class AwardServiceTest {
 		when(grepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
 		when(awardServiceMock.createAward(awardInputRequest,role)).thenReturn(expectedAward);
+		when(adminProgramRepository.findById(anyString()).orElse(null)).thenReturn(null);
 		List<Award> awards = awardServiceMock.processBulkAwards(awardList,role);
 		assertNotNull(awards);
 
@@ -211,6 +213,7 @@ public class AwardServiceTest {
 		when(grepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
 		when(awardServiceMock.createAward(awardInputRequest,role)).thenReturn(expectedAward);
+		when(adminProgramRepository.findById(anyString()).orElse(null)).thenReturn(null);
 		Award award = awardServiceMock.createAward(awardInputRequest,role);
 		assertNotNull(award);
 
@@ -244,6 +247,7 @@ public class AwardServiceTest {
 		when(grepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
 		when(awardServiceMock.createAward(awardInputRequest, role)).thenReturn(expectedAward);
+		when(adminProgramRepository.findById(anyString()).orElse(null)).thenReturn(null);
 		Award award = awardServiceMock.createAward(awardInputRequest, role);
 		assertNotNull(award);
 
@@ -278,6 +282,7 @@ public class AwardServiceTest {
 		when(grepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
 		when(awardServiceMock.createAward(awardInputRequest,role)).thenReturn(expectedAward);
+		when(adminProgramRepository.findById(anyString()).orElse(null)).thenReturn(null);
 		Award award = awardServiceMock.createAward(awardInputRequest, role);
 		assertNotNull(award);
 
@@ -311,6 +316,7 @@ public class AwardServiceTest {
 		when(grepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
 		when(awardServiceMock.createAward(awardInputRequest,role)).thenReturn(expectedAward);
+		when(adminProgramRepository.findById(anyString()).orElse(null)).thenReturn(null);
 		Award award = awardServiceMock.createAward(awardInputRequest, role);
 		assertNotNull(award);
 
