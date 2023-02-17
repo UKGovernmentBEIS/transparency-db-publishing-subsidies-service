@@ -8,6 +8,7 @@ import javax.servlet.MultipartConfigElement;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.UserPrinciple;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AuditLogsRepository;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.service.BulkUploadMfaAwardsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,6 +42,9 @@ public class BulkUploadAwardsController {
 
 	@Autowired
 	public BulkUploadAwardsService bulkUploadAwardsService;
+
+	@Autowired
+	public BulkUploadMfaAwardsService bulkUploadAwardsMfaService;
 
 	public static final String All_ROLES[]= {"BEIS Administrator","Granting Authority Administrator",
 			"Granting Authority Approver","Granting Authority Encoder"};
@@ -109,6 +113,60 @@ public class BulkUploadAwardsController {
 			validationErrorResult.setColumns("All");
 			validationErrorResult.setErrorMessages("Upload an excel file (in format xlsx) !");
 			
+			validationResult.setTotalRows(0);
+			validationResult.setErrorRows(0);
+			validationResult.setValidationErrorResult(Arrays.asList(validationErrorResult));
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validationResult);
+		}
+	}
+
+	@PostMapping(value = "/uploadBulkMfa", consumes = { "multipart/form-data" })
+	public ResponseEntity<ValidationResult> uploadMfaFile(@RequestParam("file") MultipartFile file,
+															 @RequestHeader("userPrinciple") HttpHeaders userPrinciple){
+		UserPrinciple userPrincipleObj = null;
+		//1.0 - Check uploaded file format to be xlsx
+		if(ExcelHelper.hasExcelFormat(file)) {
+
+			try {
+				log.info("{} :: Before calling validateFile", loggingComponentName);
+				String userPrincipleStr = userPrinciple.get("userPrinciple").get(0);
+				userPrincipleObj = objectMapper.readValue(userPrincipleStr, UserPrinciple.class);
+				if (!Arrays.asList(All_ROLES).contains(userPrincipleObj.getRole())) {
+					ValidationResult validationResult = new ValidationResult();
+					validationResult.setMessage("You are not authorised to bulk upload awards");
+					return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(validationResult);
+				}
+				ValidationResult validationResult = bulkUploadAwardsMfaService.validateFile(file,
+						userPrincipleObj.getRole());
+				if (validationResult.getErrorRows() == 0) {
+					ExcelHelper.saveAuditLog(userPrincipleObj, "Bulk upload Awards", userPrincipleObj.getRole(),
+							auditLogsRepository);
+				}
+				return ResponseEntity.status(HttpStatus.OK).body(validationResult);
+
+			} catch (Exception e) {
+
+				log.error("{} :: Exception block in BulkUploadAwardsController", loggingComponentName,e);
+				//2.0 - CatchException and return validation errors
+				ValidationResult validationResult = new ValidationResult();
+				validationResult.setMessage("Bulk upload failed");
+				ValidationErrorResult errorResult = new ValidationErrorResult();
+				errorResult.setErrorMessages(e.getMessage());
+				List<ValidationErrorResult> validationErrorResult = new ArrayList<>();
+				validationErrorResult.add(errorResult);
+				validationResult.setValidationErrorResult(validationErrorResult);
+				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(validationResult);
+			}
+		} else {
+
+			//3.0 - Wrong format file
+			ValidationResult validationResult = new ValidationResult();
+
+			ValidationErrorResult validationErrorResult = new ValidationErrorResult();
+			validationErrorResult.setRow("All");
+			validationErrorResult.setColumns("All");
+			validationErrorResult.setErrorMessages("Upload an excel file (in format xlsx) !");
+
 			validationResult.setTotalRows(0);
 			validationResult.setErrorRows(0);
 			validationResult.setValidationErrorResult(Arrays.asList(validationErrorResult));

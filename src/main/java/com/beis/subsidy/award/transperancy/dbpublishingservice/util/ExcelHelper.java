@@ -2,8 +2,10 @@ package com.beis.subsidy.award.transperancy.dbpublishingservice.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -12,6 +14,7 @@ import java.util.Locale;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.UserPrinciple;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.AuditLogs;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.model.BulkUploadMfaAwards;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AuditLogsRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -29,11 +32,12 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ExcelHelper {
-	
+
 	public static String TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
 	public final static int EXPECTED_COLUMN_COUNT = 19;
-	
+	public final static int EXPECTED_MFA_COLUMN_COUNT = 9;
+
 	public  final static String SHEET = "Upload Template";
 
 	/**
@@ -50,13 +54,13 @@ public class ExcelHelper {
 		return flag;
 	}
 
-	
-	
+
+
 	public static List<BulkUploadAwards> excelToAwards(InputStream is) {
 	    try {
-	       	    	
+
 	    	log.info("Inside excelToAwards::DBPublishingSubsidies Service" );
-	        
+
 	        Workbook workbook = new XSSFWorkbook(is);
 
 	        Sheet sheet = workbook.getSheet(SHEET);
@@ -136,7 +140,7 @@ public class ExcelHelper {
 					  break;
 
 				  case 7:
-					  if(currentCell.getCellType()==CellType.BLANK) {	
+					  if(currentCell.getCellType()==CellType.BLANK) {
 					  bulkUploadAwards.setSubsidyInstrumentOther(null);
 					  }else {
 						  bulkUploadAwards.setSubsidyInstrumentOther(currentCell.getStringCellValue());
@@ -207,13 +211,13 @@ public class ExcelHelper {
 					break;
 
 				  case 15:
-					 
+
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setLegalGrantingDate(null);
 					  }
 					  if(currentCell.getCellType()==CellType.STRING) {
 						  bulkUploadAwards.setLegalGrantingDate("invalid");
-						  
+
 					  }else {
 					  bulkUploadAwards.setLegalGrantingDate(convertDateToString(currentCell.getDateCellValue()));
 					  }
@@ -273,7 +277,139 @@ public class ExcelHelper {
 	    	throw new RuntimeException("fail to read Excel file: " + e);
 	    }
 	  }
-	
+
+	public static List<BulkUploadMfaAwards> excelToMfaAwards(InputStream is) {
+		try {
+
+			log.info("Inside excelToMfaAwards::DBPublishingSubsidies Service" );
+
+			Workbook workbook = new XSSFWorkbook(is);
+
+			Sheet sheet = workbook.getSheet(SHEET);
+			Iterator<Row> rows = sheet.iterator();
+
+			log.info("first row " + sheet.getFirstRowNum());
+			List<BulkUploadMfaAwards> bulkUploadMfaAwardsList = new ArrayList<BulkUploadMfaAwards>();
+			log.info("last row " + sheet.getLastRowNum());
+			int rowNumber = 0;
+			while (rows.hasNext()) {
+				log.info("before rows.next");
+				Row currentRow = rows.next();
+
+
+				// skip header
+				if (rowNumber == 0) {
+					rowNumber++;
+					continue;
+				}
+				if (containsValue(currentRow)) {
+					log.info("BulkUploadAwardsController Going Inside switch block" ,rowNumber);
+					Iterator<Cell> cellsInRow = currentRow.iterator();
+
+					BulkUploadMfaAwards bulkUploadMfaAwards = new BulkUploadMfaAwards();
+					bulkUploadMfaAwards.setRow(currentRow.getRowNum() + 1);
+
+					int cellIdx = 0;
+					while (cellsInRow.hasNext()) {
+						Cell currentCell = cellsInRow.next();
+
+						switch (cellIdx) {
+
+							case 0:
+								if(currentCell.getStringCellValue().equalsIgnoreCase("yes")){
+									bulkUploadMfaAwards.setSpeiaAward(true);
+								}else {
+									bulkUploadMfaAwards.setSpeiaAward(false);
+								}
+
+						break;
+
+							case 1:
+								if(currentCell.getStringCellValue().equalsIgnoreCase("yes")){
+									bulkUploadMfaAwards.setMfaSpeiaGrouping(true);
+								}else {
+									bulkUploadMfaAwards.setMfaSpeiaGrouping(false);
+								}
+
+								break;
+
+							case 2:
+								if(currentCell.getCellType()==CellType.BLANK) {
+									bulkUploadMfaAwards.setGroupingId("");
+								}else {
+									bulkUploadMfaAwards.setGroupingId(currentCell.getStringCellValue());
+								}
+
+								break;
+
+							case 3:
+								boolean numericCheck = isBigDecimalNumeric(BigDecimal.valueOf(currentCell.getNumericCellValue()));
+								if(!numericCheck) {
+									bulkUploadMfaAwards.setAwardFullAmount(BigDecimal.valueOf(-1.00));
+								}else {
+									bulkUploadMfaAwards.setAwardFullAmount(BigDecimal.valueOf(currentCell.getNumericCellValue()));
+								}
+								break;
+
+							case 4:
+								if(currentCell.getCellType()==CellType.BLANK) {
+									bulkUploadMfaAwards.setConfirmationDate(null);
+								}
+								if(currentCell.getCellType()==CellType.STRING) {
+									bulkUploadMfaAwards.setConfirmationDate(null);
+
+								}else {
+									bulkUploadMfaAwards.setConfirmationDate(convertDateToLocalDate(currentCell.getDateCellValue()));
+								}
+								break;
+
+							case 5:
+								bulkUploadMfaAwards.setPublicAuthority(currentCell.getStringCellValue());
+
+								break;
+
+							case 6:
+								bulkUploadMfaAwards.setOrgName(currentCell.getStringCellValue());
+
+								break;
+
+							case 7:
+								bulkUploadMfaAwards.setOrgIdType(currentCell.getStringCellValue());
+
+								break;
+
+							case 8:
+								bulkUploadMfaAwards.setIdNumber(currentCell.getStringCellValue());
+
+								break;
+
+							default:
+								break;
+						}
+
+						cellIdx++;
+					}
+
+
+					bulkUploadMfaAwardsList.add(bulkUploadMfaAwards);
+				}else {
+					break;
+				}
+			}
+
+			workbook.close();
+
+			log.info("Excel - List - size = " + bulkUploadMfaAwardsList.size());
+			return bulkUploadMfaAwardsList;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		catch (Exception e) {
+
+			throw new RuntimeException("fail to read Excel file: " + e);
+		}
+	}
+
 	private static String convertDateToString(Date incomingDate) {
 		SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
 		String date = null ;
@@ -287,7 +423,7 @@ public class ExcelHelper {
 		}
 	return date;
 	}
-	
+
 	public static boolean containsValue(Row row){
 		boolean flag = true;
 		Row.MissingCellPolicy policy = Row.MissingCellPolicy.CREATE_NULL_AS_BLANK; // If the Cell returned doesn't exist, instead of returning null, create a new Cell with a cell type of "blank".
@@ -360,6 +496,17 @@ public class ExcelHelper {
 		return true;
 	}
 
+	public static boolean isBigDecimalNumeric(BigDecimal strNum) {
+		if (strNum == null) {
+			return false;
+		}
+		try {
+			double d = Double.parseDouble(String.valueOf(strNum));
+		} catch (NumberFormatException nfe) {
+			return false;
+		}
+		return true;
+	}
 	public static Boolean validateColumnCount(InputStream is) {
 		Workbook workbook = null;
 		try {
@@ -374,5 +521,25 @@ public class ExcelHelper {
 			throw new RuntimeException("fail to read Excel file: " + e);
 		}
 		return false;
+	}
+
+	public static Boolean validateMfaColumnCount(InputStream is) {
+		Workbook workbook = null;
+		try {
+			workbook = new XSSFWorkbook(is);
+			Sheet sheet = workbook.getSheet(SHEET);
+
+			int headerColumnCount = sheet.getRow(0).getLastCellNum();
+			if (headerColumnCount == EXPECTED_MFA_COLUMN_COUNT){
+				return true;
+			}
+		} catch (IOException e) {
+			throw new RuntimeException("fail to read Excel file: " + e);
+		}
+		return false;
+	}
+
+	private static LocalDate convertDateToLocalDate(Date incomingDate){
+		return incomingDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 	}
 }
