@@ -2,7 +2,6 @@ package com.beis.subsidy.award.transperancy.dbpublishingservice.util;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -17,11 +16,7 @@ import com.beis.subsidy.award.transperancy.dbpublishingservice.model.AuditLogs;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.BulkUploadMfaAwards;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AuditLogsRepository;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.expression.ParseException;
 import org.springframework.web.multipart.MultipartFile;
@@ -292,6 +287,7 @@ public class ExcelHelper {
 			List<BulkUploadMfaAwards> bulkUploadMfaAwardsList = new ArrayList<BulkUploadMfaAwards>();
 			log.info("last row " + sheet.getLastRowNum());
 			int rowNumber = 0;
+			DataFormatter formatter = new DataFormatter();
 			while (rows.hasNext()) {
 				log.info("before rows.next");
 				Row currentRow = rows.next();
@@ -310,6 +306,7 @@ public class ExcelHelper {
 					bulkUploadMfaAwards.setRow(currentRow.getRowNum() + 1);
 
 					int cellIdx = 0;
+
 					while (cellsInRow.hasNext()) {
 						Cell currentCell = cellsInRow.next();
 
@@ -318,17 +315,20 @@ public class ExcelHelper {
 							case 0:
 								if(currentCell.getStringCellValue().equalsIgnoreCase("yes")){
 									bulkUploadMfaAwards.setSpeiaAward(true);
-								}else {
+								}else if(currentCell.getStringCellValue().equalsIgnoreCase("no")){
 									bulkUploadMfaAwards.setSpeiaAward(false);
+								}else if(currentCell.getCellType()==CellType.BLANK){
+									bulkUploadMfaAwards.setSpeiaAward(null);
 								}
-
-						break;
+								break;
 
 							case 1:
 								if(currentCell.getStringCellValue().equalsIgnoreCase("yes")){
 									bulkUploadMfaAwards.setMfaSpeiaGrouping(true);
-								}else {
+								}else if(currentCell.getStringCellValue().equalsIgnoreCase("no")){
 									bulkUploadMfaAwards.setMfaSpeiaGrouping(false);
+								}else if(currentCell.getCellType()==CellType.BLANK){
+									bulkUploadMfaAwards.setMfaSpeiaGrouping(null);
 								}
 
 								break;
@@ -343,12 +343,7 @@ public class ExcelHelper {
 								break;
 
 							case 3:
-								boolean numericCheck = isBigDecimalNumeric(BigDecimal.valueOf(currentCell.getNumericCellValue()));
-								if(!numericCheck) {
-									bulkUploadMfaAwards.setAwardFullAmount(BigDecimal.valueOf(-1.00));
-								}else {
-									bulkUploadMfaAwards.setAwardFullAmount(BigDecimal.valueOf(currentCell.getNumericCellValue()));
-								}
+								bulkUploadMfaAwards.setAwardFullAmount(formatter.formatCellValue(currentCell));
 								break;
 
 							case 4:
@@ -496,17 +491,6 @@ public class ExcelHelper {
 		return true;
 	}
 
-	public static boolean isBigDecimalNumeric(BigDecimal strNum) {
-		if (strNum == null) {
-			return false;
-		}
-		try {
-			double d = Double.parseDouble(String.valueOf(strNum));
-		} catch (NumberFormatException nfe) {
-			return false;
-		}
-		return true;
-	}
 	public static Boolean validateColumnCount(InputStream is) {
 		Workbook workbook = null;
 		try {

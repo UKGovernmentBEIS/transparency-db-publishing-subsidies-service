@@ -144,7 +144,7 @@ public class BulkUploadMfaAwardsService {
 
         List<BulkUploadMfaAwards> groupingIdExistsRecordsList = bulkUploadMfaAwards.stream()
                 .filter(
-                        award -> { if(!StringUtils.isEmpty(award.getGroupingId())) {
+                        award -> { if(!StringUtils.isEmpty(award.getGroupingId()) && (award.getMfaSpeiaGrouping() != null)) {
                             MFAGrouping groupingId = mfaGroupingRepository.findByMfaGroupingNumber(award.getGroupingId());
                             return groupingId == null && award.getMfaSpeiaGrouping();
                         }else {
@@ -155,23 +155,19 @@ public class BulkUploadMfaAwardsService {
 
         List<BulkUploadMfaAwards> groupingIdWithNoErrorRecordsList = bulkUploadMfaAwards.stream()
                 .filter(
-                        award -> (
-                                (!award.getMfaSpeiaGrouping() && (
-                                        !StringUtils.isEmpty(award.getGroupingId()) )
-                                )
-                        )
-                )
-                .collect(Collectors.toList());
+                        award -> { if(award.getMfaSpeiaGrouping() != null){
+                            return !award.getMfaSpeiaGrouping() && (!StringUtils.isEmpty(award.getGroupingId()));
+                        }
+                            return false;
+                        }).collect(Collectors.toList());
 
         List<BulkUploadMfaAwards> groupingIdWithYesErrorRecordsList = bulkUploadMfaAwards.stream()
                 .filter(
-                        award -> (
-                                (award.getMfaSpeiaGrouping() && (
-                                        StringUtils.isEmpty(award.getGroupingId()))
-                                )
-                        )
-                )
-                .collect(Collectors.toList());
+                        award -> { if(award.getMfaSpeiaGrouping() != null) {
+                            return award.getMfaSpeiaGrouping() && (StringUtils.isEmpty(award.getGroupingId()));
+                        }
+                            return false;
+                        }).collect(Collectors.toList());
 
 
 
@@ -224,14 +220,38 @@ public class BulkUploadMfaAwardsService {
         List<ValidationErrorResult> validationMfaAwardAmountErrorResultList = new ArrayList<>();
 
         List<BulkUploadMfaAwards> subsidyAmountFormatErrorRecordsList = bulkUploadMfaAwards.stream().filter(
-                award -> award.getAwardFullAmount()!=null && award.getAwardFullAmount().equals(-1.00))
-                //sets to -1.00 in excelHelper if not numeric
+                award -> !StringUtils.isEmpty(award.getAwardFullAmount()) && !ExcelHelper.isNumeric(award.getAwardFullAmount()))
                 .collect(Collectors.toList());
+
+        List<BulkUploadMfaAwards> subsidyAmountEmptyErrorRecordsList = bulkUploadMfaAwards.stream().filter(
+                        award -> StringUtils.isEmpty(award.getAwardFullAmount()))
+                .collect(Collectors.toList());
+
+            List<BulkUploadMfaAwards> subsidyAmountNegativeErrorRecordsList = bulkUploadMfaAwards.stream().filter(
+                    award -> { if(ExcelHelper.isNumeric(award.getAwardFullAmount())){
+                        return (Float.parseFloat(award.getAwardFullAmount()) < 0) || (Float.parseFloat(award.getAwardFullAmount()) % 1 != 0);
+                    }
+                    return false;
+                    }).collect(Collectors.toList());
 
         if(subsidyAmountFormatErrorRecordsList.size()>0) {
             validationMfaAwardAmountErrorResultList.addAll(subsidyAmountFormatErrorRecordsList.stream()
                     .map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Full Amount"),
-                            "MFA award amount should only contain numeric characters."))
+                            "MFA award amount should only contain numeric characters (0-9)."))
+                    .collect(Collectors.toList()));
+        }
+
+        if(subsidyAmountNegativeErrorRecordsList.size()>0) {
+            validationMfaAwardAmountErrorResultList.addAll(subsidyAmountNegativeErrorRecordsList.stream()
+                    .map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Full Amount"),
+                            "MFA award amount should only contain positive whole numbers."))
+                    .collect(Collectors.toList()));
+        }
+
+        if(subsidyAmountEmptyErrorRecordsList.size()>0) {
+            validationMfaAwardAmountErrorResultList.addAll(subsidyAmountEmptyErrorRecordsList.stream()
+                    .map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Full Amount"),
+                            "You must provide a MFA Award full amount."))
                     .collect(Collectors.toList()));
         }
 
@@ -357,7 +377,7 @@ public class BulkUploadMfaAwardsService {
     private List<ValidationErrorResult> validateOrgId(List<BulkUploadMfaAwards> bulkUploadMfaAwards) {
 
         List<BulkUploadMfaAwards> orgIdErrorRecordsList = bulkUploadMfaAwards.stream()
-                .filter(award -> award.getIdNumber()!=null && award.getIdNumber().length() > 10).collect(Collectors.toList());
+                .filter(award -> award.getIdNumber()!=null && award.getIdNumber().length() > 255).collect(Collectors.toList());
 
         List<BulkUploadMfaAwards> orgIdMissingRecordsList = bulkUploadMfaAwards.stream()
                 .filter(award -> award.getIdNumber()==null || StringUtils.isEmpty(award.getIdNumber())).collect(Collectors.toList());
@@ -377,7 +397,7 @@ public class BulkUploadMfaAwardsService {
         }
 
         List<BulkUploadMfaAwards> orgIdVATErrorRecordsList = bulkUploadMfaAwards.stream()
-                .filter(award -> award.getOrgIdType()!=null && award.getOrgIdType().equalsIgnoreCase("VAT Number") && (award.getIdNumber()!=null && (award.getIdNumber().length() != 9 || !award.getIdNumber().matches("[0-9]+")))).collect(Collectors.toList());
+                .filter(award -> award.getOrgIdType()!=null && award.getOrgIdType().equalsIgnoreCase("VAT Number") && (award.getIdNumber()!=null && (award.getIdNumber().length() > 255))).collect(Collectors.toList());
 
         if(orgIdVATErrorRecordsList.size()>0) {
             validationOrgIdResultList.addAll(orgIdVATErrorRecordsList.stream()
@@ -387,7 +407,7 @@ public class BulkUploadMfaAwardsService {
         }
 
         List<BulkUploadMfaAwards> orgIdUTRErrorRecordsList = bulkUploadMfaAwards.stream()
-                .filter(award -> award.getOrgIdType()!=null && award.getOrgIdType().equalsIgnoreCase("UTR Number") && (award.getIdNumber()!=null && (award.getIdNumber().length() != 10 ||  !award.getIdNumber().matches("[0-9]+")))).collect(Collectors.toList());
+                .filter(award -> award.getOrgIdType()!=null && award.getOrgIdType().equalsIgnoreCase("UTR Number") && (award.getIdNumber()!=null && (award.getIdNumber().length() > 255))).collect(Collectors.toList());
 
         if(orgIdUTRErrorRecordsList.size()>0) {
             validationOrgIdResultList.addAll(orgIdUTRErrorRecordsList.stream()
@@ -399,8 +419,7 @@ public class BulkUploadMfaAwardsService {
         List<BulkUploadMfaAwards> orgIdCharityErrorRecordsList = bulkUploadMfaAwards.stream()
                 .filter(award -> award.getOrgIdType()!=null && award.getOrgIdType()
                         .equalsIgnoreCase("Charity Number") && (award.getIdNumber()!=null &&
-                        (award.getIdNumber().length() > 8 ||
-                                !award.getIdNumber().matches("[0-9]+")))).collect(Collectors.toList());
+                        (award.getIdNumber().length() > 255))).collect(Collectors.toList());
 
         validationOrgIdResultList.addAll(orgIdCharityErrorRecordsList.stream()
                 .map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("ID Number"),
@@ -410,7 +429,7 @@ public class BulkUploadMfaAwardsService {
 
         List<BulkUploadMfaAwards> orgIdCompanyNumberFormatErrorRecordsList = bulkUploadMfaAwards.stream()
                 .filter(award -> award.getOrgIdType()!=null && award.getOrgIdType().equalsIgnoreCase("Company Registration Number")
-                        && (award.getIdNumber()!=null && (!validateCompanyNumber(award.getIdNumber())))).collect(Collectors.toList());
+                        && (award.getIdNumber()!=null &&  (award.getIdNumber().length() > 255))).collect(Collectors.toList());
 
         validationOrgIdResultList.addAll(orgIdCompanyNumberFormatErrorRecordsList.stream()
                 .map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("ID Number"),
