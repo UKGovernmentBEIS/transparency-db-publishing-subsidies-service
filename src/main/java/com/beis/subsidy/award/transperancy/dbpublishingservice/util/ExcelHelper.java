@@ -335,7 +335,7 @@ public class ExcelHelper {
 
 							case 2:
 								if(currentCell.getCellType()==CellType.BLANK) {
-									bulkUploadMfaAwards.setGroupingId("");
+									bulkUploadMfaAwards.setGroupingId(null);
 								}else {
 									bulkUploadMfaAwards.setGroupingId(currentCell.getStringCellValue());
 								}
