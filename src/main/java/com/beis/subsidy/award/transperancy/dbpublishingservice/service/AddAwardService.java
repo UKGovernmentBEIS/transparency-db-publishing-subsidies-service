@@ -10,6 +10,8 @@ import java.util.stream.Stream;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.feign.GraphAPIFeignClient;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.*;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.model.*;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AdminProgramRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AwardRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.GrantingAuthorityRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.SubsidyMeasureRepository;
@@ -22,11 +24,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.Award;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.GrantingAuthority;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SingleAward;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SubsidyMeasure;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
@@ -47,6 +44,9 @@ public class AddAwardService {
 
 	@Autowired
 	private GrantingAuthorityRepository gaRepository;
+
+	@Autowired
+	private AdminProgramRepository adminProgramRepository;
 
 	@Value("${loggingComponentName}")
 	private String loggingComponentName;
@@ -151,8 +151,9 @@ public class AddAwardService {
 			 * validate Goods or Service
 			 * 
 			 */
-
 			List<SingleAwardValidationResult> SubsidyInstrumentErrorList = validateSubsidyInstrument(award);
+			
+			List<SingleAwardValidationResult> AdminProgramErrorList = validateAdminProgram(award);
 			
 			// Merge lists of Validation Errors
 			List<SingleAwardValidationResult> validationErrorResultList = Stream
@@ -162,7 +163,8 @@ public class AddAwardService {
 							beneficiaryMissingList, subsidyControlNumberMismatchList,
 							grantingAuthorityNameErrorList, grantingAuthorityErrorList, sizeOfOrgErrorList,
 							spendingRegionErrorList, spendingSectorErrorList, goodsOrServiceErrorList,
-							SubsidyInstrumentErrorList,legalGrantingDateErrorList,SubsidyElementFullAmountErrorList)
+							SubsidyInstrumentErrorList,legalGrantingDateErrorList,SubsidyElementFullAmountErrorList,
+							AdminProgramErrorList)
 					.flatMap(x -> x.stream()).collect(Collectors.toList());
 
 		
@@ -213,6 +215,32 @@ public class AddAwardService {
 				
 			}
 			return validationResult;
+	}
+
+	private List<SingleAwardValidationResult> validateAdminProgram(SingleAward award) {
+		/*
+		 * Admin program validation
+		 */
+		List<SingleAwardValidationResult> errorList = new ArrayList<>();
+		if(!StringUtils.isEmpty(award.getAdminProgramNumber())) {
+			if (award.getAdminProgramNumber() != null && award.getAdminProgramNumber().length() > 255) {
+				errorList.add(new SingleAwardValidationResult("AdminProgramContainer", "Admin program number must be no greater than 255 characters."));
+			}
+
+			AdminProgram tempAdminProgram = adminProgramRepository.findById(award.getAdminProgramNumber()).orElse(null);
+			if (tempAdminProgram == null) {
+				errorList.add(new SingleAwardValidationResult("AdminProgramContainer", "Admin program does not exist."));
+			}
+
+			if (tempAdminProgram != null && !tempAdminProgram.getStatus().equalsIgnoreCase("active")) {
+				errorList.add(new SingleAwardValidationResult("AdminProgramContainer", "Admin program is not active."));
+			}
+
+			if (tempAdminProgram != null && !tempAdminProgram.getSubsidyMeasure().getScNumber().equalsIgnoreCase(award.getSubsidyControlNumber())) {
+				errorList.add(new SingleAwardValidationResult("AdminProgramContainer", "Admin program scheme must match that of the award scheme."));
+			}
+		}
+		return errorList;
 	}
 
 	private List<SingleAwardValidationResult> validateStandaloneAwardStatus(SingleAward award) {

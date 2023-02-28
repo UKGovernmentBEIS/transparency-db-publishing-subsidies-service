@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.beis.subsidy.award.transperancy.dbpublishingservice.model.AdminProgram;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AdminProgramRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,27 +33,31 @@ public class BulkUploadAwardsService {
 	@Autowired
 	private AwardService awardService;
 
+	@Autowired
+	private AdminProgramRepository adminProgramRepository;
+
 	private final HashMap<String, String> columnMapping = new HashMap<String, String>()
 	{{
 		put("SC Number", "A");
 		put("Title", "B");
-		put("Standalone", "C");
-		put("Description", "D");
-		put("Objective", "E");
-		put("Objective Other", "F");
-		put("Instrument", "G");
-		put("Instrument Other", "H");
-		put("Full Range", "I");
-		put("Full Exact", "J");
-		put("ID Type", "K");
-		put("ID", "L");
-		put("Beneficiary", "M");
-		put("Size of Org", "N");
-		put("GA Name", "O");
-		put("Legal Granting Date", "P");
-		put("Goods Services", "Q");
-		put("Region", "R");
-		put("Sector", "S");
+		put("AP Number", "C");
+		put("Standalone", "D");
+		put("Description", "E");
+		put("Objective", "F");
+		put("Objective Other", "G");
+		put("Instrument", "H");
+		put("Instrument Other", "I");
+		put("Full Range", "J");
+		put("Full Exact", "L");
+		put("ID Type", "L");
+		put("ID", "M");
+		put("Beneficiary", "N");
+		put("Size of Org", "O");
+		put("GA Name", "P");
+		put("Legal Granting Date", "Q");
+		put("Goods Services", "R");
+		put("Region", "S");
+		put("Sector", "T");
 	}};
 
 
@@ -177,6 +183,8 @@ public class BulkUploadAwardsService {
 
 			List<ValidationErrorResult> SubsidyTaxRangeAmountErrorList = validateSubsidyAmountRange(bulkUploadAwards);
 
+			List<ValidationErrorResult> adminProgramNumberErrorList = validateAdminProgramNumber(bulkUploadAwards);
+
 			// Merge lists of Validation Errors
 			List<ValidationErrorResult> validationErrorResultList = Stream
 					.of(scNumberNameCheckList, subsidyMeasureTitleNameLengthList, subsidyPurposeCheckList,
@@ -184,7 +192,8 @@ public class BulkUploadAwardsService {
 							subsidyControlNumberLengthList, subsidyControlNumberMismatchList,
 							grantingAuthorityNameErrorList, grantingAuthorityErrorList, sizeOfOrgErrorList,
 							spendingRegionErrorList, spendingSectorErrorList, goodsOrServiceErrorList,SubsidyInstrumentErrorList,
-							legalGrantingDateErrorList,SubsidyElementFullAmountErrorList, StandaloneAwardErrorList, SubsidyDescriptionErrorList, SubsidyTaxRangeAmountErrorList)
+							legalGrantingDateErrorList,SubsidyElementFullAmountErrorList, StandaloneAwardErrorList, SubsidyDescriptionErrorList,
+							SubsidyTaxRangeAmountErrorList, adminProgramNumberErrorList)
 					.flatMap(x -> x.stream()).collect(Collectors.toList());
 
 			log.info("Final validation errors list ...printing list of errors - start");
@@ -218,6 +227,72 @@ public class BulkUploadAwardsService {
 
 	}
 
+	private List<ValidationErrorResult> validateAdminProgramNumber(List<BulkUploadAwards> bulkUploadAwards) {
+		List<ValidationErrorResult> errorList = new ArrayList<>();
+
+		// AP Length
+		List<BulkUploadAwards> adminProgramLengthErrorList = bulkUploadAwards.stream()
+				.filter(award -> (
+						award.getAdminProgramNumber() != null && award.getAdminProgramNumber().length() > 255)
+				)
+				.collect(Collectors.toList());
+
+		errorList.addAll(adminProgramLengthErrorList.stream()
+				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("AP Number"),
+						"The admin program number must be 255 characters or less."))
+				.collect(Collectors.toList()));
+
+		// AP Exists
+		List<BulkUploadAwards> adminProgramExistsErrorList = bulkUploadAwards.stream()
+				.filter(award -> {
+					if(!StringUtils.isEmpty(award.getAdminProgramNumber())) {
+						AdminProgram adminProgram = adminProgramRepository.findById(award.getAdminProgramNumber()).orElse(null);
+						return adminProgram == null;
+					}else{
+						return false;
+					}
+				}).collect(Collectors.toList());
+
+		errorList.addAll(adminProgramExistsErrorList.stream()
+				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("AP Number"),
+						"Admin program " + award.getAdminProgramNumber() + " does not exist."))
+				.collect(Collectors.toList()));
+
+		// AP Active
+		List<BulkUploadAwards> adminProgramActiveErrorList = bulkUploadAwards.stream()
+				.filter(award -> {
+					if(!StringUtils.isEmpty(award.getAdminProgramNumber())) {
+						AdminProgram adminProgram = adminProgramRepository.findById(award.getAdminProgramNumber()).orElse(null);
+							return adminProgram != null && !adminProgram.getStatus().equalsIgnoreCase("active");
+					}else{
+						return false;
+					}
+				}).collect(Collectors.toList());
+
+		errorList.addAll(adminProgramActiveErrorList.stream()
+				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("AP Number"),
+						"Admin program " + award.getAdminProgramNumber() + " is not active."))
+				.collect(Collectors.toList()));
+
+		// AP SC Match
+		List<BulkUploadAwards> adminProgramSchemeMatchErrorList = bulkUploadAwards.stream()
+				.filter(award -> {
+					if(!StringUtils.isEmpty(award.getAdminProgramNumber())) {
+						AdminProgram adminProgram = adminProgramRepository.findById(award.getAdminProgramNumber()).orElse(null);
+						return adminProgram != null && !adminProgram.getSubsidyMeasure().getScNumber().equalsIgnoreCase(award.getSubsidyControlNumber());
+					}else{
+						return false;
+					}
+				}).collect(Collectors.toList());
+
+		errorList.addAll(adminProgramSchemeMatchErrorList.stream()
+				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("AP Number"),
+						"Admin program " + award.getAdminProgramNumber() + " is not associated to scheme " + award.getSubsidyControlNumber() + "."))
+				.collect(Collectors.toList()));
+
+		return errorList;
+	}
+
 	private List<ValidationErrorResult> validateSubsidyDescription(List<BulkUploadAwards> bulkUploadAwards) {
 		List<BulkUploadAwards> subsidyDescriptionErrorRecordsList = bulkUploadAwards.stream()
 				.filter(award -> (
@@ -248,7 +323,7 @@ public class BulkUploadAwardsService {
 				.filter(
 						award -> (
 								(award.getStandaloneAward().equalsIgnoreCase("yes") && (
-										!StringUtils.isEmpty(award.getSubsidyControlNumber()) || !StringUtils.isEmpty(award.getSubsidyControlTitle())
+										!StringUtils.isEmpty(award.getSubsidyControlNumber()) || !StringUtils.isEmpty(award.getSubsidyControlTitle()) || !StringUtils.isEmpty(award.getAdminProgramNumber())
 										))
 						)
 				)
@@ -263,7 +338,7 @@ public class BulkUploadAwardsService {
 		validationStandaloneAwardResultList.addAll(
 				standaloneAwardWithSCErrorRecordsList.stream()
 						.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Standalone"),
-								"If 'Standalone Award' is 'Yes', you must not provide an SC number or Title"))
+								"If 'Standalone Award' is 'Yes', you must not provide an SC number, Scheme Title, or AP number"))
 						.collect(Collectors.toList())
 		);
 

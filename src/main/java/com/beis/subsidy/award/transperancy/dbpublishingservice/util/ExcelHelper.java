@@ -30,7 +30,8 @@ public class ExcelHelper {
 
 	public static String TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-	public final static int EXPECTED_COLUMN_COUNT = 19;
+	public final static int EXPECTED_COLUMN_COUNT = 20;
+	
 	public final static int EXPECTED_MFA_COLUMN_COUNT = 9;
 
 	public  final static String SHEET = "Upload Template";
@@ -82,11 +83,10 @@ public class ExcelHelper {
 					BulkUploadAwards bulkUploadAwards = new BulkUploadAwards();
 					bulkUploadAwards.setRow(currentRow.getRowNum() + 1);
 
-				int cellIdx = 0;
 				while (cellsInRow.hasNext()) {
 				  Cell currentCell = cellsInRow.next();
 
-				  switch (cellIdx) {
+				  switch (currentCell.getColumnIndex()) {
 
 				  case 0:
 					  bulkUploadAwards.setSubsidyControlNumber(currentCell.getStringCellValue());
@@ -99,16 +99,20 @@ public class ExcelHelper {
 					break;
 
 				  case 2:
-					  bulkUploadAwards.setStandaloneAward(currentCell.getStringCellValue());
+					  bulkUploadAwards.setAdminProgramNumber(currentCell.getStringCellValue());
 
 					  break;
 
 				  case 3:
-					  bulkUploadAwards.setSubsidyDescription(currentCell.getStringCellValue());
+					  bulkUploadAwards.setStandaloneAward(currentCell.getStringCellValue());
 
 					  break;
 
 				  case 4:
+					  bulkUploadAwards.setSubsidyDescription(currentCell.getStringCellValue());
+					  break;
+
+				  case 5:
 					 if(currentCell.getCellType()==CellType.BLANK) {
 						 bulkUploadAwards.setSubsidyObjective(null);
 					 }else {
@@ -117,7 +121,7 @@ public class ExcelHelper {
 
 					break;
 
-				  case 5:
+				  case 6:
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setSubsidyObjectiveOther(null);
 					  }else {
@@ -126,7 +130,7 @@ public class ExcelHelper {
 
 					break;
 
-				  case 6:
+				  case 7:
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setSubsidyInstrument(null);
 					  }else {
@@ -134,8 +138,8 @@ public class ExcelHelper {
 					  }
 					  break;
 
-				  case 7:
-					  if(currentCell.getCellType()==CellType.BLANK) {
+				  case 8:
+					  if(currentCell.getCellType()==CellType.BLANK) {	
 					  bulkUploadAwards.setSubsidyInstrumentOther(null);
 					  }else {
 						  bulkUploadAwards.setSubsidyInstrumentOther(currentCell.getStringCellValue());
@@ -143,13 +147,13 @@ public class ExcelHelper {
 
 					  break;
 
-				  case 8:
+				  case 9:
 
 					  bulkUploadAwards.setSubsidyAmountRange( (currentCell == null || currentCell.getCellType() == CellType.BLANK || (currentCell.getCellType().equals(CellType.STRING) && currentCell.getStringCellValue().trim().isEmpty())) ? null : currentCell.getStringCellValue() );
 
 					break;
 
-				  case 9:
+				  case 10:
 					  if (currentCell.getCellType() == CellType.STRING) {
 					  bulkUploadAwards.setSubsidyAmountExact((currentCell.getStringCellValue()));
 					  }else if (currentCell.getCellType() == CellType.NUMERIC) {
@@ -158,7 +162,7 @@ public class ExcelHelper {
 
 					  break;
 
-				  case 10:
+				  case 11:
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setNationalIdType(null);
 					  }else {
@@ -167,7 +171,7 @@ public class ExcelHelper {
 
 					break;
 
-				  case 11:
+				  case 12:
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setNationalId(null);
 					  }else {
@@ -178,7 +182,7 @@ public class ExcelHelper {
 
 					break;
 
-				  case 12:
+				  case 13:
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setBeneficiaryName(null);
 					  }else {
@@ -187,7 +191,7 @@ public class ExcelHelper {
 
 					break;
 
-				  case 13:
+				  case 14:
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setOrgSize(null);
 					  }else {
@@ -196,7 +200,7 @@ public class ExcelHelper {
 
 					break;
 
-				  case 14:
+				  case 15:
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setGrantingAuthorityName(null);
 					  }else {
@@ -205,8 +209,8 @@ public class ExcelHelper {
 
 					break;
 
-				  case 15:
-
+				  case 16:
+					 
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setLegalGrantingDate(null);
 					  }
@@ -219,7 +223,7 @@ public class ExcelHelper {
 
 					break;
 
-				  case 16:
+				  case 17:
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setGoodsOrServices(null);
 					  }else {
@@ -228,7 +232,7 @@ public class ExcelHelper {
 
 					break;
 
-				  case 17:
+				  case 18:
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setSpendingRegion(null);
 					  }else {
@@ -237,7 +241,7 @@ public class ExcelHelper {
 
 					break;
 
-				  case 18:
+				  case 19:
 					  if(currentCell.getCellType()==CellType.BLANK) {
 						  bulkUploadAwards.setSpendingSector(null);
 					  }else {
@@ -249,8 +253,6 @@ public class ExcelHelper {
 				  default:
 					break;
 				  }
-
-				  cellIdx++;
 				}
 
 
@@ -420,21 +422,20 @@ public class ExcelHelper {
 	}
 
 	public static boolean containsValue(Row row){
-		boolean flag = true;
-		Row.MissingCellPolicy policy = Row.MissingCellPolicy.CREATE_NULL_AS_BLANK; // If the Cell returned doesn't exist, instead of returning null, create a new Cell with a cell type of "blank".
+		StringBuilder data = new StringBuilder();
+		DataFormatter formatter = new DataFormatter();
+		Iterator<Cell> iterator = row.cellIterator();
 
-		if(row.getCell(0, policy).getCellType()==CellType.BLANK && row.getCell(1, policy).getCellType()==CellType.BLANK &&
-				row.getCell(2, policy).getCellType()==CellType.BLANK) {
-			return false;
+		while(iterator.hasNext()){
+			Cell currentCell = iterator.next();
+			data.append(formatter.formatCellValue(currentCell));
 		}
-	    if ((StringUtils.isEmpty(String.valueOf(row.getCell(0, policy))) &&
-				StringUtils.isEmpty(String.valueOf(row.getCell(1, policy))) &&
-				StringUtils.isEmpty(String.valueOf(row.getCell(2, policy)))) ||
-				(String.valueOf(row.getCell(0, policy))==null && String.valueOf(row.getCell(1, policy))==null &&
-				String.valueOf(row.getCell(2, policy))==null ) && row.getCell(2, policy).getCellType()==CellType.BLANK){
-			flag = false;
-	    }
-	 	return flag;
+
+		if(StringUtils.isEmpty(data)){
+			return false;
+		}else{
+			return true;
+		}
 	}
 
 	public static void saveAuditLog(UserPrinciple userPrinciple, String action,String role,

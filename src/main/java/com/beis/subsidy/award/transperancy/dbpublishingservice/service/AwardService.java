@@ -33,6 +33,9 @@ public class AwardService {
 	
 	@Autowired
 	private BeneficiaryRepository beneficiaryRepository;
+
+	@Autowired
+	private AdminProgramRepository adminProgramRepository;
 	
 	@Autowired
 	private GrantingAuthorityRepository gaRepository;
@@ -120,7 +123,8 @@ public class AwardService {
 						"SYSTEM",
 						addAwardStatus(role),null,LocalDate.now(), LocalDate.now(),
 						StringUtils.capitalize(StringUtils.lowerCase(bulkaward.getStandaloneAward())),
-						bulkaward.getSubsidyDescription())
+						bulkaward.getSubsidyDescription(),
+						getAdminProgram(bulkaward))
 				
 					)
 				.collect(Collectors.toList());
@@ -135,6 +139,10 @@ public class AwardService {
 		}
 	}
 
+	private AdminProgram getAdminProgram(BulkUploadAwards bulkAward) {
+		return adminProgramRepository.findById(bulkAward.getAdminProgramNumber()).orElse(null);
+	}
+	
 	@Transactional
 	public List<MFAAward> processBulkMfaAwards(List<BulkUploadMfaAwards> bulkMfaAwards, String role) {
 		try {
@@ -223,6 +231,8 @@ public class AwardService {
 				awardStatus = "Awaiting Approval";
 			}
 
+			AdminProgram adminProgram = adminProgramRepository.findById(award.getAdminProgramNumber()).orElse(null);
+
 			Award saveAward = new Award(null, beneficiary, getGrantingAuthority(tempAward),
 					getSubsidyMeasure(tempAward), award.getSubsidyAmountRange(),
 					((award.getSubsidyAmountExact() != null) ? new BigDecimal(award.getSubsidyAmountExact())
@@ -233,7 +243,8 @@ public class AwardService {
 					addPublishedDate(role), award.getSpendingRegion(),
 					((award.getSubsidyInstrument().equalsIgnoreCase("Other")) ? "Other - "+award.getSubsidyInstrumentOther()
 							: award.getSubsidyInstrument()),
-					award.getSpendingSector(), "SYSTEM", "SYSTEM", awardStatus, null,LocalDate.now(), LocalDate.now(), award.getStandaloneAward(), award.getSubsidyAwardDescription());
+					award.getSpendingSector(), "SYSTEM", "SYSTEM", awardStatus, null,LocalDate.now(), LocalDate.now(), award.getStandaloneAward(), award.getSubsidyAwardDescription(),
+					adminProgram);
 
 			Award savedAwards = awardRepository.save(saveAward);
 			log.info("{} :: End process Bulk Awards db");
@@ -334,6 +345,10 @@ public class AwardService {
 				award.setGrantingAuthority(grantingAuthority);
 			}
 
+			if(!StringUtils.isEmpty(awardUpdateRequest.getAdminProgramNumber())){
+				award.setAdminProgram(adminProgramRepository.findById(awardUpdateRequest.getAdminProgramNumber()).orElse(null));
+			}
+
 			Award savedAwards = awardRepository.save(award);
 			log.info("{} ::End of update Award info in db");
 			return savedAwards;
@@ -396,8 +411,4 @@ public class AwardService {
 	public List<GrantingAuthority> getAllGrantingAuthorities() {
 		return gaRepository.findAll();
 	}
-
-	
-	
-	
 }
