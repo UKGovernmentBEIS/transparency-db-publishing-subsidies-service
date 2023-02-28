@@ -268,7 +268,7 @@ public class BulkUploadMfaAwardsService {
         List<ValidationErrorResult> validationSpeiaAssistanceErrorListResultList = new ArrayList<>();
         validationSpeiaAssistanceErrorListResultList = speiaAssistanceErrorRecordsList.stream()
                 .map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("SPEIA"),
-                        "You must select if the award has SPEIA assistance or not."))
+                        "You must select if the award has SPEI Assistance or not."))
                 .collect(Collectors.toList());
 
         return validationSpeiaAssistanceErrorListResultList;
