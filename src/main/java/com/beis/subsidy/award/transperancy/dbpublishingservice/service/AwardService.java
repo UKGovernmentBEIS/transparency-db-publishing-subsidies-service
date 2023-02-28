@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -11,23 +12,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.GrantingAuthorityRepository;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.SubsidyMeasureRepository;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.model.*;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.Award;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.Beneficiary;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.BulkUploadAwards;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.GrantingAuthority;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SingleAward;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SubsidyMeasure;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AwardRepository;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.BeneficiaryRepository;
 
 import lombok.extern.slf4j.Slf4j;
 @Slf4j
@@ -48,6 +40,11 @@ public class AwardService {
 	@Autowired
 	private SubsidyMeasureRepository smRepository;
 
+	@Autowired
+	private MFAGroupingRepository mfaGroupingRepository;
+
+	@Autowired
+	private MFAAwardRepository mfaAwardRepository;
 	@Value("${loggingComponentName}")
 	private String loggingComponentName;
 	
@@ -132,6 +129,46 @@ public class AwardService {
 		log.info("End process Bulk Awards db");
 				
 		return savedAwards;
+		} catch(Exception serviceException) {
+			log.error("serviceException occured::" , serviceException);
+			return null;
+		}
+	}
+
+	@Transactional
+	public List<MFAAward> processBulkMfaAwards(List<BulkUploadMfaAwards> bulkMfaAwards, String role) {
+		try {
+			log.info("{} ::inside process Bulk Awards db",loggingComponentName);
+
+			List<MFAAward> mfaAwards = bulkMfaAwards.stream()
+					.map(bulkMfaAward -> new MFAAward(
+							gaRepository.findByGrantingAuthorityName(bulkMfaAward.getPublicAuthority()),
+							mfaGroupingRepository.findByMfaGroupingNumber(bulkMfaAward.getGroupingId()),
+							null,
+							bulkMfaAward.getSpeiaAward(),
+							bulkMfaAward.getMfaSpeiaGrouping(),
+							bulkMfaAward.getGroupingId(),
+							new BigDecimal(bulkMfaAward.getAwardFullAmount()),
+							bulkMfaAward.getConfirmationDate(),
+							LocalDate.now(),
+							gaRepository.findByGrantingAuthorityName(bulkMfaAward.getPublicAuthority()).getGaId(),
+							bulkMfaAward.getOrgName(),
+							bulkMfaAward.getOrgIdType(),
+							bulkMfaAward.getIdNumber(),
+							addAwardStatus(role),
+							role,
+							"SYSTEM",
+							null,
+							LocalDateTime.now(),
+							LocalDateTime.now(),
+							null,
+							null)
+					).collect(Collectors.toList());
+
+			List<MFAAward> savedAwards = mfaAwardRepository.saveAll(mfaAwards);
+			log.info("End process Bulk Awards db");
+
+			return savedAwards;
 		} catch(Exception serviceException) {
 			log.error("serviceException occured::" , serviceException);
 			return null;
