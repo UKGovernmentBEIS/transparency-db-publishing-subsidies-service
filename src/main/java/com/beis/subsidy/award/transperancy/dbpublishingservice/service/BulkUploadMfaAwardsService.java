@@ -1,5 +1,6 @@
 package com.beis.subsidy.award.transperancy.dbpublishingservice.service;
 
+import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.GrantingAuthorityRepository;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +35,9 @@ public class BulkUploadMfaAwardsService {
 
     @Autowired
     private MFAGroupingRepository mfaGroupingRepository;
+
+    @Autowired
+    private GrantingAuthorityRepository gaRepository;
 
     private final HashMap<String, String> columnMapping = new HashMap<String, String>()
     {{
@@ -89,8 +93,6 @@ public class BulkUploadMfaAwardsService {
 
             List<ValidationErrorResult> publicAuthorityNameErrorList = validatePublicAuthorityName(bulkUploadMfaAwards);
 
-            List<ValidationErrorResult> publicAuthorityNameInDbErrorList = validatePublicAuthorityNameInDb(bulkUploadMfaAwards);
-
             List<ValidationErrorResult> mfaAwardAmountErrorList = validateMfaAwardAmount(bulkUploadMfaAwards);
 
             List<ValidationErrorResult> speiaAssistanceErrorList = validateSpeiaAssistance(bulkUploadMfaAwards);
@@ -103,7 +105,7 @@ public class BulkUploadMfaAwardsService {
             List<ValidationErrorResult> validationErrorResultList = Stream
                     .of(speiaGroupingCheckList, orgNameErrorList,
                             orgIdTypeMissingList, orgIdMissingList,
-                            publicAuthorityNameErrorList, publicAuthorityNameInDbErrorList,
+                            publicAuthorityNameErrorList,
                             speiaAssistanceErrorList, confirmationDateErrorList,
                             mfaAwardAmountErrorList, groupingIdErrorList)
                     .flatMap(x -> x.stream()).collect(Collectors.toList());
@@ -328,17 +330,19 @@ public class BulkUploadMfaAwardsService {
 
     private List<ValidationErrorResult> validatePublicAuthorityName(List<BulkUploadMfaAwards> bulkUploadMfaAwards) {
 
-        List<BulkUploadMfaAwards> validateGrantingAuthorityNameErrorRecordsList = bulkUploadMfaAwards.stream()
+        List<BulkUploadMfaAwards> validatePublicAuthorityNameErrorRecordsList = bulkUploadMfaAwards.stream()
                 .filter(award -> ((award.getPublicAuthority()!=null && award.getPublicAuthority().length() > 255))).collect(Collectors.toList());
 
         List<ValidationErrorResult> validationPublicAuthorityResultList = new ArrayList<>();
-        validationPublicAuthorityResultList = validateGrantingAuthorityNameErrorRecordsList.stream()
+
+        validationPublicAuthorityResultList = validatePublicAuthorityNameErrorRecordsList.stream()
                 .map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Public Authority"),
                         "The public authority name must be less than 255 characters."))
                 .collect(Collectors.toList());
 
         List<BulkUploadMfaAwards> validatePublicAuthorityMissingErrorRecordsList = bulkUploadMfaAwards.stream()
-                .filter(award -> (award.getPublicAuthority()==null)).collect(Collectors.toList());
+                .filter(award -> (award.getPublicAuthority()==null) || (StringUtils.isEmpty(award.getPublicAuthority()))).collect(Collectors.toList());
+
         if(validatePublicAuthorityMissingErrorRecordsList.size()>0) {
             validationPublicAuthorityResultList = validatePublicAuthorityMissingErrorRecordsList.stream()
                     .map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Public Authority"),
@@ -346,33 +350,23 @@ public class BulkUploadMfaAwardsService {
                     .collect(Collectors.toList());
         }
 
+        List<BulkUploadMfaAwards> validatePublicAuthorityExistsErrorRecordsList = bulkUploadMfaAwards.stream()
+                .filter(award -> {
+                    if (!StringUtils.isEmpty(award.getPublicAuthority()) && award.getPublicAuthority().length() <= 255) {
+                    GrantingAuthority authority = gaRepository.findByGrantingAuthorityName(award.getPublicAuthority());
+                    return authority == null;
+                }
+                    return false;
+                }).collect(Collectors.toList());
+
+        validationPublicAuthorityResultList.addAll(validatePublicAuthorityExistsErrorRecordsList.stream()
+                .map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Public Authority"),
+                        "You must enter the name of an existing public authority."))
+                .collect(Collectors.toList()));
+
         return validationPublicAuthorityResultList;
     }
 
-    private List<ValidationErrorResult> validatePublicAuthorityNameInDb(List<BulkUploadMfaAwards> bulkUploadMfaAwards) {
-
-        log.info("Calling validatePublicAuthorityNameInDb... - start");
-
-        List<GrantingAuthority> publicAuthorityList = awardService.getAllGrantingAuthorities();
-
-        List<String> publicAuthorityNamesList = publicAuthorityList.stream()
-                .map(grantingAuthority -> grantingAuthority.getGrantingAuthorityName()).collect(Collectors.toList());
-
-        log.info("Public Authority - String list size " + publicAuthorityNamesList.size());
-
-        List<BulkUploadMfaAwards> publicAuthorityNameErrorRecordsList = bulkUploadMfaAwards.stream()
-                .filter(award -> award.getPublicAuthority() != null
-                        && !publicAuthorityNamesList.contains(award.getPublicAuthority()))
-                .collect(Collectors.toList());
-
-        List<ValidationErrorResult> validationPublicAuthorityNameResultList = new ArrayList<>();
-        validationPublicAuthorityNameResultList = publicAuthorityNameErrorRecordsList.stream()
-                .map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Public Authority"),
-                        "You must enter the name of the public authority."))
-                .collect(Collectors.toList());
-
-        return validationPublicAuthorityNameResultList;
-    }
 
     private List<ValidationErrorResult> validateOrgId(List<BulkUploadMfaAwards> bulkUploadMfaAwards) {
 
