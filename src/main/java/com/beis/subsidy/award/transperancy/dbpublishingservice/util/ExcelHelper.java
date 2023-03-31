@@ -52,228 +52,181 @@ public class ExcelHelper {
 
 
 
-	public static List<BulkUploadAwards> excelToAwards(InputStream is) {
-	    try {
+	public static List < BulkUploadAwards > excelToAwards(InputStream is) {
+		try {
+			log.info("Inside excelToAwards::DBPublishingSubsidies Service");
+			Workbook workbook = new XSSFWorkbook(is);
 
-	    	log.info("Inside excelToAwards::DBPublishingSubsidies Service" );
-
-	        Workbook workbook = new XSSFWorkbook(is);
-
-	        Sheet sheet = workbook.getSheet(SHEET);
-			Iterator<Row> rows = sheet.iterator();
+			Sheet sheet = workbook.getSheet(SHEET);
+			Iterator < Row > rows = sheet.iterator();
 
 			log.info("first row " + sheet.getFirstRowNum());
-			List<BulkUploadAwards> bulkUploadAwardsList = new ArrayList<BulkUploadAwards>();
+			List < BulkUploadAwards > bulkUploadAwardsList = new ArrayList < BulkUploadAwards > ();
 			log.info("last row " + sheet.getLastRowNum());
 			int rowNumber = 0;
-			  while (rows.hasNext()) {
-			  	log.info("before rows.next");
+			while (rows.hasNext()) {
+				log.info("before rows.next");
 				Row currentRow = rows.next();
-
 
 				// skip header
 				if (rowNumber == 0) {
-				  rowNumber++;
-				  continue;
+					rowNumber++;
+					continue;
 				}
 				if (containsValue(currentRow)) {
-					log.info("BulkUploadAwardsController Going Inside switch block" ,rowNumber);
-					Iterator<Cell> cellsInRow = currentRow.iterator();
+					log.info("BulkUploadAwardsController Going Inside switch block", rowNumber);
 
 					BulkUploadAwards bulkUploadAwards = new BulkUploadAwards();
 					bulkUploadAwards.setRow(currentRow.getRowNum() + 1);
 
-				while (cellsInRow.hasNext()) {
-				  Cell currentCell = cellsInRow.next();
+					for (int i = 0; i < currentRow.getLastCellNum(); i++) {
+						Cell currentCell = currentRow.getCell(i, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
 
-				  switch (currentCell.getColumnIndex()) {
+						switch (i) {
+							case 0:
+								bulkUploadAwards.setSubsidyControlNumber(currentCell.getStringCellValue());
+								break;
+							case 1:
+								bulkUploadAwards.setSubsidyControlTitle(currentCell.getStringCellValue());
+								break;
+							case 2:
+								bulkUploadAwards.setAdminProgramNumber(currentCell.getStringCellValue());
+								break;
+							case 3:
+								bulkUploadAwards.setStandaloneAward(currentCell.getStringCellValue());
+								break;
+							case 4:
+								bulkUploadAwards.setSubsidyDescription(currentCell.getStringCellValue());
+								break;
+							case 5:
+								if (currentCell.getCellType() == CellType.BLANK) {
+									bulkUploadAwards.setSubsidyObjective(null);
+								} else {
+									bulkUploadAwards.setSubsidyObjective(currentCell.getStringCellValue());
+								}
+								break;
+							case 6:
+								if (currentCell.getCellType() == CellType.BLANK) {
+									bulkUploadAwards.setSubsidyObjectiveOther(null);
+								} else {
+									bulkUploadAwards.setSubsidyObjectiveOther(currentCell.getStringCellValue());
+								}
+								break;
+							case 7:
+								if (currentCell.getCellType() == CellType.BLANK) {
+									bulkUploadAwards.setSubsidyInstrument(null);
+								} else {
+									bulkUploadAwards.setSubsidyInstrument(currentCell.getStringCellValue());
+								}
+								break;
+							case 8:
+								if (currentCell.getCellType() == CellType.BLANK) {
+									bulkUploadAwards.setSubsidyInstrumentOther(null);
+								} else {
+									bulkUploadAwards.setSubsidyInstrumentOther(currentCell.getStringCellValue());
+								}
+								break;
+							case 9:
+								bulkUploadAwards.setSubsidyAmountRange((currentCell == null || currentCell.getCellType() == CellType.BLANK || (currentCell.getCellType().equals(CellType.STRING) && currentCell.getStringCellValue().trim().isEmpty())) ? null : currentCell.getStringCellValue());
+								break;
+							case 10:
+								if (currentCell.getCellType() == CellType.STRING) {
+									bulkUploadAwards.setSubsidyAmountExact((currentCell.getStringCellValue()));
+								} else if (currentCell.getCellType() == CellType.NUMERIC) {
+									bulkUploadAwards.setSubsidyAmountExact((String.valueOf(currentCell.getNumericCellValue())));
+								}
+								break;
+							case 11:
+								if (currentCell.getCellType() == CellType.BLANK) {
+									bulkUploadAwards.setNationalIdType(null);
+								} else {
+									bulkUploadAwards.setNationalIdType(currentCell.getStringCellValue());
+								}
+								break;
+							case 12:
+								if (currentCell.getCellType() == CellType.BLANK) {
+									bulkUploadAwards.setNationalId(null);
+								} else {
+									bulkUploadAwards.setNationalId(((currentCell.getCellType() == CellType.NUMERIC) ?
+											String.valueOf(Double.valueOf(currentCell.getNumericCellValue()).longValue()) :
+											currentCell.getStringCellValue()));
+								}
+								break;
+							case 13:
+								if (currentCell.getCellType() == CellType.BLANK) {
+									bulkUploadAwards.setBeneficiaryName(null);
+								} else {
+									bulkUploadAwards.setBeneficiaryName(currentCell.getStringCellValue());
+								}
+								break;
+							case 14:
+								if (currentCell.getCellType() == CellType.BLANK) {
+									bulkUploadAwards.setOrgSize(null);
+								} else {
+									bulkUploadAwards.setOrgSize(currentCell.getStringCellValue());
+								}
 
-				  case 0:
-					  bulkUploadAwards.setSubsidyControlNumber(currentCell.getStringCellValue());
+								break;
+							case 15:
+								if (currentCell.getCellType() == CellType.BLANK) {
+									bulkUploadAwards.setGrantingAuthorityName(null);
+								} else {
+									bulkUploadAwards.setGrantingAuthorityName(currentCell.getStringCellValue());
+								}
+								break;
+							case 16:
+								if (currentCell.getCellType() == CellType.BLANK) {
+									bulkUploadAwards.setLegalGrantingDate(null);
+								}
+								if (currentCell.getCellType() == CellType.STRING) {
+									bulkUploadAwards.setLegalGrantingDate("invalid");
+								} else {
+									bulkUploadAwards.setLegalGrantingDate(convertDateToString(currentCell.getDateCellValue()));
+								}
+								break;
+							case 17:
+								if (currentCell.getCellType() == CellType.BLANK) {
+									bulkUploadAwards.setGoodsOrServices(null);
+								} else {
+									bulkUploadAwards.setGoodsOrServices(currentCell.getStringCellValue());
+								}
+								break;
+							case 18:
+								if (currentCell.getCellType() == CellType.BLANK) {
+									bulkUploadAwards.setSpendingRegion(null);
+								} else {
+									bulkUploadAwards.setSpendingRegion(currentCell.getStringCellValue());
+								}
+								break;
+							case 19:
+								if (currentCell.getCellType() == CellType.BLANK) {
+									bulkUploadAwards.setSpendingSector(null);
+								} else {
+									bulkUploadAwards.setSpendingSector(currentCell.getStringCellValue());
+								}
+								break;
+							default:
+								break;
+						}
+					}
 
-					break;
-
-				  case 1:
-					  bulkUploadAwards.setSubsidyControlTitle(currentCell.getStringCellValue());
-
-					break;
-
-				  case 2:
-					  bulkUploadAwards.setAdminProgramNumber(currentCell.getStringCellValue());
-
-					  break;
-
-				  case 3:
-					  bulkUploadAwards.setStandaloneAward(currentCell.getStringCellValue());
-
-					  break;
-
-				  case 4:
-					  bulkUploadAwards.setSubsidyDescription(currentCell.getStringCellValue());
-					  break;
-
-				  case 5:
-					 if(currentCell.getCellType()==CellType.BLANK) {
-						 bulkUploadAwards.setSubsidyObjective(null);
-					 }else {
-					  bulkUploadAwards.setSubsidyObjective(currentCell.getStringCellValue());
-					 }
-
-					break;
-
-				  case 6:
-					  if(currentCell.getCellType()==CellType.BLANK) {
-						  bulkUploadAwards.setSubsidyObjectiveOther(null);
-					  }else {
-					  bulkUploadAwards.setSubsidyObjectiveOther(currentCell.getStringCellValue());
-					  }
-
-					break;
-
-				  case 7:
-					  if(currentCell.getCellType()==CellType.BLANK) {
-						  bulkUploadAwards.setSubsidyInstrument(null);
-					  }else {
-					  bulkUploadAwards.setSubsidyInstrument(currentCell.getStringCellValue());
-					  }
-					  break;
-
-				  case 8:
-					  if(currentCell.getCellType()==CellType.BLANK) {	
-					  bulkUploadAwards.setSubsidyInstrumentOther(null);
-					  }else {
-						  bulkUploadAwards.setSubsidyInstrumentOther(currentCell.getStringCellValue());
-					  }
-
-					  break;
-
-				  case 9:
-
-					  bulkUploadAwards.setSubsidyAmountRange( (currentCell == null || currentCell.getCellType() == CellType.BLANK || (currentCell.getCellType().equals(CellType.STRING) && currentCell.getStringCellValue().trim().isEmpty())) ? null : currentCell.getStringCellValue() );
-
-					break;
-
-				  case 10:
-					  if (currentCell.getCellType() == CellType.STRING) {
-					  bulkUploadAwards.setSubsidyAmountExact((currentCell.getStringCellValue()));
-					  }else if (currentCell.getCellType() == CellType.NUMERIC) {
-						 bulkUploadAwards.setSubsidyAmountExact((String.valueOf(currentCell.getNumericCellValue())));
-					  }
-
-					  break;
-
-				  case 11:
-					  if(currentCell.getCellType()==CellType.BLANK) {
-						  bulkUploadAwards.setNationalIdType(null);
-					  }else {
-						  bulkUploadAwards.setNationalIdType(currentCell.getStringCellValue());
-					  }
-
-					break;
-
-				  case 12:
-					  if(currentCell.getCellType()==CellType.BLANK) {
-						  bulkUploadAwards.setNationalId(null);
-					  }else {
-					 	  bulkUploadAwards.setNationalId( ((currentCell.getCellType() == CellType.NUMERIC) ?
-							  String.valueOf(Double.valueOf( currentCell.getNumericCellValue()).longValue()) :
-							  currentCell.getStringCellValue()));
-					  }
-
-					break;
-
-				  case 13:
-					  if(currentCell.getCellType()==CellType.BLANK) {
-						  bulkUploadAwards.setBeneficiaryName(null);
-					  }else {
-						  bulkUploadAwards.setBeneficiaryName(currentCell.getStringCellValue());
-					  }
-
-					break;
-
-				  case 14:
-					  if(currentCell.getCellType()==CellType.BLANK) {
-						  bulkUploadAwards.setOrgSize(null);
-					  }else {
-					  bulkUploadAwards.setOrgSize(currentCell.getStringCellValue());
-					  }
-
-					break;
-
-				  case 15:
-					  if(currentCell.getCellType()==CellType.BLANK) {
-						  bulkUploadAwards.setGrantingAuthorityName(null);
-					  }else {
-					  bulkUploadAwards.setGrantingAuthorityName(currentCell.getStringCellValue());
-					  }
-
-					break;
-
-				  case 16:
-					 
-					  if(currentCell.getCellType()==CellType.BLANK) {
-						  bulkUploadAwards.setLegalGrantingDate(null);
-					  }
-					  if(currentCell.getCellType()==CellType.STRING) {
-						  bulkUploadAwards.setLegalGrantingDate("invalid");
-
-					  }else {
-					  bulkUploadAwards.setLegalGrantingDate(convertDateToString(currentCell.getDateCellValue()));
-					  }
-
-					break;
-
-				  case 17:
-					  if(currentCell.getCellType()==CellType.BLANK) {
-						  bulkUploadAwards.setGoodsOrServices(null);
-					  }else {
-					 	 bulkUploadAwards.setGoodsOrServices(currentCell.getStringCellValue());
-					  }
-
-					break;
-
-				  case 18:
-					  if(currentCell.getCellType()==CellType.BLANK) {
-						  bulkUploadAwards.setSpendingRegion(null);
-					  }else {
-					 	 bulkUploadAwards.setSpendingRegion(currentCell.getStringCellValue());
-					  }
-
-					break;
-
-				  case 19:
-					  if(currentCell.getCellType()==CellType.BLANK) {
-						  bulkUploadAwards.setSpendingSector(null);
-					  }else {
-					  	bulkUploadAwards.setSpendingSector(currentCell.getStringCellValue());
-					  }
-
-					break;
-
-				  default:
-					break;
-				  }
-				}
-
-
-				bulkUploadAwardsList.add(bulkUploadAwards);
-				}else {
+					bulkUploadAwardsList.add(bulkUploadAwards);
+				} else {
 					break;
 				}
-	      }
+			}
 
-	      workbook.close();
+			workbook.close();
 
-	      log.info("Excel - List - size = " + bulkUploadAwardsList.size());
-	      return bulkUploadAwardsList;
-	    } catch (IOException e) {
-	      throw new RuntimeException(e);
-	    }
-	    catch (Exception e) {
+			log.info("Excel - List - size = " + bulkUploadAwardsList.size());
+			return bulkUploadAwardsList;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} catch (Exception e) {
 
-	    	throw new RuntimeException("fail to read Excel file: " + e);
-	    }
-	  }
+			throw new RuntimeException("fail to read Excel file: " + e);
+		}
+	}
 
 	public static List<BulkUploadMfaAwards> excelToMfaAwards(InputStream is) {
 		try {
