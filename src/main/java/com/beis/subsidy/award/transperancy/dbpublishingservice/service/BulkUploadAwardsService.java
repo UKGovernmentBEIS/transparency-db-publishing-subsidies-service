@@ -533,7 +533,7 @@ public class BulkUploadAwardsService {
 			}
 
 		List<BulkUploadAwards> SubsidyFullAmountInapplicableErrorList = bulkUploadAwards.stream()
-				.filter(award -> (award.getSubsidyInstrument().startsWith("Tax") && !award.getSubsidyAmountExact().isEmpty())).collect(Collectors.toList());
+				.filter(award -> (award.getSubsidyInstrument().startsWith("Tax") && !(award.getSubsidyAmountExact() == null || StringUtils.isEmpty(award.getSubsidyAmountExact())))).collect(Collectors.toList());
 
 		if(!SubsidyFullAmountInapplicableErrorList.isEmpty()) {
 			validationSubsidyAmountExactErrorResultList = SubsidyFullAmountInapplicableErrorList.stream()
@@ -604,7 +604,7 @@ public class BulkUploadAwardsService {
 		List<ValidationErrorResult> validationTaxRangeAmountErrorResultList = new ArrayList<>();
 
 		List<BulkUploadAwards> SubsidyTaxRangeInapplicableErrorList = bulkUploadAwards.stream()
-				.filter(award -> (!award.getSubsidyInstrument().startsWith("Tax") && !award.getSubsidyAmountRange().isEmpty())).collect(Collectors.toList());
+				.filter(award -> (!award.getSubsidyInstrument().startsWith("Tax") && !(award.getSubsidyAmountRange() == null || StringUtils.isEmpty(award.getSubsidyAmountRange())))).collect(Collectors.toList());
 
 		if(!SubsidyTaxRangeInapplicableErrorList.isEmpty()) {
 			validationTaxRangeAmountErrorResultList = SubsidyTaxRangeInapplicableErrorList.stream()
