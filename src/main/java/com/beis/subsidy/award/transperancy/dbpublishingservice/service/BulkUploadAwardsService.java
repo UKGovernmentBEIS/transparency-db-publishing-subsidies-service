@@ -533,12 +533,15 @@ public class BulkUploadAwardsService {
 			}
 
 		List<BulkUploadAwards> SubsidyFullAmountInapplicableErrorList = bulkUploadAwards.stream()
-				.filter(award -> (award.getSubsidyInstrument().startsWith("Tax") && !(award.getSubsidyAmountExact() == null || StringUtils.isEmpty(award.getSubsidyAmountExact())))).collect(Collectors.toList());
+				.filter(award -> (award.getSubsidyInstrument().startsWith("Tax")
+						&& !(award.getSubsidyAmountExact() == null || StringUtils.isEmpty(award.getSubsidyAmountExact())
+				 		|| award.getSubsidyAmountExact().toUpperCase().contains("N/A"))))
+				 		.collect(Collectors.toList());
 
 		if(!SubsidyFullAmountInapplicableErrorList.isEmpty()) {
 			validationSubsidyAmountExactErrorResultList = SubsidyFullAmountInapplicableErrorList.stream()
 					.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Full Exact"),
-							"Subsidy Element Full Amount field is only applicable to non-tax measure subsidies. Remove the amount value or change subsidy type."))
+							"Subsidy Element Full Amount field is only applicable to non-tax measure subsidies. Replace the value with 'N/A' or change the subsidy instrument."))
 					.collect(Collectors.toList());
 		}
 
@@ -604,12 +607,15 @@ public class BulkUploadAwardsService {
 		List<ValidationErrorResult> validationTaxRangeAmountErrorResultList = new ArrayList<>();
 
 		List<BulkUploadAwards> SubsidyTaxRangeInapplicableErrorList = bulkUploadAwards.stream()
-				.filter(award -> (!award.getSubsidyInstrument().startsWith("Tax") && !(award.getSubsidyAmountRange() == null || StringUtils.isEmpty(award.getSubsidyAmountRange())))).collect(Collectors.toList());
+				.filter(award -> (!award.getSubsidyInstrument().startsWith("Tax") && !(award.getSubsidyAmountRange() == null
+						|| StringUtils.isEmpty(award.getSubsidyAmountRange())
+						|| award.getSubsidyAmountRange().toUpperCase().contains("N/A"))))
+						.collect(Collectors.toList());
 
 		if(!SubsidyTaxRangeInapplicableErrorList.isEmpty()) {
 			validationTaxRangeAmountErrorResultList = SubsidyTaxRangeInapplicableErrorList.stream()
 					.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Full Range"),
-							"Subsidy Full Amount Range is only applicable to tax measure subsidies. Remove the range value or change subsidy type."))
+							"Subsidy Full Amount Range is only applicable to tax measure subsidies. Replace the range value with 'N/A' or change subsidy instrument."))
 					.collect(Collectors.toList());
 		}
 
