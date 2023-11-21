@@ -10,8 +10,14 @@ public final class MFAAwardSpecificaionUtils {
     }
 
     public static Specification<MFAAward> mfaAwardNumberEquals(String mfaAwardNumber) {
-        return (root, query, builder) -> builder.equal(builder.lower(root.get("mfaAwardNumber")),
-                builder.lower(builder.literal(mfaAwardNumber.trim())));
+        long mfaAwardNumberLong;
+        try {
+            mfaAwardNumberLong = Long.parseLong(mfaAwardNumber.trim());
+        } catch (NumberFormatException ignored){
+            return null;
+        }
+
+        return (root, query, builder) -> builder.equal(root.get("mfaAwardNumber"), (mfaAwardNumberLong));
     }
 
     public static Specification<MFAAward> mfaGroupingByStatus(String status) {
