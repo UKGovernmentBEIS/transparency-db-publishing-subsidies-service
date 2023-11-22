@@ -1,12 +1,33 @@
 package com.beis.subsidy.award.transperancy.dbpublishingservice.util;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.MFAAward;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.model.MFAGrouping;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
 public final class MFAAwardSpecificaionUtils {
     public static Specification<MFAAward> mfaGroupingNameLike(String mfaGroupingName) {
-        return (root, query, builder) -> builder.like(builder.lower(root.get("mfaGrouping").get("mfaGroupingName")),
-                builder.lower(builder.literal("%" + mfaGroupingName.trim() + "%")));
+        return (root, query, builder) -> {
+
+            Join<MFAAward, MFAGrouping> groupingJoin = root.join("mfaGrouping", JoinType.LEFT);
+
+            Predicate groupingNumberNullPredicate = builder.isNull(groupingJoin.get("mfaGroupingNumber"));
+            Predicate hasGroupingFalsePredicate = builder.equal(root.get("mfaGroupingPresent"), false);
+
+            Predicate nullCondition = builder.or(groupingNumberNullPredicate, hasGroupingFalsePredicate);
+
+            Predicate likePredicate = builder.and(
+                    builder.not(nullCondition),
+                    builder.like(
+                            builder.lower(root.get("mfaGrouping").get("mfaGroupingName")),
+                            builder.lower(builder.literal("%" + mfaGroupingName.trim() + "%"))
+                    )
+            );
+
+            return likePredicate;
+        };
     }
 
     public static Specification<MFAAward> mfaAwardNumberEquals(String mfaAwardNumber) {
