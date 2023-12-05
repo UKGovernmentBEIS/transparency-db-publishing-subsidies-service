@@ -793,7 +793,7 @@ public class BulkUploadAwardsService {
 		List<ValidationErrorResult> validationSubsidyControlNumberResultList = new ArrayList<>();
 		validationSubsidyControlNumberResultList = subsidyControlNumberErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("SC Number"),
-						"The subsidy control number must start with SC, followed by 6 digits."))
+						"The subsidy control number must start with SC, followed by 5 digits."))
 				.collect(Collectors.toList());
 		List<ValidationErrorResult> validationScNumberNotMatchWithTitle = new ArrayList<>();
 		validationScNumberNotMatchWithTitle = scNumberWithNameErrorRecordsList.stream()
@@ -938,7 +938,7 @@ public class BulkUploadAwardsService {
 		List<ValidationErrorResult> validationSubsidyNumberLengthResultList = new ArrayList<>();
 		validationSubsidyNumberLengthResultList = validateSubsidyNumberLengthErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("SC Number"),
-						"The subsidy control number must start with SC, followed by 6 digits."))
+						"The subsidy control number must start with SC, followed by 5 digits."))
 				.collect(Collectors.toList());
 
 		return validationSubsidyNumberLengthResultList;

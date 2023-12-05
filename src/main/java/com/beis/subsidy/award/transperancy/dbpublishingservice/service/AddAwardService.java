@@ -578,7 +578,7 @@ public class AddAwardService {
 			if (!StringUtils.isEmpty(award.getSubsidyControlNumber()) &&
 					award.getSubsidyControlNumber().length() > 7) {
 				validationScNumberResultList.add(new SingleAwardValidationResult("subsidyControlNumber",
-						"The subsidy control number must start with SC, followed by 6 digits."));
+						"The subsidy control number must start with SC, followed by 5 digits."));
 
 			} else if (award.getSubsidyControlNumber() != null && !StringUtils.isEmpty(award.getSubsidyControlNumber())
 					&& !subsidyControlNumberTitleList.contains(award.getSubsidyControlNumber())) {
