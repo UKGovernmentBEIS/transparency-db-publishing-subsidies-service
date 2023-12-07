@@ -52,24 +52,7 @@ public class MFAService {
     private String loggingComponentName;
 
     private LocalDate convertToLocalDate(String incomingDate) {
-        try
-        {
-            LocalDate finalDate = LocalDate.parse(incomingDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-            return finalDate;
-        }
-        catch(DateTimeParseException longDateException)
-        {
-            try
-            {
-                LocalDate finalDate = LocalDate.parse(incomingDate, DateTimeFormatter.ofPattern("dd-MM-yy"));
-                return finalDate;
-            }
-            catch(DateTimeParseException shortDateException)
-            {
-                log.error("Invalid date format, use dd-mm-yyyy OR dd-mm-yy");
-                throw shortDateException;
-            }
-        }
+        return LocalDate.parse(incomingDate, DateTimeFormatter.ofPattern("d-M-yyyy"));
     }
 
     public String addMfaGrouping(MFAGroupingRequest mfaGroupingRequest, UserPrinciple userPrinciple) {
