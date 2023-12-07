@@ -51,7 +51,7 @@ public class MFAService {
     private String loggingComponentName;
 
     private LocalDate convertToLocalDate(String incomingDate) {
-        return LocalDate.parse(incomingDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        return LocalDate.parse(incomingDate, DateTimeFormatter.ofPattern("d-M-yyyy"));
     }
 
     public String addMfaGrouping(MFAGroupingRequest mfaGroupingRequest, UserPrinciple userPrinciple) {
