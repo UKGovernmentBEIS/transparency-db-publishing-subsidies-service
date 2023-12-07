@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Slf4j
@@ -51,7 +52,24 @@ public class MFAService {
     private String loggingComponentName;
 
     private LocalDate convertToLocalDate(String incomingDate) {
-        return LocalDate.parse(incomingDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        try
+        {
+            LocalDate finalDate = LocalDate.parse(incomingDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            return finalDate;
+        }
+        catch(DateTimeParseException longDateException)
+        {
+            try
+            {
+                LocalDate finalDate = LocalDate.parse(incomingDate, DateTimeFormatter.ofPattern("dd-MM-yy"));
+                return finalDate;
+            }
+            catch(DateTimeParseException shortDateException)
+            {
+                log.error("Invalid date format, use dd-mm-yyyy OR dd-mm-yy");
+                throw shortDateException;
+            }
+        }
     }
 
     public String addMfaGrouping(MFAGroupingRequest mfaGroupingRequest, UserPrinciple userPrinciple) {
