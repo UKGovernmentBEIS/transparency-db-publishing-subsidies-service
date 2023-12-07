@@ -111,7 +111,8 @@ public class AwardService {
 
 
 		List<Award> awards = bulkAwards.stream()
-				.map( bulkaward -> new Award(null, getBeneficiaryDetails(bulkaward, beneficiaries), getGrantingAuthority(bulkaward), getSubsidyMeasure(bulkaward), bulkaward.getSubsidyAmountRange(), 
+				.map( bulkaward -> new Award(null, getBeneficiaryDetails(bulkaward, beneficiaries), getGrantingAuthority(bulkaward), getSubsidyMeasure(bulkaward),
+						bulkaward.getSubsidyAmountRange() != null ? bulkaward.getSubsidyAmountRange().toUpperCase() : "N/A",
 						( (bulkaward.getSubsidyAmountExact() != null) ? new BigDecimal(bulkaward.getSubsidyAmountExact()) : BigDecimal.ZERO),  
 						((bulkaward.getSubsidyObjective().equalsIgnoreCase("Other"))? "Other - "+bulkaward.getSubsidyObjectiveOther():bulkaward.getSubsidyObjective()), bulkaward.getGoodsOrServices(),
 						convertToDate(bulkaward.getLegalGrantingDate()),
@@ -234,7 +235,8 @@ public class AwardService {
 			AdminProgram adminProgram = adminProgramRepository.findById(award.getAdminProgramNumber()).orElse(null);
 
 			Award saveAward = new Award(null, beneficiary, getGrantingAuthority(tempAward),
-					getSubsidyMeasure(tempAward), award.getSubsidyAmountRange(),
+					getSubsidyMeasure(tempAward),
+					award.getSubsidyAmountRange() != null ? award.getSubsidyAmountRange().toUpperCase() : "N/A",
 					((award.getSubsidyAmountExact() != null) ? new BigDecimal(award.getSubsidyAmountExact())
 							: BigDecimal.ZERO),
 					((award.getSubsidyObjective().equalsIgnoreCase("Other")) ? "Other - "+award.getSubsidyObjectiveOther()
@@ -281,7 +283,7 @@ public class AwardService {
 				award.setSubsidyFullAmountExact(new BigDecimal(awardUpdateRequest.getSubsidyAmountExact()));
 			}
 			if (!StringUtils.isEmpty(awardUpdateRequest.getSubsidyAmountRange())) {
-				award.setSubsidyFullAmountRange(awardUpdateRequest.getSubsidyAmountRange());
+				award.setSubsidyFullAmountRange(awardUpdateRequest.getSubsidyAmountRange().toUpperCase());
 			}
 			if (!StringUtils.isEmpty(awardUpdateRequest.getSpendingRegion())) {
 				award.setSpendingRegion(awardUpdateRequest.getSpendingRegion());
