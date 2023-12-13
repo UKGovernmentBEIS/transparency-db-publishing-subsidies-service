@@ -299,9 +299,9 @@ public class ExcelHelper {
 
 							case 3:
 								if(currentCell.getCellType()==CellType.STRING) {
-									bulkUploadMfaAwards.setAwardFullAmount("Error");
+									bulkUploadMfaAwards.setAwardFullAmount(currentCell.getStringCellValue());
 								} else if (currentCell.getCellType()==CellType.BLANK) {
-									bulkUploadMfaAwards.setAwardFullAmount(null);
+									bulkUploadMfaAwards.setAwardFullAmount("");
 								} else {
 									bulkUploadMfaAwards.setAwardFullAmount(String.valueOf(currentCell.getNumericCellValue()));
 								}
