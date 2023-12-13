@@ -336,7 +336,7 @@ public class ExcelHelper {
 								break;
 
 							case 8:
-								bulkUploadMfaAwards.setIdNumber(currentCell.getStringCellValue());
+								bulkUploadMfaAwards.setIdNumber(formatter.formatCellValue(currentCell));
 
 								break;
 
