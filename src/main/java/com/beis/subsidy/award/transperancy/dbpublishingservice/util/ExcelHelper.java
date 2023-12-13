@@ -298,7 +298,14 @@ public class ExcelHelper {
 								break;
 
 							case 3:
-								bulkUploadMfaAwards.setAwardFullAmount(formatter.formatCellValue(currentCell));
+								if(currentCell.getCellType()==CellType.STRING) {
+									bulkUploadMfaAwards.setAwardFullAmount(currentCell.getStringCellValue());
+								} else if (currentCell.getCellType()==CellType.BLANK) {
+									bulkUploadMfaAwards.setAwardFullAmount("");
+								} else {
+									bulkUploadMfaAwards.setAwardFullAmount(String.valueOf(currentCell.getNumericCellValue()));
+								}
+
 								break;
 
 							case 4:
@@ -329,7 +336,7 @@ public class ExcelHelper {
 								break;
 
 							case 8:
-								bulkUploadMfaAwards.setIdNumber(currentCell.getStringCellValue());
+								bulkUploadMfaAwards.setIdNumber(formatter.formatCellValue(currentCell));
 
 								break;
 
