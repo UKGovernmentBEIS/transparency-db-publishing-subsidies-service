@@ -1045,11 +1045,11 @@ public class BulkUploadAwardsService {
 
 		List<BulkUploadAwards> nationsIdCompanyNumberFormatErrorRecordsList = bulkUploadAwards.stream()
 				.filter(award -> award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("Company Registration Number")
-						&& (award.getNationalId()!=null && (!validateCompanyNumber(award.getNationalId())))).collect(Collectors.toList());
+						&& (award.getNationalId()!=null && (award.getNationalId().length()!=8 || !award.getNationalId().matches("[A-Za-z0-9]+")))).collect(Collectors.toList());
 
 		validationNationalIdResultList.addAll(nationsIdCompanyNumberFormatErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("ID"),
-						"The company number must be in one of the following formats:8 digits 2 letters, followed by 6 digits"))
+						"The company number must be 8 characters using only letters and numbers."))
 				.collect(Collectors.toList()));
 
 		return validationNationalIdResultList;
