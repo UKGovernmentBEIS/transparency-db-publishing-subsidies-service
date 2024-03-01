@@ -807,9 +807,9 @@ public class AddAwardService {
 			if(!StringUtils.isEmpty(award.getNationalIdType())&& award.getNationalIdType()!=null &&
 					award.getNationalIdType().equalsIgnoreCase("Company Registration Number") &&
 					((!StringUtils.isEmpty(award.getNationalId())&& award.getNationalId()!=null) &&
-							(!validateCompanyNumber(award.getNationalId())))){
+							(award.getNationalId().length()!=8 || !award.getNationalId().matches("[A-Za-z0-9]+")))){
 				validationNationalIdResultList.add(new SingleAwardValidationResult("nationalId",
-						"The company number must be in one of the following formats: 8 digits 2 letters, followed by 6 digits"));
+						"The company number must be 8 characters using only letters and numbers."));
 
 			}
 		}
@@ -842,40 +842,40 @@ public class AddAwardService {
 	/**
 	 * 
 	 */
-	private boolean validateCompanyNumber(String companyNumber) {
-
-		int charCount = 0;
-		int degitCount = 0;
-		boolean isFormat = true;
-		int firstOccurence = -1;
-
-		if(companyNumber.length()!=8) {
-			return false;
-		}
-		for (int i = 0; i < companyNumber.length(); i++) {
-			if (Character.isLetter(companyNumber.charAt(i))) {
-				charCount++;
-				if (firstOccurence < 0) {
-					firstOccurence = i;
-
-				} else {
-					if (i - firstOccurence > 1) {
-						isFormat = false;
-					}
-				}
-			} else if (Character.isDigit(companyNumber.charAt(i))) {
-				degitCount++;
-			}
-		}
-
-		if ((charCount > 0) && (!isFormat || (charCount > 2 || degitCount > 6))) {
-			return false;
-		} else if (charCount == 0 && degitCount == 8) {
-			return true;
-		} else {
-			return true;
-		}
-	}
+//	private boolean validateCompanyNumber(String companyNumber) {
+//
+//		int charCount = 0;
+//		int degitCount = 0;
+//		boolean isFormat = true;
+//		int firstOccurence = -1;
+//
+//		if(companyNumber.length()!=8) {
+//			return false;
+//		}
+//		for (int i = 0; i < companyNumber.length(); i++) {
+//			if (Character.isLetter(companyNumber.charAt(i))) {
+//				charCount++;
+//				if (firstOccurence < 0) {
+//					firstOccurence = i;
+//
+//				} else {
+//					if (i - firstOccurence > 1) {
+//						isFormat = false;
+//					}
+//				}
+//			} else if (Character.isDigit(companyNumber.charAt(i))) {
+//				degitCount++;
+//			}
+//		}
+//
+//		if ((charCount > 0) && (!isFormat || (charCount > 2 || degitCount > 6))) {
+//			return false;
+//		} else if (charCount == 0 && degitCount == 8) {
+//			return true;
+//		} else {
+//			return true;
+//		}
+//	}
 	
 	/**
 	 * 
