@@ -296,14 +296,14 @@ public class BulkUploadAwardsService {
 	private List<ValidationErrorResult> validateSubsidyDescription(List<BulkUploadAwards> bulkUploadAwards) {
 		List<BulkUploadAwards> subsidyDescriptionErrorRecordsList = bulkUploadAwards.stream()
 				.filter(award -> (
-							award.getSubsidyDescription() != null && award.getSubsidyDescription().length() > 2000)
+							award.getSubsidyDescription() != null && award.getSubsidyDescription().length() > 10000)
 					)
 				.collect(Collectors.toList());
 
 		List<ValidationErrorResult> validationSubsidyDescriptionResultList = new ArrayList<>();
 		validationSubsidyDescriptionResultList = subsidyDescriptionErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Description"),
-						"The subsidy award description must be 2000 characters or less."))
+						"The subsidy award description must be 10000 characters or less."))
 				.collect(Collectors.toList());
 
 		return validationSubsidyDescriptionResultList;

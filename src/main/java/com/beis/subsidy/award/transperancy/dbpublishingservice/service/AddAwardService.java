@@ -260,8 +260,8 @@ public class AddAwardService {
 		 * Validation that subsidy award description exists
 		 */
 		List<SingleAwardValidationResult> errorList = new ArrayList<>();
-		if(award.getSubsidyAwardDescription() != null && award.getSubsidyAwardDescription().length() > 2000){
-			errorList.add(new SingleAwardValidationResult("subsidyAwardDescription","The subsidy award description must be 2000 characters or less."));
+		if(award.getSubsidyAwardDescription() != null && award.getSubsidyAwardDescription().length() > 10000){
+			errorList.add(new SingleAwardValidationResult("subsidyAwardDescription","The subsidy award description must be 10000 characters or less."));
 		}
 
 		return errorList;
