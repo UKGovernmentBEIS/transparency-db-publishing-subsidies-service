@@ -15,6 +15,7 @@ import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AdminP
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AwardRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.GrantingAuthorityRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.SubsidyMeasureRepository;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.util.AwardUtils;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.util.EmailUtils;
 import feign.FeignException;
 import feign.Response;
@@ -807,7 +808,7 @@ public class AddAwardService {
 			if(!StringUtils.isEmpty(award.getNationalIdType())&& award.getNationalIdType()!=null &&
 					award.getNationalIdType().equalsIgnoreCase("Company Registration Number") &&
 					((!StringUtils.isEmpty(award.getNationalId())&& award.getNationalId()!=null) &&
-							(validateCompanyNumber(award.getNationalId())))){
+							(AwardUtils.validateCompanyNumber(award.getNationalId())))){
 				validationNationalIdResultList.add(new SingleAwardValidationResult("nationalId",
 						"The company number must be 8 characters using only letters and numbers."));
 
@@ -839,19 +840,6 @@ public class AddAwardService {
 		return isValid;
 	}
 
-	/**
-	 *
-	 */
-
-
-	static boolean validateCompanyNumber(String companyNumber) {
-
-		if(companyNumber!=null && (companyNumber.length()!=8 || !companyNumber.matches("[A-Za-z0-9]+"))) {
-			return true;
-		}
-		return false;
-	}
-	
 	/**
 	 * 
 	 */
