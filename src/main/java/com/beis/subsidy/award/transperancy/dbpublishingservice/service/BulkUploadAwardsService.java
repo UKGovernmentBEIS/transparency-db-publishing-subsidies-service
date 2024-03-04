@@ -1046,7 +1046,7 @@ public class BulkUploadAwardsService {
 
 		List<BulkUploadAwards> nationsIdCompanyNumberFormatErrorRecordsList = bulkUploadAwards.stream()
 				.filter(award -> award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("Company Registration Number")
-						&& (AwardUtils.validateCompanyNumber(award.getNationalId()))).collect(Collectors.toList());
+						&& (!AwardUtils.validateCompanyNumber(award.getNationalId()))).collect(Collectors.toList());
 
 		validationNationalIdResultList.addAll(nationsIdCompanyNumberFormatErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("ID"),

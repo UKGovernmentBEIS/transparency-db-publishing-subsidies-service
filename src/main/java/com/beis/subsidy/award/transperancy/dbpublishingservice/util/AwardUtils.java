@@ -4,9 +4,7 @@ public class AwardUtils {
 
     public static boolean validateCompanyNumber(String companyNumber) {
 
-        if(companyNumber!=null && (companyNumber.length()!=8 || !companyNumber.matches("[A-Za-z0-9]+"))) {
-            return true;
-        }
-        return false;
+        return companyNumber != null && companyNumber.length() == 8 && companyNumber.toLowerCase().matches("[a-z0-9]+");
+
     }
 }

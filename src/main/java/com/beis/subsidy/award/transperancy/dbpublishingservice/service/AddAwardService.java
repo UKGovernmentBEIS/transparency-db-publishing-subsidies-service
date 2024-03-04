@@ -808,7 +808,7 @@ public class AddAwardService {
 			if(!StringUtils.isEmpty(award.getNationalIdType())&& award.getNationalIdType()!=null &&
 					award.getNationalIdType().equalsIgnoreCase("Company Registration Number") &&
 					((!StringUtils.isEmpty(award.getNationalId())&& award.getNationalId()!=null) &&
-							(AwardUtils.validateCompanyNumber(award.getNationalId())))){
+							(!AwardUtils.validateCompanyNumber(award.getNationalId())))){
 				validationNationalIdResultList.add(new SingleAwardValidationResult("nationalId",
 						"The company number must be 8 characters using only letters and numbers."));
 
