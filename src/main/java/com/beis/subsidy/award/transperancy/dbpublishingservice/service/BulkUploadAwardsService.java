@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.AdminProgram;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AdminProgramRepository;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.util.AwardUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -296,14 +297,14 @@ public class BulkUploadAwardsService {
 	private List<ValidationErrorResult> validateSubsidyDescription(List<BulkUploadAwards> bulkUploadAwards) {
 		List<BulkUploadAwards> subsidyDescriptionErrorRecordsList = bulkUploadAwards.stream()
 				.filter(award -> (
-							award.getSubsidyDescription() != null && award.getSubsidyDescription().length() > 2000)
+							award.getSubsidyDescription() != null && award.getSubsidyDescription().length() > 10000)
 					)
 				.collect(Collectors.toList());
 
 		List<ValidationErrorResult> validationSubsidyDescriptionResultList = new ArrayList<>();
 		validationSubsidyDescriptionResultList = subsidyDescriptionErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Description"),
-						"The subsidy award description must be 2000 characters or less."))
+						"The subsidy award description must be 10000 characters or less."))
 				.collect(Collectors.toList());
 
 		return validationSubsidyDescriptionResultList;
@@ -1045,11 +1046,11 @@ public class BulkUploadAwardsService {
 
 		List<BulkUploadAwards> nationsIdCompanyNumberFormatErrorRecordsList = bulkUploadAwards.stream()
 				.filter(award -> award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("Company Registration Number")
-						&& (award.getNationalId()!=null && (!validateCompanyNumber(award.getNationalId())))).collect(Collectors.toList());
+						&& (!AwardUtils.validateCompanyNumber(award.getNationalId()))).collect(Collectors.toList());
 
 		validationNationalIdResultList.addAll(nationsIdCompanyNumberFormatErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("ID"),
-						"The company number must be in one of the following formats:8 digits 2 letters, followed by 6 digits"))
+						"The company number must be 8 characters using only letters and numbers."))
 				.collect(Collectors.toList()));
 
 		return validationNationalIdResultList;
@@ -1058,40 +1059,6 @@ public class BulkUploadAwardsService {
 	/**
 	 *
 	 */
-	private boolean validateCompanyNumber(String companyNumber) {
-
-		int charCount = 0;
-		int degitCount = 0;
-		boolean isFormat = true;
-		int firstOccurence = -1;
-
-		if(companyNumber.length()!=8) {
-			return false;
-		}
-		for (int i = 0; i < companyNumber.length(); i++) {
-			if (Character.isLetter(companyNumber.charAt(i))) {
-				charCount++;
-				if (firstOccurence < 0) {
-					firstOccurence = i;
-
-				} else {
-					if (i - firstOccurence > 1) {
-						isFormat = false;
-					}
-				}
-			} else if (Character.isDigit(companyNumber.charAt(i))) {
-				degitCount++;
-			}
-		}
-
-		if ((charCount > 0) && (!isFormat || (charCount > 2 || degitCount > 6))) {
-			return false;
-		} else if (charCount == 0 && degitCount == 8) {
-			return true;
-		} else {
-			return true;
-		}
-	}
 
 	private boolean isLegalGrantingDateWithinSchemeDate (BulkUploadAwards award, SubsidyMeasure sm){
 		SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");

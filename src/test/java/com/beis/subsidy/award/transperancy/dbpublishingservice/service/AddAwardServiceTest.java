@@ -475,7 +475,7 @@ public class AddAwardServiceTest {
 		List<SubsidyMeasure> smList = new ArrayList<>();
 		List<BulkUploadAwards> awardList = new ArrayList<>();
 
-		Integer stringLength = 2001;
+		Integer stringLength = 10001;
 
 		String longString = StringUtils.repeat("a", stringLength);
 
@@ -519,7 +519,7 @@ public class AddAwardServiceTest {
 		assertThat(results.getMessage()).isEqualTo(expectedResult.getMessage());
 		for (int i = 0; i < expectedResult.getTotalErrors(); i++){
 			assertThat(results.getValidationErrorResult().get(i).getColumn()).isEqualTo("subsidyAwardDescription");
-			assertThat(results.getValidationErrorResult().get(i).getMessage()).isEqualTo("The subsidy award description must be 2000 characters or less.");
+			assertThat(results.getValidationErrorResult().get(i).getMessage()).isEqualTo("The subsidy award description must be 10000 characters or less.");
 		}
 	}
 
