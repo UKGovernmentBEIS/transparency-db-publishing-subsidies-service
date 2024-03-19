@@ -292,14 +292,14 @@ public class ExcelHelper {
 								if(currentCell.getCellType()==CellType.BLANK) {
 									bulkUploadMfaAwards.setGroupingId(null);
 								}else {
-									bulkUploadMfaAwards.setGroupingId(currentCell.getStringCellValue());
+									bulkUploadMfaAwards.setGroupingId(currentCell.getStringCellValue().trim());
 								}
 
 								break;
 
 							case 3:
 								if(currentCell.getCellType()==CellType.STRING) {
-									bulkUploadMfaAwards.setAwardFullAmount(currentCell.getStringCellValue());
+									bulkUploadMfaAwards.setAwardFullAmount(currentCell.getStringCellValue().trim());
 								} else if (currentCell.getCellType()==CellType.BLANK) {
 									bulkUploadMfaAwards.setAwardFullAmount("");
 								} else {
@@ -321,22 +321,22 @@ public class ExcelHelper {
 								break;
 
 							case 5:
-								bulkUploadMfaAwards.setPublicAuthority(currentCell.getStringCellValue());
+								bulkUploadMfaAwards.setPublicAuthority(currentCell.getStringCellValue().trim());
 
 								break;
 
 							case 6:
-								bulkUploadMfaAwards.setOrgName(currentCell.getStringCellValue());
+								bulkUploadMfaAwards.setOrgName(currentCell.getStringCellValue().trim());
 
 								break;
 
 							case 7:
-								bulkUploadMfaAwards.setOrgIdType(currentCell.getStringCellValue());
+								bulkUploadMfaAwards.setOrgIdType(currentCell.getStringCellValue().trim());
 
 								break;
 
 							case 8:
-								bulkUploadMfaAwards.setIdNumber(formatter.formatCellValue(currentCell));
+								bulkUploadMfaAwards.setIdNumber(formatter.formatCellValue(currentCell).trim());
 
 								break;
 
