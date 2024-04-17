@@ -33,4 +33,6 @@ public class SingleAward {
 	private String status;
 	private String reason;
 	private String adminProgramNumber;
+	private String authorityURL;
+	private String authorityURLDescription;
 }
