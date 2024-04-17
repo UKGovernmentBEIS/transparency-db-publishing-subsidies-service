@@ -201,7 +201,7 @@ public class BulkUploadAwardsService {
 							legalGrantingDateErrorList,SubsidyElementFullAmountErrorList, StandaloneAwardErrorList,
 							AuthorityURLErrorList, AuthorityURLDescriptionErrorList, SubsidyDescriptionErrorList,
 							SubsidyTaxRangeAmountErrorList, adminProgramNumberErrorList)
-					.flatMap(Collection::stream).collect(Collectors.toList());
+					.flatMap(x -> x.stream()).collect(Collectors.toList());
 
 			log.info("Final validation errors list ...printing list of errors - start");
 

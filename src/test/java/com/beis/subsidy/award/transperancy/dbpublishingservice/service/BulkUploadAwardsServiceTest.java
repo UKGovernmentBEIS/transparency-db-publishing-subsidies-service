@@ -250,7 +250,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setNationalId("123456");
 		String role = "Granting Authority Administrator";
 		ValidationResult result = new ValidationResult();
-		result.setErrorRows(40);
+		result.setErrorRows(48);
 		result.setTotalRows(2);
 
 		awardList.add(bulkUploadAward);
@@ -290,7 +290,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setNationalId("123456");
 
 		ValidationResult result = new ValidationResult();
-		result.setErrorRows(40);
+		result.setErrorRows(48);
 		result.setTotalRows(2);
 
 		awardList.add(bulkUploadAward);
@@ -331,7 +331,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setNationalId("123456");
 
 		ValidationResult result = new ValidationResult();
-		result.setErrorRows(40);
+		result.setErrorRows(48);
 		result.setTotalRows(2);
 
 		awardList.add(bulkUploadAward);
