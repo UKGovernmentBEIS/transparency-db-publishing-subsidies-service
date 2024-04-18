@@ -43,9 +43,9 @@ public class BulkUploadAwardsService {
 		put("Title", "B");
 		put("AP Number", "C");
 		put("Standalone", "D");
-		put("Public Authority URL", "E");
-		put("Public Authority URL Description", "F");
-		put("Description", "G");
+		put("Description", "E");
+		put("Public Authority URL", "F");
+		put("Public Authority URL Description", "G");
 		put("Objective", "H");
 		put("Objective Other", "I");
 		put("Instrument", "J");
