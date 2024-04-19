@@ -125,7 +125,9 @@ public class AwardService {
 						addAwardStatus(role),null,LocalDate.now(), LocalDate.now(),
 						StringUtils.capitalize(StringUtils.lowerCase(bulkaward.getStandaloneAward())),
 						bulkaward.getSubsidyDescription(),
-						getAdminProgram(bulkaward))
+						getAdminProgram(bulkaward),
+						bulkaward.getAuthorityURL(),
+						bulkaward.getAuthorityURLDescription())
 				
 					)
 				.collect(Collectors.toList());
@@ -246,7 +248,9 @@ public class AwardService {
 					((award.getSubsidyInstrument().equalsIgnoreCase("Other")) ? "Other - "+award.getSubsidyInstrumentOther()
 							: award.getSubsidyInstrument()),
 					award.getSpendingSector(), "SYSTEM", "SYSTEM", awardStatus, null,LocalDate.now(), LocalDate.now(), award.getStandaloneAward(), award.getSubsidyAwardDescription(),
-					adminProgram);
+					adminProgram,
+					award.getAuthorityURL(),
+					award.getAuthorityURLDescription());
 
 			Award savedAwards = awardRepository.save(saveAward);
 			log.info("{} :: End process Bulk Awards db");
