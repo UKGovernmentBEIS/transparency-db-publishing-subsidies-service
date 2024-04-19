@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.AdminProgram;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AdminProgramRepository;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.util.AwardUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,21 +44,23 @@ public class BulkUploadAwardsService {
 		put("AP Number", "C");
 		put("Standalone", "D");
 		put("Description", "E");
-		put("Objective", "F");
-		put("Objective Other", "G");
-		put("Instrument", "H");
-		put("Instrument Other", "I");
-		put("Full Range", "J");
-		put("Full Exact", "K");
-		put("ID Type", "L");
-		put("ID", "M");
-		put("Beneficiary", "N");
-		put("Size of Org", "O");
-		put("GA Name", "P");
-		put("Legal Granting Date", "Q");
-		put("Goods Services", "R");
-		put("Region", "S");
-		put("Sector", "T");
+		put("Public Authority URL", "F");
+		put("Public Authority URL Description", "G");
+		put("Objective", "H");
+		put("Objective Other", "I");
+		put("Instrument", "J");
+		put("Instrument Other", "K");
+		put("Full Range", "L");
+		put("Full Exact", "M");
+		put("ID Type", "N");
+		put("ID", "O");
+		put("Beneficiary", "P");
+		put("Size of Org", "Q");
+		put("GA Name", "R");
+		put("Legal Granting Date", "S");
+		put("Goods Services", "T");
+		put("Region", "U");
+		put("Sector", "V");
 	}};
 
 
@@ -178,6 +181,9 @@ public class BulkUploadAwardsService {
 
 			List<ValidationErrorResult> StandaloneAwardErrorList = validateStandaloneAward(bulkUploadAwards);
 
+			List<ValidationErrorResult> AuthorityURLErrorList = validateAuthorityURL(bulkUploadAwards);
+			List<ValidationErrorResult> AuthorityURLDescriptionErrorList = validateAuthorityURLDescription(bulkUploadAwards);
+
 			List<ValidationErrorResult> SubsidyDescriptionErrorList = validateSubsidyDescription(bulkUploadAwards);
 
 
@@ -192,7 +198,8 @@ public class BulkUploadAwardsService {
 							subsidyControlNumberLengthList, subsidyControlNumberMismatchList,
 							grantingAuthorityNameErrorList, grantingAuthorityErrorList, sizeOfOrgErrorList,
 							spendingRegionErrorList, spendingSectorErrorList, goodsOrServiceErrorList,SubsidyInstrumentErrorList,
-							legalGrantingDateErrorList,SubsidyElementFullAmountErrorList, StandaloneAwardErrorList, SubsidyDescriptionErrorList,
+							legalGrantingDateErrorList,SubsidyElementFullAmountErrorList, StandaloneAwardErrorList,
+							AuthorityURLErrorList, AuthorityURLDescriptionErrorList, SubsidyDescriptionErrorList,
 							SubsidyTaxRangeAmountErrorList, adminProgramNumberErrorList)
 					.flatMap(x -> x.stream()).collect(Collectors.toList());
 
@@ -202,7 +209,7 @@ public class BulkUploadAwardsService {
 			validationResult.setValidationErrorResult(validationErrorResultList);
 			validationResult.setTotalRows(bulkUploadAwards.size());
 			validationResult.setErrorRows(validationErrorResultList.size());
-			validationResult.setMessage((validationErrorResultList.size() > 0) ? "Validation Errors in Uploaded file"
+			validationResult.setMessage((!validationErrorResultList.isEmpty()) ? "Validation Errors in Uploaded file"
 					: "No errors in Uploaded file");
 
 			log.info("Final validation Result object ...printing validationResult - start");
@@ -212,10 +219,6 @@ public class BulkUploadAwardsService {
 				log.info("No validation error in bulk excel template");
 
 				awardService.processBulkAwards(bulkUploadAwards,role);
-
-				log.info("After calling process api - response = ");
-				validationResult
-						.setMessage((true ? "All Awards saved in Database" : "Error while saving awards in Database"));
 			}
 
 			return validationResult;
@@ -225,6 +228,18 @@ public class BulkUploadAwardsService {
 			throw new RuntimeException("Fail to store data : " + e.getMessage());
 		}
 
+	}
+
+	private List<ValidationErrorResult> validateAuthorityURLDescription(List<BulkUploadAwards> bulkUploadAwards) {
+		return bulkUploadAwards.stream().filter(award -> award.getAuthorityURL() != null && award.getAuthorityURLDescription().trim().length() > 255)
+				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Public Authority URL Description"),
+						"The public authority policy URL description must be 255 characters or less")).collect(Collectors.toList());
+	}
+
+	private List<ValidationErrorResult> validateAuthorityURL(List<BulkUploadAwards> bulkUploadAwards) {
+		return bulkUploadAwards.stream().filter(award -> award.getAuthorityURL() != null && award.getAuthorityURL().trim().length() > 500)
+				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Public Authority URL"),
+						"The public authority policy URL must be 500 characters or less")).collect(Collectors.toList());
 	}
 
 	private List<ValidationErrorResult> validateAdminProgramNumber(List<BulkUploadAwards> bulkUploadAwards) {
@@ -538,7 +553,7 @@ public class BulkUploadAwardsService {
 		if(!SubsidyFullAmountInapplicableErrorList.isEmpty()) {
 			validationSubsidyAmountExactErrorResultList = SubsidyFullAmountInapplicableErrorList.stream()
 					.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Full Exact"),
-							"Subsidy Element Full Amount field is only applicable to non-tax measure subsidy instruments. Remove the amount value or change the subsidy instrument."))
+							"Subsidy Element Full Amount field is only applicable to non-tax measure subsidy forms. Remove the amount value or change the subsidy form."))
 					.collect(Collectors.toList());
 		}
 
@@ -613,7 +628,7 @@ public class BulkUploadAwardsService {
 		if(!SubsidyTaxRangeInapplicableErrorList.isEmpty()) {
 			validationTaxRangeAmountErrorResultList = SubsidyTaxRangeInapplicableErrorList.stream()
 					.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Full Range"),
-							"Subsidy Full Amount Range is only applicable to tax measure subsidy instruments. Remove the range value or change the subsidy instrument."))
+							"Subsidy Full Amount Range is only applicable to tax measure subsidy forms. Remove the range value or change the subsidy form."))
 					.collect(Collectors.toList());
 		}
 
@@ -1045,7 +1060,7 @@ public class BulkUploadAwardsService {
 
 		List<BulkUploadAwards> nationsIdCompanyNumberFormatErrorRecordsList = bulkUploadAwards.stream()
 				.filter(award -> award.getNationalIdType()!=null && award.getNationalIdType().equalsIgnoreCase("Company Registration Number")
-						&& (award.getNationalId()!=null && (award.getNationalId().length()!=8 || !award.getNationalId().matches("[A-Za-z0-9]+")))).collect(Collectors.toList());
+						&& (!AwardUtils.validateCompanyNumber(award.getNationalId()))).collect(Collectors.toList());
 
 		validationNationalIdResultList.addAll(nationsIdCompanyNumberFormatErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("ID"),
@@ -1058,40 +1073,6 @@ public class BulkUploadAwardsService {
 	/**
 	 *
 	 */
-	private boolean validateCompanyNumber(String companyNumber) {
-
-		int charCount = 0;
-		int degitCount = 0;
-		boolean isFormat = true;
-		int firstOccurence = -1;
-
-		if(companyNumber.length()!=8) {
-			return false;
-		}
-		for (int i = 0; i < companyNumber.length(); i++) {
-			if (Character.isLetter(companyNumber.charAt(i))) {
-				charCount++;
-				if (firstOccurence < 0) {
-					firstOccurence = i;
-
-				} else {
-					if (i - firstOccurence > 1) {
-						isFormat = false;
-					}
-				}
-			} else if (Character.isDigit(companyNumber.charAt(i))) {
-				degitCount++;
-			}
-		}
-
-		if ((charCount > 0) && (!isFormat || (charCount > 2 || degitCount > 6))) {
-			return false;
-		} else if (charCount == 0 && degitCount == 8) {
-			return true;
-		} else {
-			return true;
-		}
-	}
 
 	private boolean isLegalGrantingDateWithinSchemeDate (BulkUploadAwards award, SubsidyMeasure sm){
 		SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
