@@ -110,4 +110,7 @@ public class Award {
 
 	@Column(name = "AUTHORITY_URL_DESCRIPTION")
 	private String authorityURLDescription;
+
+	@Column(name = "SUBSIDY_AWARD_INTEREST")
+	private String subsidyAwardInterest;
 }
