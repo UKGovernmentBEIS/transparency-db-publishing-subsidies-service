@@ -336,7 +336,7 @@ public class AwardService {
 					award.setAuthorityURL(awardUpdateRequest.getAuthorityURL().trim());
 				}
 				if(!StringUtils.isEmpty((awardUpdateRequest.getAuthorityURLDescription()))){
-					award.setAuthorityURL(awardUpdateRequest.getAuthorityURLDescription().trim());
+					award.setAuthorityURLDescription(awardUpdateRequest.getAuthorityURLDescription().trim());
 				}
 			}
 			Beneficiary beneficiaryDtls = award.getBeneficiary();
