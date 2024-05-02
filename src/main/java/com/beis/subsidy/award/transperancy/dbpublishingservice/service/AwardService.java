@@ -330,6 +330,15 @@ public class AwardService {
 					award.setSubsidyAwardDescription(awardUpdateRequest.getSubsidyAwardDescription().trim());
 				}
 			}
+
+			if(awardUpdateRequest.getStandaloneAward().equalsIgnoreCase("yes")){
+				if(!StringUtils.isEmpty((awardUpdateRequest.getAuthorityURL()))){
+					award.setAuthorityURL(awardUpdateRequest.getAuthorityURL().trim());
+				}
+				if(!StringUtils.isEmpty((awardUpdateRequest.getAuthorityURLDescription()))){
+					award.setAuthorityURL(awardUpdateRequest.getAuthorityURLDescription().trim());
+				}
+			}
 			Beneficiary beneficiaryDtls = award.getBeneficiary();
 			if (!StringUtils.isEmpty(awardUpdateRequest.getNationalId())) {
 				beneficiaryDtls.setNationalId(awardUpdateRequest.getNationalId().trim());
