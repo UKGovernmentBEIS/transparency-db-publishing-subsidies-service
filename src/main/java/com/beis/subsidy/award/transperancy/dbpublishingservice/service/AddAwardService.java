@@ -263,7 +263,7 @@ public class AddAwardService {
 		 * Validation that subsidy award description exists
 		 */
 		List<SingleAwardValidationResult> errorList = new ArrayList<>();
-		if(award.getSpecificPolicyObjective() != null && award.getSpecificPolicyObjective().length() >= 1500){
+		if(award.getSpecificPolicyObjective() != null && award.getSpecificPolicyObjective().length() > 1500){
 			errorList.add(new SingleAwardValidationResult("specificPolicyObjective","The specific policy objective must be 1500 characters or less."));
 		}
 
