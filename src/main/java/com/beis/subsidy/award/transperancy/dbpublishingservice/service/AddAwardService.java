@@ -73,6 +73,8 @@ public class AddAwardService {
 
 			List<SingleAwardValidationResult> validateSubsidyAwardDescription = validateSubsidyAwardDescription(award);
 
+			List<SingleAwardValidationResult> validateSpecificPolicyObjective = validateSpecificPolicyObjective(award);
+
 			// Validation National Id length check
 			List<SingleAwardValidationResult> nationalIdMissingList = validateNationalIdAwards(award);
 
@@ -159,7 +161,7 @@ public class AddAwardService {
 			// Merge lists of Validation Errors
 			List<SingleAwardValidationResult> validationErrorResultList = Stream
 					.of(scNumberNameCheckList, subsidyMeasureTitleNameLengthList, subsidyPurposeCheckList,
-							nationalIdTypeMissingList, standaloneAwardStatusMissingList, validateSubsidyAwardDescription,
+							nationalIdTypeMissingList, standaloneAwardStatusMissingList, validateSubsidyAwardDescription,validateSpecificPolicyObjective,
 							nationalIdMissingList, beneficiaryNameErrorList,
 							beneficiaryMissingList, subsidyControlNumberMismatchList,
 							grantingAuthorityNameErrorList, grantingAuthorityErrorList, sizeOfOrgErrorList,
@@ -256,6 +258,17 @@ public class AddAwardService {
 		return errorList;
 	}
 
+	private List<SingleAwardValidationResult> validateSpecificPolicyObjective(SingleAward award) {
+		/*
+		 * Validation that subsidy award description exists
+		 */
+		List<SingleAwardValidationResult> errorList = new ArrayList<>();
+		if(award.getSpecificPolicyObjective() != null && award.getSpecificPolicyObjective().length() >= 1500){
+			errorList.add(new SingleAwardValidationResult("specificPolicyObjective","The specific policy objective must be 1500 characters or less."));
+		}
+
+		return errorList;
+	}
 	private List<SingleAwardValidationResult> validateSubsidyAwardDescription(SingleAward award) {
 		/*
 		 * Validation that subsidy award description exists

@@ -12,6 +12,7 @@ public class SingleAward {
 	private String awardNumber;
 	private String standaloneAward;
 	private String subsidyAwardDescription;
+	private String specificPolicyObjective;
 	private String subsidyControlTitle;
 	private String subsidyControlNumber;
 	private String nationalIdType;

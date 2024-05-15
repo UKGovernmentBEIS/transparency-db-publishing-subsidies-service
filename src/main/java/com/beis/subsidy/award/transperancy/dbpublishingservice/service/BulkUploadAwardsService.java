@@ -44,23 +44,24 @@ public class BulkUploadAwardsService {
 		put("AP Number", "C");
 		put("Standalone", "D");
 		put("Description", "E");
-		put("Public Authority URL", "F");
-		put("Public Authority URL Description", "G");
-		put("Objective", "H");
-		put("Objective Other", "I");
-		put("Instrument", "J");
-		put("Instrument Other", "K");
-		put("Full Range", "L");
-		put("Full Exact", "M");
-		put("ID Type", "N");
-		put("ID", "O");
-		put("Beneficiary", "P");
-		put("Size of Org", "Q");
-		put("GA Name", "R");
-		put("Legal Granting Date", "S");
-		put("Goods Services", "T");
-		put("Region", "U");
-		put("Sector", "V");
+		put("Specific Policy Objective", "F");
+		put("Public Authority URL", "G");
+		put("Public Authority URL Description", "H");
+		put("Objective", "I");
+		put("Objective Other", "J");
+		put("Instrument", "K");
+		put("Instrument Other", "L");
+		put("Full Range", "M");
+		put("Full Exact", "N");
+		put("ID Type", "O");
+		put("ID", "P");
+		put("Beneficiary", "Q");
+		put("Size of Org", "R");
+		put("GA Name", "S");
+		put("Legal Granting Date", "T");
+		put("Goods Services", "U");
+		put("Region", "V");
+		put("Sector", "W");
 	}};
 
 
@@ -186,6 +187,7 @@ public class BulkUploadAwardsService {
 
 			List<ValidationErrorResult> SubsidyDescriptionErrorList = validateSubsidyDescription(bulkUploadAwards);
 
+			List<ValidationErrorResult> SpecificPolicyObjectiveErrorList = validateSpecificPolicyObjective(bulkUploadAwards);
 
 			List<ValidationErrorResult> SubsidyTaxRangeAmountErrorList = validateSubsidyAmountRange(bulkUploadAwards);
 
@@ -199,7 +201,7 @@ public class BulkUploadAwardsService {
 							grantingAuthorityNameErrorList, grantingAuthorityErrorList, sizeOfOrgErrorList,
 							spendingRegionErrorList, spendingSectorErrorList, goodsOrServiceErrorList,SubsidyInstrumentErrorList,
 							legalGrantingDateErrorList,SubsidyElementFullAmountErrorList, StandaloneAwardErrorList,
-							AuthorityURLErrorList, AuthorityURLDescriptionErrorList, SubsidyDescriptionErrorList,
+							AuthorityURLErrorList, AuthorityURLDescriptionErrorList, SubsidyDescriptionErrorList, SpecificPolicyObjectiveErrorList,
 							SubsidyTaxRangeAmountErrorList, adminProgramNumberErrorList)
 					.flatMap(x -> x.stream()).collect(Collectors.toList());
 
@@ -324,6 +326,32 @@ public class BulkUploadAwardsService {
 		return validationSubsidyDescriptionResultList;
 	}
 
+	private List<ValidationErrorResult> validateSpecificPolicyObjective(List<BulkUploadAwards> bulkUploadAwards) {
+		List<BulkUploadAwards> specificPolicyObjectiveErrorRecordsList = bulkUploadAwards.stream()
+				.filter(award -> (
+						award.getSpecificPolicyObjective() != null && award.getSpecificPolicyObjective().length() > 1500)
+				)
+				.collect(Collectors.toList());
+
+		List<ValidationErrorResult> validationSpecificPolicyObjectiveResultList = new ArrayList<>();
+		validationSpecificPolicyObjectiveResultList = specificPolicyObjectiveErrorRecordsList.stream()
+				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Specific Policy Objective"),
+						"The specific policy objective must be 1500 characters or less."))
+				.collect(Collectors.toList());
+
+		List<BulkUploadAwards> validateSpecificPolicyObjectiveMissingErrorList = bulkUploadAwards.stream()
+				.filter(award -> (award.getSpecificPolicyObjective() == null)).collect(Collectors.toList());
+
+		if (validateSpecificPolicyObjectiveMissingErrorList.size() > 0){
+			validationSpecificPolicyObjectiveResultList.addAll(validateSpecificPolicyObjectiveMissingErrorList.stream()
+					.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Specific Policy Objective"),
+							"You must enter the specific policy objective."))
+					.collect(Collectors.toList()));
+		}
+
+		return validationSpecificPolicyObjectiveResultList;
+	}
+
 	private List<ValidationErrorResult> validateStandaloneAward(List<BulkUploadAwards> bulkUploadAwards) {
 		List<BulkUploadAwards> standaloneAwardErrorRecordsList = bulkUploadAwards.stream()
 				.filter(
@@ -405,6 +433,9 @@ public class BulkUploadAwardsService {
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Size of Org"),
 						"You must select an organisation size."))
 				.collect(Collectors.toList());
+
+
+
 
 		return validationSizeOfOrgErrorListResultList;
 	}

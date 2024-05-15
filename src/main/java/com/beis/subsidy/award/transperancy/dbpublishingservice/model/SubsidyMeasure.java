@@ -100,6 +100,9 @@ public class SubsidyMeasure {
 	@Column (name = "SUBSIDY_SCHEME_DESCRIPTION")
 	private String subsidySchemeDescription;
 
+	@Column (name = "SPECIFIC_POLICY_OBJECTIVE")
+	private String specificPolicyObjective;
+
 	@Column(name = "CONFIRMATION_DATE")
 	private Date confirmationDate;
 
