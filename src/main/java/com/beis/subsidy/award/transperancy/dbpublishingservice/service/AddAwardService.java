@@ -267,11 +267,11 @@ public class AddAwardService {
 		 */
 		List<SingleAwardValidationResult> errorList = new ArrayList<>();
 
-		if (award.getStandaloneAward().equals("No") && (award.getSubsidyAwardInterest() != null || !award.getSubsidyAwardInterest().equals(""))) {
+		if (award.getStandaloneAward().equals("No") && (!award.getSubsidyAwardInterest().isEmpty() || !award.getSubsidyAwardInterest().equals(""))) {
 			errorList.add(new SingleAwardValidationResult("SubsidyAwardInterestContainer", "Subsidy award interest is only applicable to standalone awards"));
 		}
 
-		if (!validOptions.contains(award.getSubsidyAwardInterest())) {
+		if (award.getStandaloneAward().equals("Yes") && !validOptions.contains(award.getSubsidyAwardInterest())) {
 			errorList.add(new SingleAwardValidationResult("SubsidyAwardInterestContainer", "Subsidy award interest can only be one of the following options: Subsidies or Schemes of Interest (SSoI), Subsidies or Schemes of Particular Interest (SSoPI), Neither"));
 		}
 
