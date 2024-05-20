@@ -106,4 +106,6 @@ public class SubsidyMeasure {
 	@Column(name = "SPENDING_SECTORS")
 	private String spendingSectors;
 
+	@Column(name = "SUBSIDY_SCHEME_INTEREST")
+	private String subsidySchemeInterest;
 }
