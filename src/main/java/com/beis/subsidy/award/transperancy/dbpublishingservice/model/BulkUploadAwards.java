@@ -35,4 +35,5 @@ public class BulkUploadAwards {
 	private String specificPolicyObjective;
 	private String authorityURL;
 	private String authorityURLDescription;
+	private String subsidyAwardInterest;
 }

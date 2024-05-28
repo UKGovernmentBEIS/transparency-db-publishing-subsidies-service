@@ -2,9 +2,7 @@ package com.beis.subsidy.award.transperancy.dbpublishingservice.service;
 
 import static com.beis.subsidy.award.transperancy.dbpublishingservice.util.JsonFeignResponseUtil.toResponseEntity;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -157,7 +155,9 @@ public class AddAwardService {
 			List<SingleAwardValidationResult> SubsidyInstrumentErrorList = validateSubsidyInstrument(award);
 			
 			List<SingleAwardValidationResult> AdminProgramErrorList = validateAdminProgram(award);
-			
+
+			List<SingleAwardValidationResult> subsidyAwardInterestErrorList = validateSubsidyAwardInterest(award);
+
 			// Merge lists of Validation Errors
 			List<SingleAwardValidationResult> validationErrorResultList = Stream
 					.of(scNumberNameCheckList, subsidyMeasureTitleNameLengthList, subsidyPurposeCheckList,
@@ -167,7 +167,7 @@ public class AddAwardService {
 							grantingAuthorityNameErrorList, grantingAuthorityErrorList, sizeOfOrgErrorList,
 							spendingRegionErrorList, spendingSectorErrorList, goodsOrServiceErrorList,
 							SubsidyInstrumentErrorList,legalGrantingDateErrorList,SubsidyElementFullAmountErrorList,
-							AdminProgramErrorList)
+							AdminProgramErrorList, subsidyAwardInterestErrorList)
 					.flatMap(x -> x.stream()).collect(Collectors.toList());
 
 		
@@ -257,6 +257,32 @@ public class AddAwardService {
 		}
 		return errorList;
 	}
+
+    private List<SingleAwardValidationResult> validateSubsidyAwardInterest(SingleAward award) {
+        Set<String> validOptions = new HashSet<>();
+        validOptions.add("Subsidies or Schemes of Interest (SSoI)");
+        validOptions.add("Subsidies or Schemes of Particular Interest (SSoPI)");
+        validOptions.add("Neither");
+
+        /*
+         * Subsidy award interest validation
+         */
+        List<SingleAwardValidationResult> errorList = new ArrayList<>();
+
+        if(award.getStandaloneAward() != null) {
+            if (award.getStandaloneAward().equals("No") && (!award.getSubsidyAwardInterest().isEmpty() || !award.getSubsidyAwardInterest().equals(""))) {
+                errorList.add(new SingleAwardValidationResult("SubsidyAwardInterestContainer", "Subsidy award interest is only applicable to standalone awards"));
+            }
+
+            if (award.getStandaloneAward().equals("Yes") && !validOptions.contains(award.getSubsidyAwardInterest())) {
+                errorList.add(new SingleAwardValidationResult("SubsidyAwardInterestContainer", "Subsidy award interest can only be one of the following options: Subsidies or Schemes of Interest (SSoI), Subsidies or Schemes of Particular Interest (SSoPI), Neither"));
+            }
+        }
+
+        return errorList;
+    }
+
+
 
 	private List<SingleAwardValidationResult> validateSpecificPolicyObjective(SingleAward award) {
 		/*

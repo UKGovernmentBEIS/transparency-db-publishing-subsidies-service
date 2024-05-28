@@ -36,4 +36,5 @@ public class SingleAward {
 	private String adminProgramNumber;
 	private String authorityURL;
 	private String authorityURLDescription;
+	private String subsidyAwardInterest;
 }

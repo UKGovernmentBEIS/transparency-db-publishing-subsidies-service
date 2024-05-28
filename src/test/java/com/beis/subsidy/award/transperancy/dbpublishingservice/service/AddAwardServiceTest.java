@@ -71,6 +71,7 @@ public class AddAwardServiceTest {
 		awardInputRequest.setGoodsOrServices("Goods");
 		awardInputRequest.setSubsidyObjectiveOther("abc");
 		awardInputRequest.setSubsidyInstrumentOther("def");
+		awardInputRequest.setSubsidyAwardInterest("");
 		MockitoAnnotations.openMocks(this);
 	}
 
@@ -481,6 +482,7 @@ public class AddAwardServiceTest {
 
 		awardInputRequest.setStandaloneAward("Yes");
 		awardInputRequest.setSubsidyAwardDescription(longString);
+		awardInputRequest.setSubsidyAwardInterest("Subsidies or Schemes of Interest (SSoI)");
 
 		List<SubsidyMeasure> submList = new ArrayList<>();
 		SubsidyMeasure sub = new SubsidyMeasure();

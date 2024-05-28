@@ -63,6 +63,7 @@ public class AwardServiceTest {
 		awardInputRequest.setSpendingSector("10.Information and communication");
 		awardInputRequest.setSubsidyObjectiveOther("abc");
 		awardInputRequest.setSubsidyInstrumentOther("def");
+		awardInputRequest.setSubsidyAwardInterest("");
 
 		bulkUploadAward = new BulkUploadAwards();
 		bulkUploadAward.setRow(2);

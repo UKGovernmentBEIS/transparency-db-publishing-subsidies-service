@@ -127,8 +127,8 @@ public class AwardService {
 						bulkaward.getSubsidyDescription(), bulkaward.getSpecificPolicyObjective(),
 						getAdminProgram(bulkaward),
 						bulkaward.getAuthorityURL(),
-						bulkaward.getAuthorityURLDescription())
-				
+						bulkaward.getAuthorityURLDescription(),
+						bulkaward.getSubsidyAwardInterest())
 					)
 				.collect(Collectors.toList());
 				
@@ -250,7 +250,8 @@ public class AwardService {
 					award.getSpendingSector(), "SYSTEM", "SYSTEM", awardStatus, null,LocalDate.now(), LocalDate.now(), award.getStandaloneAward(), award.getSubsidyAwardDescription(),award.getSpecificPolicyObjective(),
 					adminProgram,
 					award.getAuthorityURL(),
-					award.getAuthorityURLDescription());
+					award.getAuthorityURLDescription(),
+					award.getSubsidyAwardInterest());
 
 			Award savedAwards = awardRepository.save(saveAward);
 			log.info("{} :: End process Bulk Awards db");
@@ -356,6 +357,9 @@ public class AwardService {
 
 			if(!StringUtils.isEmpty(awardUpdateRequest.getAdminProgramNumber())){
 				award.setAdminProgram(adminProgramRepository.findById(awardUpdateRequest.getAdminProgramNumber()).orElse(null));
+			}
+			if(!StringUtils.isEmpty(awardUpdateRequest.getSubsidyAwardInterest())){
+				award.setSubsidyAwardInterest(awardUpdateRequest.getSubsidyAwardInterest());
 			}
 
 			Award savedAwards = awardRepository.save(award);
