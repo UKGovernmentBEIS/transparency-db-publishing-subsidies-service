@@ -3,10 +3,7 @@ package com.beis.subsidy.award.transperancy.dbpublishingservice.service;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -359,7 +356,7 @@ public class BulkUploadAwardsService {
 				.collect(Collectors.toList());
 
 		List<BulkUploadAwards> validateSpecificPolicyObjectiveMissingErrorList = bulkUploadAwards.stream()
-				.filter(award -> (award.getSpecificPolicyObjective() == null)).collect(Collectors.toList());
+				.filter(award -> (Objects.equals(award.getStandaloneAward(), "Yes") && award.getSpecificPolicyObjective() == null)).collect(Collectors.toList());
 
 		if (validateSpecificPolicyObjectiveMissingErrorList.size() > 0){
 			validationSpecificPolicyObjectiveResultList.addAll(validateSpecificPolicyObjectiveMissingErrorList.stream()
@@ -595,7 +592,7 @@ public class BulkUploadAwardsService {
 			}
 
 		List<BulkUploadAwards> SubsidyFullAmountInapplicableErrorList = bulkUploadAwards.stream()
-				.filter(award -> (award.getSubsidyInstrument().startsWith("Tax") && !(award.getSubsidyAmountExact() == null || StringUtils.isEmpty(award.getSubsidyAmountExact())))).collect(Collectors.toList());
+				.filter(award -> (award.getSubsidyInstrument()!= null && award.getSubsidyInstrument().startsWith("Tax") && !(award.getSubsidyAmountExact() == null || StringUtils.isEmpty(award.getSubsidyAmountExact())))).collect(Collectors.toList());
 
 		if(!SubsidyFullAmountInapplicableErrorList.isEmpty()) {
 			validationSubsidyAmountExactErrorResultList = SubsidyFullAmountInapplicableErrorList.stream()
@@ -666,7 +663,7 @@ public class BulkUploadAwardsService {
 		List<ValidationErrorResult> validationTaxRangeAmountErrorResultList = new ArrayList<>();
 
 		List<BulkUploadAwards> SubsidyTaxRangeInapplicableErrorList = bulkUploadAwards.stream()
-				.filter(award -> (!award.getSubsidyInstrument().startsWith("Tax")
+				.filter(award -> (award.getSubsidyInstrument()!= null && !award.getSubsidyInstrument().startsWith("Tax")
 						&& !(award.getSubsidyAmountRange() == null
 						|| StringUtils.isEmpty(award.getSubsidyAmountRange())
 						|| StringUtils.contains(award.getSubsidyAmountRange().toUpperCase(), "N/A")))
