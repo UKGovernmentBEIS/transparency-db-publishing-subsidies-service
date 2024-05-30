@@ -381,13 +381,8 @@ public class AddAwardService {
 		
 		if(award.getSpendingRegion() == null || StringUtils.isEmpty(award.getSpendingRegion())) {
 			validationSpendingRegionErrorResultList.add(new SingleAwardValidationResult("spendingRegion",
-					"You must select the region that the recipient organisation is based in."));
+					"You must select the region where the subsidised economic activity takes place."));
 		}
-		if(award.getSpendingRegion()!=null && award.getSpendingRegion().length() > 255){
-			validationSpendingRegionErrorResultList.add(new SingleAwardValidationResult("spendingRegion",
-					"Spending Region other field length > 255 characters."));
-		}
-		
 		return validationSpendingRegionErrorResultList;
 	}
 
