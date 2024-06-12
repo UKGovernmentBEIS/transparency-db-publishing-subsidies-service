@@ -41,8 +41,8 @@ public class BulkUploadAwardsService {
 		put("AP Number", "C");
 		put("Standalone", "D");
 		put("Subsidies or Schemes of Interest (SSoI) or Subsidies or Schemes of Particular Interest (SSoPI)", "E");
-		put("Description", "F");
-        put("Specific Policy Objective", "G");
+		put("Specific Policy Objective", "F");
+		put("Description", "G");
         put("Public Authority URL", "H");
 		put("Public Authority URL Description", "I");
 		put("Objective", "J");
@@ -439,16 +439,26 @@ public class BulkUploadAwardsService {
 		/*
 		 * validation for Size of Organization entered in the input file.
 		 */
+		List<ValidationErrorResult> validationSizeOfOrgErrorListResultList = new ArrayList<>();
+		List<String> orgSizeOptions = Arrays.asList("SME", "Large", "Not specified");
+
+		List<BulkUploadAwards> sizeOfOrgMatchOptionsErrorList = bulkUploadAwards.stream()
+				.filter(award -> ((award.getOrgSize() != null && !orgSizeOptions.contains(award.getOrgSize()))))
+				.collect(Collectors.toList());
+		validationSizeOfOrgErrorListResultList.addAll(sizeOfOrgMatchOptionsErrorList.stream()
+				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Size of Org"),
+						"You must select one of the following options for organisation size: SME, Large or Not specified"))
+				.collect(Collectors.toList()));
+
 
 		List<BulkUploadAwards> sizeOfOrgErrorRecordsList = bulkUploadAwards.stream()
 				.filter(award -> ((award.getOrgSize() == null || StringUtils.isEmpty(award.getOrgSize()))))
 				.collect(Collectors.toList());
 
-		List<ValidationErrorResult> validationSizeOfOrgErrorListResultList = new ArrayList<>();
-		validationSizeOfOrgErrorListResultList = sizeOfOrgErrorRecordsList.stream()
+		validationSizeOfOrgErrorListResultList.addAll(sizeOfOrgErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Size of Org"),
 						"You must select an organisation size."))
-				.collect(Collectors.toList());
+				.collect(Collectors.toList()));
 
 		return validationSizeOfOrgErrorListResultList;
 	}
