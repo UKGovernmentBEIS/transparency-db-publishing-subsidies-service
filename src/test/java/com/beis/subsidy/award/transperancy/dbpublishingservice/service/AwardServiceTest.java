@@ -47,7 +47,7 @@ public class AwardServiceTest {
 		// awardInputRequest.setRow(2);
 		awardInputRequest.setSubsidyControlNumber("SC10000");
 		awardInputRequest.setSubsidyControlTitle("AHDB Generic Promotional Measures scheme");
-		awardInputRequest.setSubsidyObjective("SME support");
+		awardInputRequest.setSubsidyObjective("Environmental protection");
 		awardInputRequest.setSubsidyInstrument("Loan");
 		awardInputRequest.setSubsidyAmountRange("500000 - 1000000");
 		awardInputRequest.setSubsidyAmountExact("99.0");
