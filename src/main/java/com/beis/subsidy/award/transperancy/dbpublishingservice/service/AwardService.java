@@ -5,11 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.*;
@@ -117,7 +113,7 @@ public class AwardService {
 						((bulkaward.getSubsidyObjective().equalsIgnoreCase("Other"))? "Other - "+bulkaward.getSubsidyObjectiveOther():bulkaward.getSubsidyObjective()), bulkaward.getGoodsOrServices(),
 						convertToDate(bulkaward.getLegalGrantingDate()),
 						addPublishedDate(role),
-						bulkaward.getSpendingRegion(), 
+						convertCsvToJsonString(bulkaward.getSpendingRegion()),
 						((bulkaward.getSubsidyInstrument().equalsIgnoreCase("Other"))? "Other - "+bulkaward.getSubsidyInstrumentOther():bulkaward.getSubsidyInstrument()),
 						bulkaward.getSpendingSector(),
 						"SYSTEM", 
@@ -140,6 +136,16 @@ public class AwardService {
 			log.error("serviceException occured::" , serviceException);
 			return null;
 		}
+	}
+
+	private String convertCsvToJsonString(String csv) {
+		String[] csvList = (csv.split("\\s*,\\s*"));
+		List<String> finalList = new ArrayList<String>();
+		for (String csvItem:csvList) {
+			csvItem = '\"' + csvItem + '\"';
+			finalList.add(csvItem);
+		}
+		return "[" + String.join(",", finalList) +"]";
 	}
 
 	private AdminProgram getAdminProgram(BulkUploadAwards bulkAward) {
