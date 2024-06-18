@@ -100,9 +100,6 @@ public class ExcelHelper {
 									bulkUploadAwards.setSubsidyAwardInterest(currentCell.getStringCellValue().trim());
 								break;
 							case 5:
-								bulkUploadAwards.setSubsidyDescription(currentCell.getStringCellValue().trim());
-								break;
-							case 6:
 								if(bulkUploadAwards.getStandaloneAward().equalsIgnoreCase("yes")) {
 									if (currentCell.getCellType() == CellType.BLANK) {
 										bulkUploadAwards.setSpecificPolicyObjective(null);
@@ -110,6 +107,9 @@ public class ExcelHelper {
 										bulkUploadAwards.setSpecificPolicyObjective(currentCell.getStringCellValue().trim());
 									}
 								}
+								break;
+							case 6:
+								bulkUploadAwards.setSubsidyDescription(currentCell.getStringCellValue().trim());
 								break;
 							case 7:
 								if(bulkUploadAwards.getStandaloneAward().equalsIgnoreCase("yes"))
