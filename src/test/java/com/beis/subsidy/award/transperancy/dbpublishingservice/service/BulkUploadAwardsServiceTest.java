@@ -75,7 +75,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setSubsidyControlTitle("AHDB Generic Promotional Measures scheme");
 		bulkUploadAward.setStandaloneAward("No");
 		bulkUploadAward.setSubsidyDescription("A description");
-		bulkUploadAward.setSubsidyObjective("SME support");
+		bulkUploadAward.setSubsidyObjective("Environmental protection");
 		bulkUploadAward.setSubsidyInstrument("Loan");
 		bulkUploadAward.setSubsidyAwardInterest("");
 		bulkUploadAward.setSubsidyAmountRange("500000-1000000");
