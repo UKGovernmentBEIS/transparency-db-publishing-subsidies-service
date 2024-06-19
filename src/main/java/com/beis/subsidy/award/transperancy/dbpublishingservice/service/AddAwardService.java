@@ -291,15 +291,16 @@ public class AddAwardService {
 			if (award.getStandaloneAward().equals("No") && (!award.getSpecificPolicyObjective().isEmpty() || !award.getSpecificPolicyObjective().equals(""))) {
 				errorList.add(new SingleAwardValidationResult("SpecificPolicyObjectiveContainer", "Policy objective is only applicable to a standalone award"));
 			}
-		}
-		if (award.getStandaloneAward().equals("Yes")) {
-			if ((award.getSpecificPolicyObjective().isEmpty() || award.getSpecificPolicyObjective().equals(""))) {
-				errorList.add(new SingleAwardValidationResult("SpecificPolicyObjectiveContainer", "You must add a policy objective- tu6r76 "));
+			if (award.getStandaloneAward().equals("Yes")) {
+				if ((award.getSpecificPolicyObjective().isEmpty() || award.getSpecificPolicyObjective().equals(""))) {
+					errorList.add(new SingleAwardValidationResult("SpecificPolicyObjectiveContainer", "You must add a policy objective"));
+				}
+				if(award.getSpecificPolicyObjective() != null && award.getSpecificPolicyObjective().length() > 1500){
+					errorList.add(new SingleAwardValidationResult("SpecificPolicyObjectiveContainer","The specific policy objective must be 1500 characters or less."));
+				}
 			}
-			if(award.getSpecificPolicyObjective() != null && award.getSpecificPolicyObjective().length() > 1500){
-				errorList.add(new SingleAwardValidationResult("SpecificPolicyObjectiveContainer","The specific policy objective must be 1500 characters or less."));
-			}
 		}
+
 		return errorList;
 	}
 	private List<SingleAwardValidationResult> validateSubsidyAwardDescription(SingleAward award) {
