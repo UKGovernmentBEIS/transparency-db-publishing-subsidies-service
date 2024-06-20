@@ -120,7 +120,7 @@ public class AwardService {
 						"SYSTEM",
 						addAwardStatus(role),null,LocalDate.now(), LocalDate.now(),
 						StringUtils.capitalize(StringUtils.lowerCase(bulkaward.getStandaloneAward())),
-						bulkaward.getSubsidyDescription(),
+						bulkaward.getSubsidyDescription(), bulkaward.getSpecificPolicyObjective(),
 						getAdminProgram(bulkaward),
 						bulkaward.getAuthorityURL(),
 						bulkaward.getAuthorityURLDescription(),
@@ -253,7 +253,7 @@ public class AwardService {
 					addPublishedDate(role), award.getSpendingRegion(),
 					((award.getSubsidyInstrument().equalsIgnoreCase("Other")) ? "Other - "+award.getSubsidyInstrumentOther()
 							: award.getSubsidyInstrument()),
-					award.getSpendingSector(), "SYSTEM", "SYSTEM", awardStatus, null,LocalDate.now(), LocalDate.now(), award.getStandaloneAward(), award.getSubsidyAwardDescription(),
+					award.getSpendingSector(), "SYSTEM", "SYSTEM", awardStatus, null,LocalDate.now(), LocalDate.now(), award.getStandaloneAward(), award.getSubsidyAwardDescription(),award.getSpecificPolicyObjective(),
 					adminProgram,
 					award.getAuthorityURL(),
 					award.getAuthorityURLDescription(),
@@ -335,6 +335,9 @@ public class AwardService {
 			}else if(awardUpdateRequest.getStandaloneAward().equalsIgnoreCase("yes")){
 				if(!StringUtils.isEmpty(awardUpdateRequest.getSubsidyAwardDescription())){
 					award.setSubsidyAwardDescription(awardUpdateRequest.getSubsidyAwardDescription().trim());
+				}
+				if(!StringUtils.isEmpty(awardUpdateRequest.getSpecificPolicyObjective())){
+					award.setSpecificPolicyObjective(awardUpdateRequest.getSpecificPolicyObjective().trim());
 				}
 			}
 			Beneficiary beneficiaryDtls = award.getBeneficiary();
