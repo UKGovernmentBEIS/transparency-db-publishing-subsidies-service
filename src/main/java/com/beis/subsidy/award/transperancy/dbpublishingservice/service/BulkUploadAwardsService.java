@@ -7,11 +7,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.AdminProgram;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AdminProgramRepository;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.util.AccessManagementConstant;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.util.AwardUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -433,44 +436,65 @@ public class BulkUploadAwardsService {
 	 * the below method validate Subsidy Purpose entered or not in the file.
 	 */
 	private List<ValidationErrorResult> validateSubsidyPurpose(List<BulkUploadAwards> bulkUploadAwards) {
-
-		/*
-		 * validation for Size of Organization entered in the input file.
-		 */
-
-		List<BulkUploadAwards> subsidyPurposeErrorRecordsList = bulkUploadAwards.stream().filter(
-				award -> ((award.getSubsidyObjective() == null || StringUtils.isEmpty(award.getSubsidyObjective()))))
-				.collect(Collectors.toList());
-
 		List<ValidationErrorResult> subsidyObjectiveErrorResultList = new ArrayList<>();
-		subsidyObjectiveErrorResultList = subsidyPurposeErrorRecordsList.stream()
-				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Objective"),
-						"Subsidy Objective  field is mandatory."))
-				.collect(Collectors.toList());
 
-		List<BulkUploadAwards> subsidyPurposeOthersErrorRecordsList = bulkUploadAwards.stream().filter(
-				award -> ((award.getSubsidyObjective()!= null && ("Other".equalsIgnoreCase(award.getSubsidyObjective())
-						&& (award.getSubsidyObjectiveOther()==null || StringUtils.isEmpty(award.getSubsidyObjectiveOther()))))))
-				.collect(Collectors.toList());
-		subsidyObjectiveErrorResultList.addAll(subsidyPurposeOthersErrorRecordsList.stream()
-				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Objective Other"),
-						"Subsidy Objective- other field is mandatory when Subsidy Objective is Other"))
-				.collect(Collectors.toList()));
+		List<BulkUploadAwards> objectiveFormatErrorList = bulkUploadAwards.stream()
+				.filter(award -> {
+					if (award.getSubsidyObjective() != null) {
+						ArrayList<String> objectiveList = new ArrayList<>(Arrays.asList(award.getSubsidyObjective().toLowerCase().trim().split("\\s*\\|\\s*")));
+						int otherIndex = -1;
+						for (int i = 0; i < objectiveList.size(); i++) {
+							if(objectiveList.get(i).startsWith("other")) {
+								otherIndex = i;
+							}
+						}
+						if(otherIndex >= 0){
+							objectiveList.remove(otherIndex);
+						}
 
-		List<BulkUploadAwards> subsidyPurposeOtherErrorRecordsList = bulkUploadAwards.stream().filter(
-				award -> ((award.getSubsidyObjectiveOther()!=null && award.getSubsidyObjectiveOther() .length() > 255)))
-				.collect(Collectors.toList());
-		if (subsidyPurposeOtherErrorRecordsList.size()>0) {
+						if(objectiveList.size() > 0 && !Objects.equals(objectiveList.get(0), "")) {
+							return (!new HashSet<>(AccessManagementConstant.SUBSIDY_OBJECTIVES).containsAll(objectiveList));
+						}
+					}
+					return false;
+				}).collect(Collectors.toList());
 
-			subsidyObjectiveErrorResultList.addAll(subsidyPurposeOtherErrorRecordsList.stream()
-				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Objective Other"),
-						"Subsidy Objective- other field length is > 255 characters"))
-				.collect(Collectors.toList()));
+
+		ArrayList<String> objectiveErrorList = new ArrayList<>();
+
+		for (BulkUploadAwards scheme : objectiveFormatErrorList) {
+			ArrayList<String> objectiveList = new ArrayList<>(Arrays.asList(scheme.getSubsidyObjective().toLowerCase().trim().split("\\s*\\|\\s*")));
+			for (int i = 0; i < objectiveList.size(); i++) {
+				if (!AccessManagementConstant.SUBSIDY_OBJECTIVES.contains(objectiveList.get(i))) {
+					String currentError = objectiveList.get(i);
+					objectiveErrorList.add(objectiveList.get(i));
+					subsidyObjectiveErrorResultList.add(new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Objective"),
+							"The following purpose(s) are incorrect '" + currentError + "'. Check that the spelling and punctuation matches the purpose list."));
+				}
+			}
 		}
 
-		log.info("Validation Result Error list - validateSubsidyObjective = "
-				+ subsidyObjectiveErrorResultList);
+		List<BulkUploadAwards> validateObjectiveOtherMissingErrorList = bulkUploadAwards.stream()
+				.filter(award -> (award.getSubsidyObjectiveOther() == null && award.getSubsidyObjective() == null)).collect(Collectors.toList());
 
+
+		if (validateObjectiveOtherMissingErrorList.size() > 0){
+			subsidyObjectiveErrorResultList.addAll(validateObjectiveOtherMissingErrorList.stream()
+					.map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Objective - Other"),
+							"You must enter a Purpose or Other Purpose."))
+					.collect(Collectors.toList()));
+		}
+
+		List<BulkUploadAwards> validateObjectiveOtherCharLimitErrorList = bulkUploadAwards.stream()
+				.filter(scheme -> (scheme.getSubsidyObjectiveOther() != null && scheme.getSubsidyObjectiveOther().length() > 255)).collect(Collectors.toList());
+
+
+		if (validateObjectiveOtherCharLimitErrorList.size() > 0){
+			subsidyObjectiveErrorResultList.addAll(validateObjectiveOtherCharLimitErrorList.stream()
+					.map(scheme -> new ValidationErrorResult(String.valueOf(scheme.getRow()), columnMapping.get("Objective - Other"),
+							"You cannot have more than 255 characters for the Other Purpose field."))
+					.collect(Collectors.toList()));
+		}
 		return subsidyObjectiveErrorResultList;
 	}
 

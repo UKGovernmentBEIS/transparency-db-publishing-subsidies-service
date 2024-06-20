@@ -118,10 +118,17 @@ public class ExcelHelper {
 								}
 								break;
 							case 9:
-								if (currentCell.getCellType() == CellType.BLANK) {
+								//if purpose other purpose is blank - sets it to null
+								if(currentCell.getCellType()==CellType.BLANK || currentCell.getStringCellValue().trim().isEmpty()) {
 									bulkUploadAwards.setSubsidyObjectiveOther(null);
-								} else {
+									//if purpose other is populated but purpose is blank
+								}else if(currentCell.getCellType()!=CellType.BLANK && bulkUploadAwards.getSubsidyObjective() == null) {
+									bulkUploadAwards.setSubsidyObjective("Other - " + currentCell.getStringCellValue().trim());
 									bulkUploadAwards.setSubsidyObjectiveOther(currentCell.getStringCellValue().trim());
+									//if purpose and other purpose are both populated
+								}else {
+									bulkUploadAwards.setSubsidyObjectiveOther(currentCell.getStringCellValue().trim());
+									bulkUploadAwards.setSubsidyObjective(bulkUploadAwards.getSubsidyObjective() + " | Other - " + currentCell.getStringCellValue().trim());
 								}
 								break;
 							case 10:

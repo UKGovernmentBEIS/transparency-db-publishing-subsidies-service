@@ -1,5 +1,9 @@
 package com.beis.subsidy.award.transperancy.dbpublishingservice.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class AccessManagementConstant {
 	public static String ACTIVE="Active";
 	public static String INACTIVE="Inactive";
@@ -15,4 +19,7 @@ public class AccessManagementConstant {
     public static String GA_APPROVER_ROLE="Granting Authority Approver";
     public static String GA_ENCODER_ROLE="Granting Authority Encoder";
     public static int GA_ALREADY_EXISTS = 491;
+    public static List<String> SUBSIDY_OBJECTIVES = new ArrayList<String>(Arrays.asList("culture or heritage", "employment", "energy efficiency",
+            "environmental protection", "infrastructure", "regional development", "rescue subsidy", "research and development",
+            "sme (small/medium-sized enterprise) support", "training","other"));
 }
