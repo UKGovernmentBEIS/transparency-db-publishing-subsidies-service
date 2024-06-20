@@ -7,17 +7,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.AdminProgram;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.model.*;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AdminProgramRepository;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.util.AccessManagementConstant;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.util.AwardUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.BulkUploadAwards;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.GrantingAuthority;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SubsidyMeasure;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.ValidationErrorResult;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.ValidationResult;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.util.ExcelHelper;
@@ -523,26 +521,55 @@ public class BulkUploadAwardsService {
 				award -> ((award.getSpendingRegion() == null || StringUtils.isEmpty(award.getSpendingRegion()))))
 				.collect(Collectors.toList());
 
-		List<ValidationErrorResult> validationspendingRegionErrorListResultList = new ArrayList<>();
-		validationspendingRegionErrorListResultList = spendingRegionErrorRecordsList.stream()
+		List<ValidationErrorResult> validationSpendingRegionErrorListResultList = new ArrayList<>();
+		validationSpendingRegionErrorListResultList.addAll(spendingRegionErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Region"),
 						"You must select the region that the recipient organisation is based in."))
-				.collect(Collectors.toList());
+				.collect(Collectors.toList()));
 
-		List<BulkUploadAwards> spendingRegionOtherErrorRecordsList = bulkUploadAwards.stream()
-				.filter(award -> ((award.getSpendingRegion()!=null && award.getSpendingRegion().length() > 255))).collect(Collectors.toList());
-
-		if(spendingRegionOtherErrorRecordsList.size()>0) {
-
-		validationspendingRegionErrorListResultList = spendingRegionOtherErrorRecordsList.stream()
+		// Check that the regions provided are allowed
+		List<BulkUploadAwards> spendingRegionInvalidStringRecordsList = bulkUploadAwards.stream()
+				.filter(award -> ((award.getSpendingRegion()!=null && !new HashSet<>(Arrays.asList(AccessManagementConstant.REGIONS_LOWER)).containsAll(Arrays.asList(award.getSpendingRegion().toLowerCase().trim().split("\\s*,\\s*")))))).collect(Collectors.toList());
+		validationSpendingRegionErrorListResultList.addAll(spendingRegionInvalidStringRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Region"),
-						"Spending Region other  field length > 255 characters."))
+						"Spending Region(s) must contain only the following: " + Arrays.toString(AccessManagementConstant.REGIONS)))
+				.collect(Collectors.toList()));
+
+		// check that there are no duplicated regions
+		List<BulkUploadAwards> spendingRegionDuplicateStringRecordsList = bulkUploadAwards.stream()
+				.filter(award -> {
+					if(award.getSpendingRegion() == null){
+						return false;
+					}
+					String[] spendingRegionArray = award.getSpendingRegion().toLowerCase().trim().split("\\s*,\\s*");
+					Set<String> spendingRegionSet = new HashSet<>(Arrays.asList(spendingRegionArray));
+					return spendingRegionSet.size() != spendingRegionArray.length;
+				})
 				.collect(Collectors.toList());
-		}
 
-		log.info("Validation Result Error list - Spending Region should enter = " + validationspendingRegionErrorListResultList.size());
+		validationSpendingRegionErrorListResultList.addAll(spendingRegionDuplicateStringRecordsList.stream()
+				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Region"),
+						"Spending Region(s) must not contain duplicate entries"))
+				.collect(Collectors.toList()));
 
-		return validationspendingRegionErrorListResultList;
+		List<BulkUploadAwards> spendingRegionNationalErrorRecordsList = bulkUploadAwards.stream()
+				.filter(award -> {
+					if(award.getSpendingRegion() == null){
+						return false;
+					}
+					String[] spendingRegionArray = award.getSpendingRegion().toLowerCase().trim().split("\\s*,\\s*");
+					return Arrays.asList(spendingRegionArray).contains("national") && spendingRegionArray.length > 1;
+				})
+				.collect(Collectors.toList());
+
+		validationSpendingRegionErrorListResultList.addAll(spendingRegionNationalErrorRecordsList.stream()
+				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Region"),
+						"Spending Region(s) should not contain other regions if 'National' is included"))
+				.collect(Collectors.toList()));
+
+		log.info("Validation Result Error list - Spending Region should enter = " + validationSpendingRegionErrorListResultList.size());
+
+		return validationSpendingRegionErrorListResultList;
 	}
 
 	/*

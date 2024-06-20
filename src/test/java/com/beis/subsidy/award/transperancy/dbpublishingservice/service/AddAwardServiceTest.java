@@ -66,7 +66,7 @@ public class AddAwardServiceTest {
 		awardInputRequest.setGrantingAuthorityName("BEIS");
 		awardInputRequest.setLegalGrantingDate("19-02-1999");
 		awardInputRequest.setOrgSize("Small organisation");
-		awardInputRequest.setSpendingRegion("South East");
+		awardInputRequest.setSpendingRegion("[\"South East\", \"North West\"]");
 		awardInputRequest.setSpendingSector("10.Information and communication");
 		awardInputRequest.setGoodsOrServices("Goods");
 		awardInputRequest.setSubsidyObjectiveOther("abc");

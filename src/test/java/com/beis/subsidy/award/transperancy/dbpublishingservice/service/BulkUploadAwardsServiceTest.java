@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -86,7 +88,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setGrantingAuthorityName("BEIS");
 		bulkUploadAward.setLegalGrantingDate("19-Feb-1999");
 		bulkUploadAward.setOrgSize("Small organisation");
-		bulkUploadAward.setSpendingRegion("South East");
+		bulkUploadAward.setSpendingRegion("[\"South East\", \"North West\"]");
 		bulkUploadAward.setSpendingSector("10.Information and communication");
 		bulkUploadAward.setGoodsOrServices("Goods");
 		bulkUploadAward.setSpecificPolicyObjective("");
@@ -348,13 +350,15 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setNationalId("123456");
 		String role = "Granting Authority Administrator";
 		ValidationResult result = new ValidationResult();
-		result.setErrorRows(49);
-		result.setTotalRows(10);
+		result.setErrorRows(34);
+		result.setTotalRows(2);
 
 		awardList.add(bulkUploadAward);
 		SubsidyMeasure sub = new SubsidyMeasure();
 		sub.setSubsidyMeasureTitle("AHDB Generic Promotional Measures scheme");
 		sub.setScNumber("SC10000");
+		sub.setStartDate(formatter.parse("01-01-1970"));
+		sub.setEndDate(formatter.parse("31-12-2099"));
 		smList.add(sub);
 		GrantingAuthority ga = new GrantingAuthority();
 		ga.setGaId(Long.valueOf(1));
@@ -366,8 +370,8 @@ public class BulkUploadAwardsServiceTest {
 		expectedAward.setApprovedBy("test");
 		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
-		when(grepo.findAll()).thenReturn(gaList);
-		when(smRepository.findAll()).thenReturn(smList);
+		when(adServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
+		when(adServiceMock.getAllSubsidyMeasures()).thenReturn(smList);
 		ValidationResult results = bulkAwardServiceMock.validateFile(mockMultipartFile, role);
 
 		assertThat(results.getErrorRows()).isEqualTo(result.getErrorRows());
@@ -388,13 +392,15 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setNationalId("123456");
 
 		ValidationResult result = new ValidationResult();
-		result.setErrorRows(49);
-		result.setTotalRows(10);
+		result.setErrorRows(34);
+		result.setTotalRows(2);
 
 		awardList.add(bulkUploadAward);
 		SubsidyMeasure sub = new SubsidyMeasure();
 		sub.setSubsidyMeasureTitle("AHDB Generic Promotional Measures scheme");
 		sub.setScNumber("SC10000");
+		sub.setStartDate(formatter.parse("01-01-1970"));
+		sub.setEndDate(formatter.parse("31-12-2099"));
 		smList.add(sub);
 		GrantingAuthority ga = new GrantingAuthority();
 		ga.setGaId(Long.valueOf(1));
@@ -407,8 +413,8 @@ public class BulkUploadAwardsServiceTest {
 		String role = "Granting Authority Administrator";
 		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
-		when(grepo.findAll()).thenReturn(gaList);
-		when(smRepository.findAll()).thenReturn(smList);
+		when(adServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
+		when(adServiceMock.getAllSubsidyMeasures()).thenReturn(smList);
 		ValidationResult results = bulkAwardServiceMock.validateFile(mockMultipartFile,role);
 
 		assertThat(results.getErrorRows()).isEqualTo(result.getErrorRows());
@@ -429,13 +435,15 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setNationalId("123456");
 
 		ValidationResult result = new ValidationResult();
-		result.setErrorRows(49);
-		result.setTotalRows(10);
+		result.setErrorRows(34);
+		result.setTotalRows(2);
 
 		awardList.add(bulkUploadAward);
 		SubsidyMeasure sub = new SubsidyMeasure();
 		sub.setSubsidyMeasureTitle("AHDB Generic Promotional Measures scheme");
 		sub.setScNumber("SC10000");
+		sub.setStartDate(formatter.parse("01-01-1970"));
+		sub.setEndDate(formatter.parse("31-12-2099"));
 		smList.add(sub);
 		GrantingAuthority ga = new GrantingAuthority();
 		ga.setGaId(Long.valueOf(1));
@@ -448,8 +456,8 @@ public class BulkUploadAwardsServiceTest {
 		String role = "Granting Authority Administrator";
 		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
-		when(grepo.findAll()).thenReturn(gaList);
-		when(smRepository.findAll()).thenReturn(smList);
+		when(adServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
+		when(adServiceMock.getAllSubsidyMeasures()).thenReturn(smList);
 		ValidationResult results = bulkAwardServiceMock.validateFile(mockMultipartFile, role);
 
 		assertThat(results.getErrorRows()).isEqualTo(result.getErrorRows());
