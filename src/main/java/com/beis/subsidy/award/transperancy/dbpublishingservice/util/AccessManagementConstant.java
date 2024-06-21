@@ -19,6 +19,9 @@ public class AccessManagementConstant {
     public static String GA_APPROVER_ROLE="Granting Authority Approver";
     public static String GA_ENCODER_ROLE="Granting Authority Encoder";
     public static int GA_ALREADY_EXISTS = 491;
+
+    public static String REGIONS[] = {"National", "UK-wide", "GB-wide", "England", "Northern Ireland", "Scotland", "Wales", "North East", "North West", "Yorkshire and Humber", "East Midlands", "West Midlands", "East of England", "London", "South East", "South West"};
+    public static String REGIONS_LOWER[] = Arrays.stream(REGIONS).map(String::toLowerCase).toArray(String[]::new);
     public static List<String> SUBSIDY_OBJECTIVES = new ArrayList<String>(Arrays.asList("culture or heritage", "employment", "energy efficiency",
             "environmental protection", "infrastructure", "regional development", "rescue subsidy", "research and development",
             "sme (small/medium-sized enterprise) support", "training","other"));

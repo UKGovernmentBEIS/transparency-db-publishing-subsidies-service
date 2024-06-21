@@ -56,7 +56,7 @@ public class AddAwardServiceTest {
 		awardInputRequest.setStandaloneAward("No");
 		awardInputRequest.setSubsidyControlNumber("SC10000");
 		awardInputRequest.setSubsidyControlTitle("AHDB Generic Promotional Measures scheme");
-		awardInputRequest.setSubsidyObjective("SME support");
+		awardInputRequest.setSubsidyObjective("Environmental protection");
 		awardInputRequest.setSubsidyInstrument("Loan");
 		awardInputRequest.setSubsidyAmountRange("500000 - 1000000");
 		awardInputRequest.setSubsidyAmountExact("99");
@@ -66,12 +66,13 @@ public class AddAwardServiceTest {
 		awardInputRequest.setGrantingAuthorityName("BEIS");
 		awardInputRequest.setLegalGrantingDate("19-02-1999");
 		awardInputRequest.setOrgSize("Small organisation");
-		awardInputRequest.setSpendingRegion("South East");
+		awardInputRequest.setSpendingRegion("[\"South East\", \"North West\"]");
 		awardInputRequest.setSpendingSector("10.Information and communication");
 		awardInputRequest.setGoodsOrServices("Goods");
 		awardInputRequest.setSubsidyObjectiveOther("abc");
 		awardInputRequest.setSubsidyInstrumentOther("def");
 		awardInputRequest.setSubsidyAwardInterest("");
+		awardInputRequest.setSpecificPolicyObjective("");
 		MockitoAnnotations.openMocks(this);
 	}
 
@@ -483,6 +484,7 @@ public class AddAwardServiceTest {
 		awardInputRequest.setStandaloneAward("Yes");
 		awardInputRequest.setSubsidyAwardDescription(longString);
 		awardInputRequest.setSubsidyAwardInterest("Subsidies or Schemes of Interest (SSoI)");
+		awardInputRequest.setSpecificPolicyObjective("test");
 
 		List<SubsidyMeasure> submList = new ArrayList<>();
 		SubsidyMeasure sub = new SubsidyMeasure();

@@ -5,11 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.*;
@@ -119,14 +115,14 @@ public class AwardService {
 						bulkaward.getGoodsOrServices(),
 						convertToDate(bulkaward.getLegalGrantingDate()),
 						addPublishedDate(role),
-						bulkaward.getSpendingRegion(), 
+						convertCsvToJsonString(bulkaward.getSpendingRegion()),
 						((bulkaward.getSubsidyInstrument().equalsIgnoreCase("Other"))? "Other - "+bulkaward.getSubsidyInstrumentOther():bulkaward.getSubsidyInstrument()),
 						bulkaward.getSpendingSector(),
 						"SYSTEM", 
 						"SYSTEM",
 						addAwardStatus(role),null,LocalDate.now(), LocalDate.now(),
 						StringUtils.capitalize(StringUtils.lowerCase(bulkaward.getStandaloneAward())),
-						bulkaward.getSubsidyDescription(),
+						bulkaward.getSubsidyDescription(), bulkaward.getSpecificPolicyObjective(),
 						getAdminProgram(bulkaward),
 						bulkaward.getAuthorityURL(),
 						bulkaward.getAuthorityURLDescription(),
@@ -142,6 +138,16 @@ public class AwardService {
 			log.error("serviceException occured::" , serviceException);
 			return null;
 		}
+	}
+
+	private String convertCsvToJsonString(String csv) {
+		String[] csvList = (csv.split("\\s*,\\s*"));
+		List<String> finalList = new ArrayList<String>();
+		for (String csvItem:csvList) {
+			csvItem = '\"' + csvItem + '\"';
+			finalList.add(csvItem);
+		}
+		return "[" + String.join(",", finalList) +"]";
 	}
 
 	private AdminProgram getAdminProgram(BulkUploadAwards bulkAward) {
@@ -249,7 +255,7 @@ public class AwardService {
 					addPublishedDate(role), award.getSpendingRegion(),
 					((award.getSubsidyInstrument().equalsIgnoreCase("Other")) ? "Other - "+award.getSubsidyInstrumentOther()
 							: award.getSubsidyInstrument()),
-					award.getSpendingSector(), "SYSTEM", "SYSTEM", awardStatus, null,LocalDate.now(), LocalDate.now(), award.getStandaloneAward(), award.getSubsidyAwardDescription(),
+					award.getSpendingSector(), "SYSTEM", "SYSTEM", awardStatus, null,LocalDate.now(), LocalDate.now(), award.getStandaloneAward(), award.getSubsidyAwardDescription(),award.getSpecificPolicyObjective(),
 					adminProgram,
 					award.getAuthorityURL(),
 					award.getAuthorityURLDescription(),
@@ -331,6 +337,9 @@ public class AwardService {
 			}else if(awardUpdateRequest.getStandaloneAward().equalsIgnoreCase("yes")){
 				if(!StringUtils.isEmpty(awardUpdateRequest.getSubsidyAwardDescription())){
 					award.setSubsidyAwardDescription(awardUpdateRequest.getSubsidyAwardDescription().trim());
+				}
+				if(!StringUtils.isEmpty(awardUpdateRequest.getSpecificPolicyObjective())){
+					award.setSpecificPolicyObjective(awardUpdateRequest.getSpecificPolicyObjective().trim());
 				}
 			}
 			Beneficiary beneficiaryDtls = award.getBeneficiary();
