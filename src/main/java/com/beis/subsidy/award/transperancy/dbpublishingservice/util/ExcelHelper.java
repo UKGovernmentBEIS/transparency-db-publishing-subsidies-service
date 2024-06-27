@@ -136,7 +136,7 @@ public class ExcelHelper {
 									//if purpose and other purpose are both populated
 								}else {
 									bulkUploadAwards.setSubsidyObjectiveOther(currentCell.getStringCellValue().trim());
-									bulkUploadAwards.setSubsidyObjective(bulkUploadAwards.getSubsidyObjective() + " | Other - " + currentCell.getStringCellValue().trim());
+									bulkUploadAwards.setSubsidyObjective(bulkUploadAwards.getSubsidyObjective().replace("Other", "Other - " + currentCell.getStringCellValue().replace("Other - ", "").trim()));
 								}
 								break;
 							case 11:
