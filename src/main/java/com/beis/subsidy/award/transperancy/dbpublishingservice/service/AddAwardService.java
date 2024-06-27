@@ -370,21 +370,21 @@ public class AddAwardService {
 		 * validation for Size of Organization entered in the input file.
 		 */
 		List<SingleAwardValidationResult> validationSubsidyObjErrorResultList = new ArrayList<>();
-		
+
 		if(award.getSubsidyObjective() == null || StringUtils.isEmpty(award.getSubsidyObjective())) {
 			validationSubsidyObjErrorResultList.add(new SingleAwardValidationResult("subsidyObjective",
-					"You must select a subsidy type."));
+					"You must select at least one subsidy purpose."));
 		}
 		if(!StringUtils.isEmpty(award.getSubsidyObjectiveOther()) && award.getSubsidyObjectiveOther() .length() > 255){
-			validationSubsidyObjErrorResultList.add(new SingleAwardValidationResult("Subsidy Objective- other",
-					"The subsidy type must be less than 248 characters."));
+			validationSubsidyObjErrorResultList.add(new SingleAwardValidationResult("SubsidyObjective- other",
+					"The subsidy purpose must be less than 248 characters."));
 		}
 			
-		if(award.getSubsidyObjective()!= null && ("Other".equalsIgnoreCase(award.getSubsidyObjective()) &&
-				(award.getSubsidyObjectiveOther()==null || StringUtils.isEmpty(award.getSubsidyObjectiveOther())))){
+		if(award.getSubsidyObjective()!= null && award.getSubsidyObjective().contains("Other") &&
+				(award.getSubsidyObjectiveOther()==null || StringUtils.isEmpty(award.getSubsidyObjectiveOther()))){
 
-			validationSubsidyObjErrorResultList.add(new SingleAwardValidationResult("Subsidy Objective- other",
-					"You must enter the details of the subsidy type."));
+			validationSubsidyObjErrorResultList.add(new SingleAwardValidationResult("SubsidyObjective-other",
+					"You must enter the details of the subsidy purpose."));
 		}
 
 		return validationSubsidyObjErrorResultList;

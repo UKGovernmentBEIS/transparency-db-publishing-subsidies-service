@@ -127,10 +127,22 @@ public class ExcelHelper {
 								}
 								break;
 							case 10:
-								if (currentCell.getCellType() == CellType.BLANK) {
+								String objectiveOther = currentCell.getStringCellValue();
+								String[] otherSplit = currentCell.getStringCellValue().split("-",2);
+								if(otherSplit[0].toLowerCase().contains("other"))
+									objectiveOther = otherSplit.length > 1 ? otherSplit[1] : otherSplit[0];
+
+								if (currentCell.getCellType()==CellType.BLANK || currentCell.getStringCellValue().trim().isEmpty()) {
 									bulkUploadAwards.setSubsidyObjectiveOther(null);
-								} else {
+									//if purpose other is populated but purpose is blank
+								}else if(currentCell.getCellType()!=CellType.BLANK && bulkUploadAwards.getSubsidyObjective() == null) {
+
+									bulkUploadAwards.setSubsidyObjective("Other - " + objectiveOther);
 									bulkUploadAwards.setSubsidyObjectiveOther(currentCell.getStringCellValue().trim());
+									//if purpose and other purpose are both populated
+								}else {
+									bulkUploadAwards.setSubsidyObjectiveOther(objectiveOther);
+									bulkUploadAwards.setSubsidyObjective(bulkUploadAwards.getSubsidyObjective().replace("Other", "Other - " + objectiveOther));
 								}
 								break;
 							case 11:

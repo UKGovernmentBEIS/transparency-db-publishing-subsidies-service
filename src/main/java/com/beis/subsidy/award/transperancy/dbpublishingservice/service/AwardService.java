@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.*;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.*;
+import static com.beis.subsidy.award.transperancy.dbpublishingservice.util.AwardUtils.convertToObjectiveJSONString;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,8 +110,9 @@ public class AwardService {
 		List<Award> awards = bulkAwards.stream()
 				.map( bulkaward -> new Award(null, getBeneficiaryDetails(bulkaward, beneficiaries), getGrantingAuthority(bulkaward), getSubsidyMeasure(bulkaward),
 						bulkaward.getSubsidyAmountRange() != null ? bulkaward.getSubsidyAmountRange().toUpperCase() : "N/A",
-						( (bulkaward.getSubsidyAmountExact() != null) ? new BigDecimal(bulkaward.getSubsidyAmountExact()) : BigDecimal.ZERO),  
-						((bulkaward.getSubsidyObjective().equalsIgnoreCase("Other"))? "Other - "+bulkaward.getSubsidyObjectiveOther():bulkaward.getSubsidyObjective()), bulkaward.getGoodsOrServices(),
+						( (bulkaward.getSubsidyAmountExact() != null) ? new BigDecimal(bulkaward.getSubsidyAmountExact()) : BigDecimal.ZERO),
+						convertToObjectiveJSONString(bulkaward.getSubsidyObjective()),
+						bulkaward.getGoodsOrServices(),
 						convertToDate(bulkaward.getLegalGrantingDate()),
 						addPublishedDate(role),
 						convertCsvToJsonString(bulkaward.getSpendingRegion()),

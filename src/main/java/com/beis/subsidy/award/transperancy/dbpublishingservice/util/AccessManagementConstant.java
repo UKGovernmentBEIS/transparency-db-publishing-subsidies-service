@@ -1,6 +1,8 @@
 package com.beis.subsidy.award.transperancy.dbpublishingservice.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class AccessManagementConstant {
 	public static String ACTIVE="Active";
@@ -20,4 +22,7 @@ public class AccessManagementConstant {
 
     public static String REGIONS[] = {"National", "UK-wide", "GB-wide", "England", "Northern Ireland", "Scotland", "Wales", "North East", "North West", "Yorkshire and Humber", "East Midlands", "West Midlands", "East of England", "London", "South East", "South West"};
     public static String REGIONS_LOWER[] = Arrays.stream(REGIONS).map(String::toLowerCase).toArray(String[]::new);
+    public static List<String> SUBSIDY_OBJECTIVES = new ArrayList<String>(Arrays.asList("culture or heritage", "employment", "energy efficiency",
+            "environmental protection", "infrastructure", "regional development", "rescue subsidy", "research and development",
+            "sme (small/medium-sized enterprise) support", "training","other"));
 }
