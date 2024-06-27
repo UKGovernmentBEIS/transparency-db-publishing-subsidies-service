@@ -127,8 +127,11 @@ public class ExcelHelper {
 								}
 								break;
 							case 10:
+								String objectiveOther = currentCell.getStringCellValue();
 								String[] otherSplit = currentCell.getStringCellValue().split("-",2);
-								String objectiveOther = otherSplit.length > 1 ? otherSplit[1] : otherSplit[0];
+								if(otherSplit[0].toLowerCase().contains("other"))
+									objectiveOther = otherSplit.length > 1 ? otherSplit[1] : otherSplit[0];
+
 								if (currentCell.getCellType()==CellType.BLANK || currentCell.getStringCellValue().trim().isEmpty()) {
 									bulkUploadAwards.setSubsidyObjectiveOther(null);
 									//if purpose other is populated but purpose is blank
