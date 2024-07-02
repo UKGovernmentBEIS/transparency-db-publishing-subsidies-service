@@ -380,7 +380,7 @@ public class BulkUploadAwardsService {
 
 		List<BulkUploadAwards> speiErrorRecordsList = bulkUploadAwards.stream().filter(
 						award -> (((award.getSpei() == null || StringUtils.isEmpty(award.getSpei()))
-								|| (!speiOptions.contains(award.getSpei())))))
+								|| (!speiAcceptedOptions.contains(award.getSpei())))))
 				.collect(Collectors.toList());
 
 		List<ValidationErrorResult> validationSpeiErrorListResultList = new ArrayList<>();
