@@ -158,6 +158,8 @@ public class AddAwardService {
 
 			List<SingleAwardValidationResult> subsidyAwardInterestErrorList = validateSubsidyAwardInterest(award);
 
+			List<SingleAwardValidationResult> SpeiErrorList = validateSpei(award);
+
 			// Merge lists of Validation Errors
 			List<SingleAwardValidationResult> validationErrorResultList = Stream
 					.of(scNumberNameCheckList, subsidyMeasureTitleNameLengthList, subsidyPurposeCheckList,
@@ -167,7 +169,7 @@ public class AddAwardService {
 							grantingAuthorityNameErrorList, grantingAuthorityErrorList, sizeOfOrgErrorList,
 							spendingRegionErrorList, spendingSectorErrorList, goodsOrServiceErrorList,
 							SubsidyInstrumentErrorList,legalGrantingDateErrorList,SubsidyElementFullAmountErrorList,
-							AdminProgramErrorList, subsidyAwardInterestErrorList)
+							AdminProgramErrorList, subsidyAwardInterestErrorList, SpeiErrorList)
 					.flatMap(x -> x.stream()).collect(Collectors.toList());
 
 		
@@ -358,6 +360,26 @@ public class AddAwardService {
 				,validationSizeOfOrgErrorListResultList);
 
 		return validationSizeOfOrgErrorListResultList;
+	}
+
+	private List<SingleAwardValidationResult> validateSpei(SingleAward award) {
+
+		/*
+		 * validation for SPEI entered in the input file.
+		 */
+		List<String> speiAcceptedOptions = Arrays.asList("Yes", "No");
+
+		List<SingleAwardValidationResult> validationSPEIErrorResultList = new ArrayList<>();
+
+		if((award.getSpei() == null || StringUtils.isEmpty(award.getSpei())) || !speiAcceptedOptions.contains(award.getSpei())){
+			validationSPEIErrorResultList.add(new SingleAwardValidationResult("Services of Public Economic Interest (SPEI)",
+					"You must select if the award is a Services of Public Economic Interest (SPEI) or not. Accepted values are 'Yes' or 'No'"));
+		}
+
+		log.info("Validation Result Error list - SPEI should enter = {}",
+				validationSPEIErrorResultList.size());
+
+		return validationSPEIErrorResultList;
 	}
 
 	/*

@@ -36,4 +36,5 @@ public class BulkUploadAwards {
 	private String authorityURL;
 	private String authorityURLDescription;
 	private String subsidyAwardInterest;
+	private String spei;
 }

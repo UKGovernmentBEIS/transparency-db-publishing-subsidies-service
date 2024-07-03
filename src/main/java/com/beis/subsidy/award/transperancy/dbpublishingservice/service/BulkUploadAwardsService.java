@@ -43,21 +43,22 @@ public class BulkUploadAwardsService {
 		put("Description", "G");
         put("Public Authority URL", "H");
 		put("Public Authority URL Description", "I");
-		put("Objective", "J");
-		put("Objective Other", "K");
-		put("Instrument", "L");
-		put("Instrument Other", "M");
-		put("Full Range", "N");
-		put("Full Exact", "O");
-		put("ID Type", "P");
-		put("ID", "Q");
-		put("Beneficiary", "R");
-		put("Size of Org", "S");
-		put("GA Name", "T");
-		put("Legal Granting Date", "U");
-		put("Goods Services", "V");
-		put("Region", "W");
-		put("Sector", "X");
+		put("Services of Public Economic Interest (SPEI)", "J");
+		put("Objective", "K");
+		put("Objective Other", "L");
+		put("Instrument", "M");
+		put("Instrument Other", "N");
+		put("Full Range", "O");
+		put("Full Exact", "P");
+		put("ID Type", "Q");
+		put("ID", "R");
+		put("Beneficiary", "S");
+		put("Size of Org", "T");
+		put("GA Name", "U");
+		put("Legal Granting Date", "V");
+		put("Goods Services", "W");
+		put("Region", "X");
+		put("Sector", "Y");
 	}};
 
 
@@ -192,6 +193,9 @@ public class BulkUploadAwardsService {
 			List<ValidationErrorResult> SubsidyAwardInterestErrorList = validateSubsidyAwardInterest(
 					bulkUploadAwards);
 
+			List<ValidationErrorResult> subsidySpeiErrorList = validateSubsidySpei(
+					bulkUploadAwards);
+
 			// Merge lists of Validation Errors
 			List<ValidationErrorResult> validationErrorResultList = Stream
 					.of(scNumberNameCheckList, subsidyMeasureTitleNameLengthList, subsidyPurposeCheckList,
@@ -201,7 +205,7 @@ public class BulkUploadAwardsService {
 							spendingRegionErrorList, spendingSectorErrorList, goodsOrServiceErrorList,SubsidyInstrumentErrorList,
 							legalGrantingDateErrorList,SubsidyElementFullAmountErrorList, StandaloneAwardErrorList,
 							AuthorityURLErrorList, AuthorityURLDescriptionErrorList, SubsidyDescriptionErrorList, SpecificPolicyObjectiveErrorList,
-							SubsidyTaxRangeAmountErrorList, adminProgramNumberErrorList, SubsidyAwardInterestErrorList)
+							SubsidyTaxRangeAmountErrorList, adminProgramNumberErrorList, SubsidyAwardInterestErrorList, subsidySpeiErrorList)
 					.flatMap(x -> x.stream()).collect(Collectors.toList());
 
 			log.info("Final validation errors list ...printing list of errors - start");
@@ -364,6 +368,28 @@ public class BulkUploadAwardsService {
 		}
 
 		return validationSpecificPolicyObjectiveResultList;
+	}
+
+	private List<ValidationErrorResult> validateSubsidySpei(List<BulkUploadAwards> bulkUploadAwards) {
+
+		/*
+		 * validation for subsidy SPEI entered in the input file.
+		 */
+
+		List<String> speiAcceptedOptions = Arrays.asList("Yes", "No");
+
+		List<BulkUploadAwards> speiErrorRecordsList = bulkUploadAwards.stream().filter(
+						award -> (((award.getSpei() == null || StringUtils.isEmpty(award.getSpei()))
+								|| (!speiAcceptedOptions.contains(award.getSpei())))))
+				.collect(Collectors.toList());
+
+		List<ValidationErrorResult> validationSpeiErrorListResultList = new ArrayList<>();
+		validationSpeiErrorListResultList = speiErrorRecordsList.stream()
+				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Services of Public Economic Interest (SPEI)"),
+						"You must select if the award is a Services of Public Economic Interest (SPEI) or not. Accepted values are 'Yes' or 'No'"))
+				.collect(Collectors.toList());
+
+		return validationSpeiErrorListResultList;
 	}
 
 	private List<ValidationErrorResult> validateStandaloneAward(List<BulkUploadAwards> bulkUploadAwards) {
