@@ -344,6 +344,14 @@ public class AwardService {
 					award.setSpecificPolicyObjective(awardUpdateRequest.getSpecificPolicyObjective().trim());
 				}
 			}
+			if(awardUpdateRequest.getStandaloneAward().equalsIgnoreCase("yes")){
+				if(!StringUtils.isEmpty((awardUpdateRequest.getAuthorityURL()))){
+					award.setAuthorityURL(awardUpdateRequest.getAuthorityURL().trim());
+				}
+				if(!StringUtils.isEmpty((awardUpdateRequest.getAuthorityURLDescription()))){
+					award.setAuthorityURLDescription(awardUpdateRequest.getAuthorityURLDescription().trim());
+				}
+			}
 			Beneficiary beneficiaryDtls = award.getBeneficiary();
 			if (!StringUtils.isEmpty(awardUpdateRequest.getNationalId())) {
 				beneficiaryDtls.setNationalId(awardUpdateRequest.getNationalId().trim());
