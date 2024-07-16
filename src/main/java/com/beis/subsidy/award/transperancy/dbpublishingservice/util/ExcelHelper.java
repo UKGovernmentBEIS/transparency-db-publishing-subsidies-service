@@ -192,7 +192,9 @@ public class ExcelHelper {
 								if (currentCell.getCellType() == CellType.BLANK) {
 									bulkUploadAwards.setBeneficiaryName(null);
 								} else {
-									bulkUploadAwards.setBeneficiaryName(currentCell.getStringCellValue().trim());
+									bulkUploadAwards.setBeneficiaryName(((currentCell.getCellType() == CellType.NUMERIC) ?
+											String.valueOf(Double.valueOf(currentCell.getNumericCellValue()).longValue()) :
+											currentCell.getStringCellValue().trim()));
 								}
 								break;
 							case 19:
