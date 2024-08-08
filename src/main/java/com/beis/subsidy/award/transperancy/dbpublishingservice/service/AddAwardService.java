@@ -2,9 +2,7 @@ package com.beis.subsidy.award.transperancy.dbpublishingservice.service;
 
 import static com.beis.subsidy.award.transperancy.dbpublishingservice.util.JsonFeignResponseUtil.toResponseEntity;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -72,6 +70,8 @@ public class AddAwardService {
 			List<SingleAwardValidationResult> standaloneAwardStatusMissingList = validateStandaloneAwardStatus(award);
 
 			List<SingleAwardValidationResult> validateSubsidyAwardDescription = validateSubsidyAwardDescription(award);
+
+			List<SingleAwardValidationResult> validateSpecificPolicyObjective = validateSpecificPolicyObjective(award);
 
 			// Validation National Id length check
 			List<SingleAwardValidationResult> nationalIdMissingList = validateNationalIdAwards(award);
@@ -155,17 +155,21 @@ public class AddAwardService {
 			List<SingleAwardValidationResult> SubsidyInstrumentErrorList = validateSubsidyInstrument(award);
 			
 			List<SingleAwardValidationResult> AdminProgramErrorList = validateAdminProgram(award);
-			
+
+			List<SingleAwardValidationResult> subsidyAwardInterestErrorList = validateSubsidyAwardInterest(award);
+
+			List<SingleAwardValidationResult> SpeiErrorList = validateSpei(award);
+
 			// Merge lists of Validation Errors
 			List<SingleAwardValidationResult> validationErrorResultList = Stream
 					.of(scNumberNameCheckList, subsidyMeasureTitleNameLengthList, subsidyPurposeCheckList,
-							nationalIdTypeMissingList, standaloneAwardStatusMissingList, validateSubsidyAwardDescription,
+							nationalIdTypeMissingList, standaloneAwardStatusMissingList, validateSubsidyAwardDescription,validateSpecificPolicyObjective,
 							nationalIdMissingList, beneficiaryNameErrorList,
 							beneficiaryMissingList, subsidyControlNumberMismatchList,
 							grantingAuthorityNameErrorList, grantingAuthorityErrorList, sizeOfOrgErrorList,
 							spendingRegionErrorList, spendingSectorErrorList, goodsOrServiceErrorList,
 							SubsidyInstrumentErrorList,legalGrantingDateErrorList,SubsidyElementFullAmountErrorList,
-							AdminProgramErrorList)
+							AdminProgramErrorList, subsidyAwardInterestErrorList, SpeiErrorList)
 					.flatMap(x -> x.stream()).collect(Collectors.toList());
 
 		
@@ -256,6 +260,51 @@ public class AddAwardService {
 		return errorList;
 	}
 
+    private List<SingleAwardValidationResult> validateSubsidyAwardInterest(SingleAward award) {
+        Set<String> validOptions = new HashSet<>();
+        validOptions.add("Subsidies or Schemes of Interest (SSoI)");
+        validOptions.add("Subsidies or Schemes of Particular Interest (SSoPI)");
+        validOptions.add("Neither");
+
+        /*
+         * Subsidy award interest validation
+         */
+        List<SingleAwardValidationResult> errorList = new ArrayList<>();
+
+        if(award.getStandaloneAward() != null) {
+            if (award.getStandaloneAward().equals("No") && (!award.getSubsidyAwardInterest().isEmpty() || !award.getSubsidyAwardInterest().equals(""))) {
+                errorList.add(new SingleAwardValidationResult("SubsidyAwardInterestContainer", "Subsidy award interest is only applicable to standalone awards"));
+            }
+
+            if (award.getStandaloneAward().equals("Yes") && !validOptions.contains(award.getSubsidyAwardInterest())) {
+                errorList.add(new SingleAwardValidationResult("SubsidyAwardInterestContainer", "Subsidy award interest can only be one of the following options: Subsidies or Schemes of Interest (SSoI), Subsidies or Schemes of Particular Interest (SSoPI), Neither"));
+            }
+        }
+
+        return errorList;
+    }
+
+
+
+	private List<SingleAwardValidationResult> validateSpecificPolicyObjective(SingleAward award) {
+
+		List<SingleAwardValidationResult> errorList = new ArrayList<>();
+		if(award.getStandaloneAward() != null) {
+			if (award.getStandaloneAward().equals("No") && (!award.getSpecificPolicyObjective().isEmpty() || !award.getSpecificPolicyObjective().equals(""))) {
+				errorList.add(new SingleAwardValidationResult("SpecificPolicyObjectiveContainer", "Policy objective is only applicable to a standalone award"));
+			}
+			if (award.getStandaloneAward().equals("Yes")) {
+				if ((award.getSpecificPolicyObjective().isEmpty() || award.getSpecificPolicyObjective().equals(""))) {
+					errorList.add(new SingleAwardValidationResult("SpecificPolicyObjectiveContainer", "You must add a policy objective"));
+				}
+				if(award.getSpecificPolicyObjective() != null && award.getSpecificPolicyObjective().length() > 1500){
+					errorList.add(new SingleAwardValidationResult("SpecificPolicyObjectiveContainer","The specific policy objective must be 1500 characters or less."));
+				}
+			}
+		}
+
+		return errorList;
+	}
 	private List<SingleAwardValidationResult> validateSubsidyAwardDescription(SingleAward award) {
 		/*
 		 * Validation that subsidy award description exists
@@ -313,6 +362,26 @@ public class AddAwardService {
 		return validationSizeOfOrgErrorListResultList;
 	}
 
+	private List<SingleAwardValidationResult> validateSpei(SingleAward award) {
+
+		/*
+		 * validation for SPEI entered in the input file.
+		 */
+		List<String> speiAcceptedOptions = Arrays.asList("Yes", "No");
+
+		List<SingleAwardValidationResult> validationSPEIErrorResultList = new ArrayList<>();
+
+		if((award.getSpei() == null || StringUtils.isEmpty(award.getSpei())) || !speiAcceptedOptions.contains(award.getSpei())){
+			validationSPEIErrorResultList.add(new SingleAwardValidationResult("Services of Public Economic Interest (SPEI)",
+					"You must select if the award is a Services of Public Economic Interest (SPEI) or not. Accepted values are 'Yes' or 'No'"));
+		}
+
+		log.info("Validation Result Error list - SPEI should enter = {}",
+				validationSPEIErrorResultList.size());
+
+		return validationSPEIErrorResultList;
+	}
+
 	/*
 	 * 
 	 * the below method validate Subsidy Purpose entered or not in the file.
@@ -323,21 +392,21 @@ public class AddAwardService {
 		 * validation for Size of Organization entered in the input file.
 		 */
 		List<SingleAwardValidationResult> validationSubsidyObjErrorResultList = new ArrayList<>();
-		
+
 		if(award.getSubsidyObjective() == null || StringUtils.isEmpty(award.getSubsidyObjective())) {
 			validationSubsidyObjErrorResultList.add(new SingleAwardValidationResult("subsidyObjective",
-					"You must select a subsidy type."));
+					"You must select at least one subsidy purpose."));
 		}
 		if(!StringUtils.isEmpty(award.getSubsidyObjectiveOther()) && award.getSubsidyObjectiveOther() .length() > 255){
-			validationSubsidyObjErrorResultList.add(new SingleAwardValidationResult("Subsidy Objective- other",
-					"The subsidy type must be less than 248 characters."));
+			validationSubsidyObjErrorResultList.add(new SingleAwardValidationResult("SubsidyObjective- other",
+					"The subsidy purpose must be less than 248 characters."));
 		}
 			
-		if(award.getSubsidyObjective()!= null && ("Other".equalsIgnoreCase(award.getSubsidyObjective()) &&
-				(award.getSubsidyObjectiveOther()==null || StringUtils.isEmpty(award.getSubsidyObjectiveOther())))){
+		if(award.getSubsidyObjective()!= null && award.getSubsidyObjective().contains("Other") &&
+				(award.getSubsidyObjectiveOther()==null || StringUtils.isEmpty(award.getSubsidyObjectiveOther()))){
 
-			validationSubsidyObjErrorResultList.add(new SingleAwardValidationResult("Subsidy Objective- other",
-					"You must enter the details of the subsidy type."));
+			validationSubsidyObjErrorResultList.add(new SingleAwardValidationResult("SubsidyObjective-other",
+					"You must enter the details of the subsidy purpose."));
 		}
 
 		return validationSubsidyObjErrorResultList;
@@ -357,13 +426,8 @@ public class AddAwardService {
 		
 		if(award.getSpendingRegion() == null || StringUtils.isEmpty(award.getSpendingRegion())) {
 			validationSpendingRegionErrorResultList.add(new SingleAwardValidationResult("spendingRegion",
-					"You must select the region that the recipient organisation is based in."));
+					"You must select the region where the subsidised economic activity takes place."));
 		}
-		if(award.getSpendingRegion()!=null && award.getSpendingRegion().length() > 255){
-			validationSpendingRegionErrorResultList.add(new SingleAwardValidationResult("spendingRegion",
-					"Spending Region other field length > 255 characters."));
-		}
-		
 		return validationSpendingRegionErrorResultList;
 	}
 

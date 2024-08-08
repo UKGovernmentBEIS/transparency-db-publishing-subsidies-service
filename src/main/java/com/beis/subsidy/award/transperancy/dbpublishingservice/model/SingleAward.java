@@ -12,6 +12,7 @@ public class SingleAward {
 	private String awardNumber;
 	private String standaloneAward;
 	private String subsidyAwardDescription;
+	private String specificPolicyObjective;
 	private String subsidyControlTitle;
 	private String subsidyControlNumber;
 	private String nationalIdType;
@@ -33,4 +34,9 @@ public class SingleAward {
 	private String status;
 	private String reason;
 	private String adminProgramNumber;
+	private String authorityURL;
+	private String authorityURLDescription;
+	private String subsidyAwardInterest;
+	private String spei;
+
 }

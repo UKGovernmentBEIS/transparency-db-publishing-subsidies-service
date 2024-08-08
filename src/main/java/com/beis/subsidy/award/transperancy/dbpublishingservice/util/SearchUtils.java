@@ -177,7 +177,7 @@ public class SearchUtils {
 				orders.add(new Sort.Order(getSortDirection(_sort[1]), _sort[0]));
 			}
 		} else {
-			orders.add(new Sort.Order(getSortDirection("desc"), "createdTimestamp"));
+			orders.add(new Sort.Order(getSortDirection("desc"), "lastModifiedTimestamp"));
 		}
 		return orders;
 	}

@@ -32,4 +32,9 @@ public class BulkUploadAwards {
 	private String subsidyInstrumentOther;
 	private String standaloneAward;
 	private String subsidyDescription;
+	private String specificPolicyObjective;
+	private String authorityURL;
+	private String authorityURLDescription;
+	private String subsidyAwardInterest;
+	private String spei;
 }

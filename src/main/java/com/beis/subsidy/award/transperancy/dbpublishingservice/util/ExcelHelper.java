@@ -30,7 +30,7 @@ public class ExcelHelper {
 
 	public static String TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-	public final static int EXPECTED_COLUMN_COUNT = 20;
+	public final static int EXPECTED_COLUMN_COUNT = 25;
 	
 	public final static int EXPECTED_MFA_COLUMN_COUNT = 9;
 
@@ -84,97 +84,133 @@ public class ExcelHelper {
 
 						switch (i) {
 							case 0:
-								bulkUploadAwards.setSubsidyControlNumber(currentCell.getStringCellValue());
+								bulkUploadAwards.setSubsidyControlNumber(currentCell.getStringCellValue().trim());
 								break;
 							case 1:
-								bulkUploadAwards.setSubsidyControlTitle(currentCell.getStringCellValue());
+								bulkUploadAwards.setSubsidyControlTitle(currentCell.getStringCellValue().trim());
 								break;
 							case 2:
-								bulkUploadAwards.setAdminProgramNumber(currentCell.getStringCellValue());
+								bulkUploadAwards.setAdminProgramNumber(currentCell.getStringCellValue().trim());
 								break;
 							case 3:
-								bulkUploadAwards.setStandaloneAward(currentCell.getStringCellValue());
+								bulkUploadAwards.setStandaloneAward(currentCell.getStringCellValue().trim());
 								break;
 							case 4:
-								bulkUploadAwards.setSubsidyDescription(currentCell.getStringCellValue());
+								if(bulkUploadAwards.getStandaloneAward().equalsIgnoreCase("yes"))
+									bulkUploadAwards.setSubsidyAwardInterest(currentCell.getStringCellValue().trim());
 								break;
 							case 5:
-								if (currentCell.getCellType() == CellType.BLANK) {
-									bulkUploadAwards.setSubsidyObjective(null);
-								} else {
-									bulkUploadAwards.setSubsidyObjective(currentCell.getStringCellValue());
+								if(bulkUploadAwards.getStandaloneAward().equalsIgnoreCase("yes")) {
+									if (currentCell.getCellType() == CellType.BLANK) {
+										bulkUploadAwards.setSpecificPolicyObjective(null);
+									} else {
+										bulkUploadAwards.setSpecificPolicyObjective(currentCell.getStringCellValue().trim());
+									}
 								}
 								break;
 							case 6:
-								if (currentCell.getCellType() == CellType.BLANK) {
-									bulkUploadAwards.setSubsidyObjectiveOther(null);
-								} else {
-									bulkUploadAwards.setSubsidyObjectiveOther(currentCell.getStringCellValue());
-								}
+								bulkUploadAwards.setSubsidyDescription(currentCell.getStringCellValue().trim());
 								break;
 							case 7:
+								if(bulkUploadAwards.getStandaloneAward().equalsIgnoreCase("yes"))
+									bulkUploadAwards.setAuthorityURL(currentCell.getStringCellValue());
+								break;
+							case 8:
+								if(bulkUploadAwards.getStandaloneAward().equalsIgnoreCase("yes"))
+									bulkUploadAwards.setAuthorityURLDescription(currentCell.getStringCellValue());
+								break;
+							case 9:
+								bulkUploadAwards.setSpei(currentCell.getStringCellValue().trim());
+								break;
+							case 10:
+								if (currentCell.getCellType() == CellType.BLANK) {
+									bulkUploadAwards.setSubsidyObjective(null);
+								} else {
+									bulkUploadAwards.setSubsidyObjective(currentCell.getStringCellValue().trim());
+								}
+								break;
+							case 11:
+								String objectiveOther = currentCell.getStringCellValue();
+								String[] otherSplit = currentCell.getStringCellValue().split("-",2);
+								if(otherSplit[0].toLowerCase().contains("other"))
+									objectiveOther = otherSplit.length > 1 ? otherSplit[1] : otherSplit[0];
+
+								if (currentCell.getCellType()==CellType.BLANK || currentCell.getStringCellValue().trim().isEmpty()) {
+									bulkUploadAwards.setSubsidyObjectiveOther(null);
+									//if purpose other is populated but purpose is blank
+								}else if(currentCell.getCellType()!=CellType.BLANK && bulkUploadAwards.getSubsidyObjective() == null) {
+
+									bulkUploadAwards.setSubsidyObjective("Other - " + objectiveOther);
+									bulkUploadAwards.setSubsidyObjectiveOther(currentCell.getStringCellValue().trim());
+									//if purpose and other purpose are both populated
+								}else {
+									bulkUploadAwards.setSubsidyObjectiveOther(objectiveOther);
+									bulkUploadAwards.setSubsidyObjective(bulkUploadAwards.getSubsidyObjective().replace("Other", "Other - " + objectiveOther));
+								}
+								break;
+							case 12:
 								if (currentCell.getCellType() == CellType.BLANK) {
 									bulkUploadAwards.setSubsidyInstrument(null);
 								} else {
-									bulkUploadAwards.setSubsidyInstrument(currentCell.getStringCellValue());
+									bulkUploadAwards.setSubsidyInstrument(currentCell.getStringCellValue().trim());
 								}
 								break;
-							case 8:
+							case 13:
 								if (currentCell.getCellType() == CellType.BLANK) {
 									bulkUploadAwards.setSubsidyInstrumentOther(null);
 								} else {
-									bulkUploadAwards.setSubsidyInstrumentOther(currentCell.getStringCellValue());
+									bulkUploadAwards.setSubsidyInstrumentOther(currentCell.getStringCellValue().trim());
 								}
 								break;
-							case 9:
-								bulkUploadAwards.setSubsidyAmountRange((currentCell == null || currentCell.getCellType() == CellType.BLANK || (currentCell.getCellType().equals(CellType.STRING) && currentCell.getStringCellValue().trim().isEmpty())) ? null : currentCell.getStringCellValue());
+							case 14:
+								bulkUploadAwards.setSubsidyAmountRange((currentCell == null || currentCell.getCellType() == CellType.BLANK || (currentCell.getCellType().equals(CellType.STRING) && currentCell.getStringCellValue().trim().isEmpty())) ? null : currentCell.getStringCellValue().trim());
 								break;
-							case 10:
+							case 15:
 								if (currentCell.getCellType() == CellType.STRING) {
 									bulkUploadAwards.setSubsidyAmountExact((currentCell.getStringCellValue().trim()));
 								} else if (currentCell.getCellType() == CellType.NUMERIC) {
 									bulkUploadAwards.setSubsidyAmountExact((String.valueOf(currentCell.getNumericCellValue())));
 								}
 								break;
-							case 11:
+							case 16:
 								if (currentCell.getCellType() == CellType.BLANK) {
 									bulkUploadAwards.setNationalIdType(null);
 								} else {
-									bulkUploadAwards.setNationalIdType(currentCell.getStringCellValue());
+									bulkUploadAwards.setNationalIdType(currentCell.getStringCellValue().trim());
 								}
 								break;
-							case 12:
+							case 17:
 								if (currentCell.getCellType() == CellType.BLANK) {
 									bulkUploadAwards.setNationalId(null);
 								} else {
 									bulkUploadAwards.setNationalId(((currentCell.getCellType() == CellType.NUMERIC) ?
 											String.valueOf(Double.valueOf(currentCell.getNumericCellValue()).longValue()) :
-											currentCell.getStringCellValue()));
+											currentCell.getStringCellValue().trim()));
 								}
 								break;
-							case 13:
+							case 18:
 								if (currentCell.getCellType() == CellType.BLANK) {
 									bulkUploadAwards.setBeneficiaryName(null);
 								} else {
-									bulkUploadAwards.setBeneficiaryName(currentCell.getStringCellValue());
+									bulkUploadAwards.setBeneficiaryName(currentCell.getStringCellValue().trim());
 								}
 								break;
-							case 14:
+							case 19:
 								if (currentCell.getCellType() == CellType.BLANK) {
 									bulkUploadAwards.setOrgSize(null);
 								} else {
-									bulkUploadAwards.setOrgSize(currentCell.getStringCellValue());
+									bulkUploadAwards.setOrgSize(currentCell.getStringCellValue().trim());
 								}
 
 								break;
-							case 15:
+							case 20:
 								if (currentCell.getCellType() == CellType.BLANK) {
 									bulkUploadAwards.setGrantingAuthorityName(null);
 								} else {
-									bulkUploadAwards.setGrantingAuthorityName(currentCell.getStringCellValue());
+									bulkUploadAwards.setGrantingAuthorityName(currentCell.getStringCellValue().trim());
 								}
 								break;
-							case 16:
+							case 21:
 								if (currentCell.getCellType() == CellType.BLANK) {
 									bulkUploadAwards.setLegalGrantingDate(null);
 								}
@@ -184,25 +220,25 @@ public class ExcelHelper {
 									bulkUploadAwards.setLegalGrantingDate(convertDateToString(currentCell.getDateCellValue()));
 								}
 								break;
-							case 17:
+							case 22:
 								if (currentCell.getCellType() == CellType.BLANK) {
 									bulkUploadAwards.setGoodsOrServices(null);
 								} else {
-									bulkUploadAwards.setGoodsOrServices(currentCell.getStringCellValue());
+									bulkUploadAwards.setGoodsOrServices(currentCell.getStringCellValue().trim());
 								}
 								break;
-							case 18:
+							case 23:
 								if (currentCell.getCellType() == CellType.BLANK) {
 									bulkUploadAwards.setSpendingRegion(null);
 								} else {
-									bulkUploadAwards.setSpendingRegion(currentCell.getStringCellValue());
+									bulkUploadAwards.setSpendingRegion(currentCell.getStringCellValue().trim());
 								}
 								break;
-							case 19:
+							case 24:
 								if (currentCell.getCellType() == CellType.BLANK) {
 									bulkUploadAwards.setSpendingSector(null);
 								} else {
-									bulkUploadAwards.setSpendingSector(currentCell.getStringCellValue());
+									bulkUploadAwards.setSpendingSector(currentCell.getStringCellValue().trim());
 								}
 								break;
 							default:
@@ -292,14 +328,14 @@ public class ExcelHelper {
 								if(currentCell.getCellType()==CellType.BLANK) {
 									bulkUploadMfaAwards.setGroupingId(null);
 								}else {
-									bulkUploadMfaAwards.setGroupingId(currentCell.getStringCellValue());
+									bulkUploadMfaAwards.setGroupingId(currentCell.getStringCellValue().trim());
 								}
 
 								break;
 
 							case 3:
 								if(currentCell.getCellType()==CellType.STRING) {
-									bulkUploadMfaAwards.setAwardFullAmount(currentCell.getStringCellValue());
+									bulkUploadMfaAwards.setAwardFullAmount(currentCell.getStringCellValue().trim());
 								} else if (currentCell.getCellType()==CellType.BLANK) {
 									bulkUploadMfaAwards.setAwardFullAmount("");
 								} else {
@@ -321,22 +357,22 @@ public class ExcelHelper {
 								break;
 
 							case 5:
-								bulkUploadMfaAwards.setPublicAuthority(currentCell.getStringCellValue());
+								bulkUploadMfaAwards.setPublicAuthority(currentCell.getStringCellValue().trim());
 
 								break;
 
 							case 6:
-								bulkUploadMfaAwards.setOrgName(currentCell.getStringCellValue());
+								bulkUploadMfaAwards.setOrgName(currentCell.getStringCellValue().trim());
 
 								break;
 
 							case 7:
-								bulkUploadMfaAwards.setOrgIdType(currentCell.getStringCellValue());
+								bulkUploadMfaAwards.setOrgIdType(currentCell.getStringCellValue().trim());
 
 								break;
 
 							case 8:
-								bulkUploadMfaAwards.setIdNumber(formatter.formatCellValue(currentCell));
+								bulkUploadMfaAwards.setIdNumber(formatter.formatCellValue(currentCell).trim());
 
 								break;
 

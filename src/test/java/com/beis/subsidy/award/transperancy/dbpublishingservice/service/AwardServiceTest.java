@@ -47,7 +47,7 @@ public class AwardServiceTest {
 		// awardInputRequest.setRow(2);
 		awardInputRequest.setSubsidyControlNumber("SC10000");
 		awardInputRequest.setSubsidyControlTitle("AHDB Generic Promotional Measures scheme");
-		awardInputRequest.setSubsidyObjective("SME support");
+		awardInputRequest.setSubsidyObjective("Environmental protection");
 		awardInputRequest.setSubsidyInstrument("Loan");
 		awardInputRequest.setSubsidyAmountRange("500000 - 1000000");
 		awardInputRequest.setSubsidyAmountExact("99.0");
@@ -63,6 +63,7 @@ public class AwardServiceTest {
 		awardInputRequest.setSpendingSector("10.Information and communication");
 		awardInputRequest.setSubsidyObjectiveOther("abc");
 		awardInputRequest.setSubsidyInstrumentOther("def");
+		awardInputRequest.setSubsidyAwardInterest("");
 
 		bulkUploadAward = new BulkUploadAwards();
 		bulkUploadAward.setRow(2);
