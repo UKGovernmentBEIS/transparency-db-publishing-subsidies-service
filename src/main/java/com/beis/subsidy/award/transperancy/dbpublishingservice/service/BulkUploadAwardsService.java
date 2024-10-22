@@ -605,13 +605,13 @@ public class BulkUploadAwardsService {
 						return false;
 					}
 					String[] spendingRegionArray = award.getSpendingRegion().toLowerCase().trim().split("\\s*,\\s*");
-					return Arrays.asList(spendingRegionArray).contains("national") && spendingRegionArray.length > 1;
+					return Arrays.asList(spendingRegionArray).contains("uk-wide") && spendingRegionArray.length > 1;
 				})
 				.collect(Collectors.toList());
 
 		validationSpendingRegionErrorListResultList.addAll(spendingRegionNationalErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Region"),
-						"Spending Region(s) should not contain other regions if 'National' is included"))
+						"Spending Region(s) should not contain other regions if 'UK-wide' is included"))
 				.collect(Collectors.toList()));
 
 		log.info("Validation Result Error list - Spending Region should enter = " + validationSpendingRegionErrorListResultList.size());
