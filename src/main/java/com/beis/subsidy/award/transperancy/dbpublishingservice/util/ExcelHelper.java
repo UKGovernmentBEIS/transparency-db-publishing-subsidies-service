@@ -167,7 +167,9 @@ public class ExcelHelper {
 								break;
 							case 15:
 								if (currentCell.getCellType() == CellType.STRING) {
-									bulkUploadAwards.setSubsidyAmountExact((currentCell.getStringCellValue().trim()));
+									bulkUploadAwards.setSubsidyAmountExact(
+                                            currentCell.getStringCellValue().isEmpty() ? null : currentCell.getStringCellValue().trim()
+									);
 								} else if (currentCell.getCellType() == CellType.NUMERIC) {
 									bulkUploadAwards.setSubsidyAmountExact((String.valueOf(currentCell.getNumericCellValue())));
 								}
