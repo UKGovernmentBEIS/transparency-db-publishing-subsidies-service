@@ -398,7 +398,7 @@ public class AddAwardService {
 					"You must select at least one subsidy purpose."));
 		}
 		if(!StringUtils.isEmpty(award.getSubsidyObjectiveOther()) && award.getSubsidyObjectiveOther() .length() > 255){
-			validationSubsidyObjErrorResultList.add(new SingleAwardValidationResult("SubsidyObjective- other",
+			validationSubsidyObjErrorResultList.add(new SingleAwardValidationResult("SubsidyObjective-other",
 					"The subsidy purpose must be less than 248 characters."));
 		}
 			
