@@ -73,6 +73,7 @@ public class AddAwardService {
 
 			List<SingleAwardValidationResult> validateSpecificPolicyObjective = validateSpecificPolicyObjective(award);
 
+
 			// Validation National Id length check
 			List<SingleAwardValidationResult> nationalIdMissingList = validateNationalIdAwards(award);
 
@@ -160,11 +161,14 @@ public class AddAwardService {
 
 			List<SingleAwardValidationResult> SpeiErrorList = validateSpei(award);
 
-			// Merge lists of Validation Errors
+			List<SingleAwardValidationResult> validateLegalBasisErrorList = validateLegalBasis(award);
+
+
+		// Merge lists of Validation Errors
 			List<SingleAwardValidationResult> validationErrorResultList = Stream
 					.of(scNumberNameCheckList, subsidyMeasureTitleNameLengthList, subsidyPurposeCheckList,
-							nationalIdTypeMissingList, standaloneAwardStatusMissingList, validateSubsidyAwardDescription,validateSpecificPolicyObjective,
-							nationalIdMissingList, beneficiaryNameErrorList,
+							nationalIdTypeMissingList, standaloneAwardStatusMissingList, validateSubsidyAwardDescription,validateSpecificPolicyObjective
+							,validateLegalBasisErrorList, nationalIdMissingList, beneficiaryNameErrorList,
 							beneficiaryMissingList, subsidyControlNumberMismatchList,
 							grantingAuthorityNameErrorList, grantingAuthorityErrorList, sizeOfOrgErrorList,
 							spendingRegionErrorList, spendingSectorErrorList, goodsOrServiceErrorList,
@@ -317,6 +321,22 @@ public class AddAwardService {
 		return errorList;
 	}
 
+	private List<SingleAwardValidationResult> validateLegalBasis(SingleAward award) {
+		/*
+		 * Validation that subsidy award description exists
+		 */
+		List<SingleAwardValidationResult> errorList = new ArrayList<>();
+		if(award.getLegalBasis() != null && award.getLegalBasis().length() > 5000){
+			errorList.add(new SingleAwardValidationResult("legalBasis","The legal basis must be 5000 characters or less."));
+		}
+
+		if(award.getLegalBasis() == null || StringUtils.isEmpty(award.getLegalBasis())){
+			errorList.add(new SingleAwardValidationResult("legalBasis","The legal basis field is mandatory."));
+		}
+
+
+		return errorList;
+	}
 	/*
 	 * 
 	 * the below method validate either SC number or Sc Title exist in the file.

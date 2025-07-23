@@ -33,6 +33,7 @@ public class BulkUploadAwards {
 	private String standaloneAward;
 	private String subsidyDescription;
 	private String specificPolicyObjective;
+	private String legalBasis;
 	private String authorityURL;
 	private String authorityURLDescription;
 	private String subsidyAwardInterest;

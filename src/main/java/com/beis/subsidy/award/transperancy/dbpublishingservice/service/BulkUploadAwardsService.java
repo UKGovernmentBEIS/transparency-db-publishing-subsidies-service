@@ -43,22 +43,24 @@ public class BulkUploadAwardsService {
 		put("Description", "G");
         put("Public Authority URL", "H");
 		put("Public Authority URL Description", "I");
-		put("Services of Public Economic Interest (SPEI)", "J");
-		put("Objective", "K");
-		put("Objective Other", "L");
-		put("Instrument", "M");
-		put("Instrument Other", "N");
-		put("Full Range", "O");
-		put("Full Exact", "P");
-		put("ID Type", "Q");
-		put("ID", "R");
-		put("Beneficiary", "S");
-		put("Size of Org", "T");
-		put("GA Name", "U");
-		put("Legal Granting Date", "V");
-		put("Goods Services", "W");
-		put("Region", "X");
-		put("Sector", "Y");
+		put("Legal Basis","J");
+		put("Services of Public Economic Interest (SPEI)", "K");
+		put("Objective", "L");
+		put("Objective Other", "M");
+		put("Instrument", "N");
+		put("Instrument Other", "O");
+		put("Full Range", "P");
+		put("Full Exact", "Q");
+		put("ID Type", "R");
+		put("ID", "S");
+		put("Beneficiary", "T");
+		put("Size of Org", "U");
+		put("GA Name", "V");
+		put("Legal Granting Date", "W");
+		put("Goods Services", "X");
+		put("Region", "Y");
+		put("Sector", "Z");
+
 	}};
 
 
@@ -196,6 +198,9 @@ public class BulkUploadAwardsService {
 			List<ValidationErrorResult> subsidySpeiErrorList = validateSubsidySpei(
 					bulkUploadAwards);
 
+			List<ValidationErrorResult> LegalBasisErrorList = validateLegalBasis(
+					bulkUploadAwards);
+
 			// Merge lists of Validation Errors
 			List<ValidationErrorResult> validationErrorResultList = Stream
 					.of(scNumberNameCheckList, subsidyMeasureTitleNameLengthList, subsidyPurposeCheckList,
@@ -205,7 +210,7 @@ public class BulkUploadAwardsService {
 							spendingRegionErrorList, spendingSectorErrorList, goodsOrServiceErrorList,SubsidyInstrumentErrorList,
 							legalGrantingDateErrorList,SubsidyElementFullAmountErrorList, StandaloneAwardErrorList,
 							AuthorityURLErrorList, AuthorityURLDescriptionErrorList, SubsidyDescriptionErrorList, SpecificPolicyObjectiveErrorList,
-							SubsidyTaxRangeAmountErrorList, adminProgramNumberErrorList, SubsidyAwardInterestErrorList, subsidySpeiErrorList)
+							SubsidyTaxRangeAmountErrorList, adminProgramNumberErrorList, SubsidyAwardInterestErrorList, subsidySpeiErrorList,LegalBasisErrorList)
 					.flatMap(x -> x.stream()).collect(Collectors.toList());
 
 			log.info("Final validation errors list ...printing list of errors - start");
@@ -368,6 +373,35 @@ public class BulkUploadAwardsService {
 		}
 
 		return validationSpecificPolicyObjectiveResultList;
+	}
+
+	private List<ValidationErrorResult> validateLegalBasis(List<BulkUploadAwards> bulkUploadAwards) {
+		List<BulkUploadAwards> legalBasisErrorRecordsList = bulkUploadAwards.stream()
+				.filter(award -> (
+						award.getLegalBasis() != null && award.getLegalBasis().length() > 5000)
+				)
+				.collect(Collectors.toList());
+
+		List<ValidationErrorResult> validationLegalBasisResultList = new ArrayList<>();
+		validationLegalBasisResultList = legalBasisErrorRecordsList.stream()
+				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Legal Basis"),
+						"The legal basis must be 5000 characters or less."))
+				.collect(Collectors.toList());
+
+		// Condition 2: Null or empty
+		List<BulkUploadAwards> legalBasisMissingList = bulkUploadAwards.stream()
+				.filter(award -> award.getLegalBasis() == null || award.getLegalBasis().trim().isEmpty())
+				.collect(Collectors.toList());
+
+		List<ValidationErrorResult> missingErrors = legalBasisMissingList.stream()
+				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Legal Basis"),
+						"You must enter a legal basis."))
+				.collect(Collectors.toList());
+
+		validationLegalBasisResultList.addAll(missingErrors);
+
+
+		return validationLegalBasisResultList;
 	}
 
 	private List<ValidationErrorResult> validateSubsidySpei(List<BulkUploadAwards> bulkUploadAwards) {
