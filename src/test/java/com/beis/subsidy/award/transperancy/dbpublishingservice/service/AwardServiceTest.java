@@ -10,6 +10,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.UserPrinciple;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,8 @@ public class AwardServiceTest {
 	private final AdminProgramRepository adminProgramRepository = mock(AdminProgramRepository.class);
 
 	BulkUploadAwards bulkUploadAward;
+
+	UserPrinciple userPrinciple;
 
 	SingleAward awardInputRequest;
 
@@ -84,6 +87,13 @@ public class AwardServiceTest {
 		bulkUploadAward.setGoodsOrServices("Goods");
 		bulkUploadAward.setSubsidyObjectiveOther("abc");
 		bulkUploadAward.setSubsidyInstrumentOther("def");
+
+		userPrinciple = new UserPrinciple();
+		userPrinciple.setUserName("Beis Admin");
+		userPrinciple.setRole("Beis Administrator");
+		userPrinciple.setPassword("password123");
+		userPrinciple.setGrantingAuthorityGroupId(1);
+		userPrinciple.setGrantingAuthorityGroupName("TEST GA");
 
 		MockitoAnnotations.openMocks(this);
 
@@ -146,7 +156,7 @@ public class AwardServiceTest {
 		when(smRepository.findAll()).thenReturn(smList);
 		when(awardServiceMock.createAward(awardInputRequest,role)).thenReturn(expectedAward);
 		when(adminProgramRepository.findById(anyString()).orElse(null)).thenReturn(null);
-		List<Award> awards = awardServiceMock.processBulkAwards(awardList,role);
+		List<Award> awards = awardServiceMock.processBulkAwards(awardList,role, userPrinciple);
 		assertNotNull(awards);
 
 	}
@@ -181,7 +191,7 @@ public class AwardServiceTest {
 		when(smRepository.findAll()).thenReturn(smList);
 		when(awardServiceMock.createAward(awardInputRequest,role)).thenReturn(expectedAward);
 		when(adminProgramRepository.findById(anyString()).orElse(null)).thenReturn(null);
-		List<Award> awards = awardServiceMock.processBulkAwards(awardList,role);
+		List<Award> awards = awardServiceMock.processBulkAwards(awardList,role,userPrinciple);
 		assertNotNull(awards);
 
 	}

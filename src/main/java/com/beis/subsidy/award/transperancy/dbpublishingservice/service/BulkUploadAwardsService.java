@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.UserPrinciple;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.*;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AdminProgramRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.util.AccessManagementConstant;
@@ -65,7 +66,7 @@ public class BulkUploadAwardsService {
 	/*
 	 * the below method validate the excel file passed in request.
 	 */
-	public ValidationResult validateFile(MultipartFile file, String role) {
+	public ValidationResult validateFile(MultipartFile file, String role, UserPrinciple userPrinciple) {
 
 		try {
 
@@ -223,7 +224,7 @@ public class BulkUploadAwardsService {
 
 				log.info("No validation error in bulk excel template");
 
-				awardService.processBulkAwards(bulkUploadAwards,role);
+				awardService.processBulkAwards(bulkUploadAwards,role, userPrinciple);
 			}
 
 			return validationResult;

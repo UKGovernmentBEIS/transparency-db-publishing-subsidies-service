@@ -96,7 +96,7 @@ public class AddAwardController {
 
 			if ( validationResult.getTotalErrors() == 0) {
 
-				ExcelHelper.saveAuditLog(userPrincipleObj, "Add Award", userPrincipleObj.getRole(), auditLogsRepository);
+				ExcelHelper.saveAuditLog(userPrincipleObj, "Add Award", userPrincipleObj.getRole(), auditLogsRepository, validationResult.getAwardNumber());
 				log.info("{} :: after saving the audit log in  add Award",loggingComponentName);
 			}
 

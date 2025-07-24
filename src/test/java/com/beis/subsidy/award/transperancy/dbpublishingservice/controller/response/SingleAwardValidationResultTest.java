@@ -33,7 +33,7 @@ public class SingleAwardValidationResultTest {
 		List<SingleAwardValidationResult> validationErrorResult = new ArrayList<>();
 
 		SingleAwardValidationResults singleAwardValidationResultTest = new SingleAwardValidationResults(0,
-				validationErrorResult, "test");
+				validationErrorResult, "test", null);
 
 		singleAwardValidationResultTest.setTotalErrors(0);
 		singleAwardValidationResultTest.setMessage("Award saved in Database");

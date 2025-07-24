@@ -4,24 +4,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.UserPrinciple;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.AuditLogs;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.BulkUploadMfaAwards;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.model.*;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AuditLogsRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.expression.ParseException;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.BulkUploadAwards;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -436,17 +435,22 @@ public class ExcelHelper {
 		}
 	}
 
-	public static void saveAuditLog(UserPrinciple userPrinciple, String action,String role,
-									AuditLogsRepository auditLogsRepository) {
+	public static void saveAuditLog(UserPrinciple userPrinciple, String action, String role,
+									AuditLogsRepository auditLogsRepository, String award) {
 		AuditLogs audit = new AuditLogs();
 		try {
 			String status ="Published";
-
+			StringBuilder msg;
 			if ("Granting Authority Encoder".equals(role.trim())) {
 				status = "Awaiting Approval";
 			}
-			StringBuilder msg = new StringBuilder("Award ")
-					.append(" added with status ").append(status) ;
+			if ("Bulk upload Awards".equals(action)) {
+				msg = new StringBuilder("Award(s)")
+						.append(" bulk uploaded with status ").append(status) ;
+			}else{
+				msg = new StringBuilder("Award ").append(award)
+						.append(" added with status ").append(status) ;
+			};
 
 			String userName = userPrinciple.getUserName();
 			audit.setUserName(userName);
@@ -454,7 +458,7 @@ public class ExcelHelper {
 			audit.setEventId(role);
 			audit.setEventMessage(msg.toString());
 			audit.setGaName(userPrinciple.getGrantingAuthorityGroupName());
-			audit.setCreatedTimestamp(LocalDate.now());
+			audit.setCreatedTimestamp(LocalDateTime.now());
 			auditLogsRepository.save(audit);
 		} catch(Exception e) {
 			log.error("{} :: saveAuditLog failed to perform action", e);
@@ -471,11 +475,77 @@ public class ExcelHelper {
 			audit.setEventId(awardNo);
 			audit.setEventMessage(eventMsg.toString());
 			audit.setGaName(userPrinciple.getGrantingAuthorityGroupName());
-			audit.setCreatedTimestamp(LocalDate.now());
+			audit.setCreatedTimestamp(LocalDateTime.now());
 			auditLogsRepository.save(audit);
 		} catch(Exception e) {
 			log.error("{} :: saveAuditLogForUpdate failed to perform action", e);
 		}
+	}
+
+	public static void saveBulkUploadAwardsAuditLog(List<Award> savedAwards, AuditLogsRepository auditLogsRepository) {
+		log.info("Creating audit logs for each added award");
+		List<AuditLogs> auditLogs = savedAwards.stream().map(award -> {
+			AuditLogs auditLog = new AuditLogs();
+			auditLog.setUserName(award.getCreatedBy());
+			auditLog.setGaName(award.getGrantingAuthority().getGrantingAuthorityName());
+			auditLog.setEventType("Bulk upload award(s)");
+			auditLog.setEventId(award.getAwardNumber().toString());
+			auditLog.setEventMessage("Award " + award.getAwardNumber() + " bulk uploaded.");
+			return auditLog;
+		}).collect(Collectors.toList());
+		log.info("creating generic award bulk upload message");
+
+		AuditLogs audit = new AuditLogs();
+		try{
+			StringBuilder msg;
+			msg = new StringBuilder(auditLogs.size() + " Award(s) " + "(" + savedAwards.get(0).getAwardNumber() + "-" + savedAwards.get(savedAwards.size()-1).getAwardNumber() + ")")
+					.append(" bulk uploaded successfully") ;
+
+			audit.setUserName(auditLogs.get(0).getUserName());
+			audit.setEventType(auditLogs.get(0).getEventType());
+			audit.setEventId(auditLogs.get(0).getEventId());
+			audit.setEventMessage(msg.toString());
+			audit.setGaName(auditLogs.get(0).getGaName());
+			audit.setCreatedTimestamp(LocalDateTime.now());
+			auditLogsRepository.save(audit);
+		}catch(Exception e) {
+			log.error("{} :: saveBulkUploadIndividualAwardsAuditLog failed to perform action", e);
+		}
+
+		List<AuditLogs> savedAuditLogs = auditLogsRepository.saveAll(auditLogs);
+	}
+
+	public static void saveBulkUploadMfaAwardsAuditLog(List<MFAAward> savedAwards, AuditLogsRepository auditLogsRepository) {
+		log.info("Creating audit logs for each added award");
+		List<AuditLogs> auditLogs = savedAwards.stream().map(mfaAward -> {
+			AuditLogs auditLog = new AuditLogs();
+			auditLog.setUserName(mfaAward.getCreatedBy());
+			auditLog.setGaName(mfaAward.getGrantingAuthority().getGrantingAuthorityName());
+			auditLog.setEventType("Bulk upload award(s)");
+			auditLog.setEventId(mfaAward.getMfaAwardNumber().toString());
+			auditLog.setEventMessage("MFA Award " + mfaAward.getMfaAwardNumber() + " bulk uploaded.");
+			return auditLog;
+		}).collect(Collectors.toList());
+		log.info("creating generic award bulk upload message");
+
+		AuditLogs audit = new AuditLogs();
+		try{
+			StringBuilder msg;
+			msg = new StringBuilder(auditLogs.size() + " MFA Award(s) " + "(" + savedAwards.get(0).getMfaAwardNumber() + "-" + savedAwards.get(savedAwards.size()-1).getMfaAwardNumber() + ")")
+					.append(" bulk uploaded successfully") ;
+
+			audit.setUserName(auditLogs.get(0).getUserName());
+			audit.setEventType(auditLogs.get(0).getEventType());
+			audit.setEventId(auditLogs.get(0).getEventId());
+			audit.setEventMessage(msg.toString());
+			audit.setGaName(auditLogs.get(0).getGaName());
+			audit.setCreatedTimestamp(LocalDateTime.now());
+			auditLogsRepository.save(audit);
+		}catch(Exception e) {
+			log.error("{} :: saveBulkUploadIndividualAwardsAuditLog failed to perform action", e);
+		}
+
+		List<AuditLogs> savedAuditLogs = auditLogsRepository.saveAll(auditLogs);
 	}
 
 	public static boolean isNumeric(String strNum) {
