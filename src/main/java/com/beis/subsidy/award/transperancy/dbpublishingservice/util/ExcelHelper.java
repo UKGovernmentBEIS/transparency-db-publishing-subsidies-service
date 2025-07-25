@@ -163,7 +163,11 @@ public class ExcelHelper {
 								}
 								break;
 							case 14:
-								bulkUploadAwards.setSubsidyAmountRange((currentCell == null || currentCell.getCellType() == CellType.BLANK || (currentCell.getCellType().equals(CellType.STRING) && currentCell.getStringCellValue().trim().isEmpty())) ? null : currentCell.getStringCellValue().trim());
+								bulkUploadAwards.setSubsidyAmountRange(
+										(currentCell == null || currentCell.getCellType() == CellType.BLANK ||
+												(currentCell.getCellType().equals(CellType.STRING) && currentCell.getStringCellValue().trim().isEmpty()))
+												? null : currentCell.getStringCellValue().replaceAll("[£,]","").trim()
+								);
 								break;
 							case 15:
 								if (currentCell.getCellType() == CellType.STRING) {

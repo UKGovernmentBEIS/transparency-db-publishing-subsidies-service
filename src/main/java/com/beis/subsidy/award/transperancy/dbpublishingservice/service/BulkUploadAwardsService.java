@@ -1080,7 +1080,10 @@ public class BulkUploadAwardsService {
 	private List<ValidationErrorResult> validateSubsidyNumberLength(List<BulkUploadAwards> bulkUploadAwards) {
 
 		List<BulkUploadAwards> validateSubsidyNumberLengthErrorRecordsList = bulkUploadAwards.stream()
-				.filter(award -> ((award.getSubsidyControlNumber().length() > 7))).collect(Collectors.toList());
+				.filter(award -> ((award.getSubsidyControlNumber() == null || !award.getSubsidyControlNumber().matches("^SC\\d{5}$")))).collect(Collectors.toList());
+
+
+
 
 		List<ValidationErrorResult> validationSubsidyNumberLengthResultList = new ArrayList<>();
 		validationSubsidyNumberLengthResultList = validateSubsidyNumberLengthErrorRecordsList.stream()
