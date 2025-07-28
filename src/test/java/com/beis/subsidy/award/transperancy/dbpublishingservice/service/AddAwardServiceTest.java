@@ -74,6 +74,8 @@ public class AddAwardServiceTest {
 		awardInputRequest.setSubsidyAwardInterest("");
 		awardInputRequest.setSpecificPolicyObjective("");
 		awardInputRequest.setSpei("Yes");
+		awardInputRequest.setLegalBasis("legal basis");
+
 		MockitoAnnotations.openMocks(this);
 	}
 
