@@ -66,7 +66,7 @@ public class BulkUploadAwardsService {
 	/*
 	 * the below method validate the excel file passed in request.
 	 */
-	public ValidationResult validateFile(MultipartFile file, String role, UserPrinciple userPrinciple) {
+	public ValidationResult validateFile(MultipartFile file, UserPrinciple userPrinciple) {
 
 		try {
 
@@ -224,7 +224,7 @@ public class BulkUploadAwardsService {
 
 				log.info("No validation error in bulk excel template");
 
-				awardService.processBulkAwards(bulkUploadAwards,role, userPrinciple);
+				awardService.processBulkAwards(bulkUploadAwards,userPrinciple.getRole(), userPrinciple);
 			}
 
 			return validationResult;

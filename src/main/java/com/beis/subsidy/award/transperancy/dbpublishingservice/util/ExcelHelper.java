@@ -435,13 +435,13 @@ public class ExcelHelper {
 		}
 	}
 
-	public static void saveAuditLog(UserPrinciple userPrinciple, String action, String role,
+	public static void saveAuditLog(UserPrinciple userPrinciple, String action,
 									AuditLogsRepository auditLogsRepository, String award) {
 		AuditLogs audit = new AuditLogs();
 		try {
 			String status ="Published";
 			StringBuilder msg;
-			if ("Granting Authority Encoder".equals(role.trim())) {
+			if ("Granting Authority Encoder".equals(userPrinciple.getRole().trim())) {
 				status = "Awaiting Approval";
 			}
 			if ("Bulk upload Awards".equals(action)) {
@@ -455,7 +455,7 @@ public class ExcelHelper {
 			String userName = userPrinciple.getUserName();
 			audit.setUserName(userName);
 			audit.setEventType(action);
-			audit.setEventId(role);
+			audit.setEventId(userPrinciple.getRole());
 			audit.setEventMessage(msg.toString());
 			audit.setGaName(userPrinciple.getGrantingAuthorityGroupName());
 			audit.setCreatedTimestamp(LocalDateTime.now());
@@ -530,20 +530,23 @@ public class ExcelHelper {
 	}
 
 	public static StringBuilder bulkUploadAuditMsgBuilder (List savedAwardsList, List<AuditLogs> auditLogs){
-		if(savedAwardsList.get(0) instanceof MFAAward){
-			List<MFAAward> savedAwards = savedAwardsList;
-			StringBuilder msg;
-			msg = new StringBuilder(auditLogs.size() + " MFA Award(s) " + "(" + savedAwards.get(0).getMfaAwardNumber() + "-" + savedAwards.get(savedAwards.size()-1).getMfaAwardNumber() + ")")
-					.append(" bulk uploaded successfully") ;
-			return msg;
-		} else if (savedAwardsList.get(0) instanceof Award) {
-			List<Award> savedAwards = savedAwardsList;
-			StringBuilder msg;
-			msg = new StringBuilder(auditLogs.size() + " Award(s) " + "(" + savedAwards.get(0).getAwardNumber() + "-" + savedAwards.get(savedAwards.size()-1).getAwardNumber() + ")")
-					.append(" bulk uploaded successfully") ;
-			return msg;
+		StringBuilder msg = new StringBuilder("");
+		try {
+			if(savedAwardsList.get(0) instanceof MFAAward){
+				List<MFAAward> savedAwards = savedAwardsList;
+				msg = new StringBuilder(auditLogs.size() + " MFA Award(s) " + "(" + savedAwards.get(0).getMfaAwardNumber() + "-" + savedAwards.get(savedAwards.size()-1).getMfaAwardNumber() + ")")
+						.append(" bulk uploaded successfully") ;
+				return msg;
+			} else if (savedAwardsList.get(0) instanceof Award) {
+				List<Award> savedAwards = savedAwardsList;
+				msg = new StringBuilder(auditLogs.size() + " Award(s) " + "(" + savedAwards.get(0).getAwardNumber() + "-" + savedAwards.get(savedAwards.size()-1).getAwardNumber() + ")")
+						.append(" bulk uploaded successfully") ;
+				return msg;
+			}
+		} catch(Exception e) {
+			log.error("{} :: bulkUploadAuditMsgBuilder failed to perform action", e);
 		}
-		return null;
+		return msg;
 	}
 	public static boolean isNumeric(String strNum) {
 		if (strNum == null) {

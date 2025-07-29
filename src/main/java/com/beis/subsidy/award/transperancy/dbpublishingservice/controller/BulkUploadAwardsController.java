@@ -82,8 +82,7 @@ public class BulkUploadAwardsController {
 				   validationResult.setMessage("You are not authorised to bulk upload awards");
 				   return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(validationResult);
 			   }
-				ValidationResult validationResult = bulkUploadAwardsService.validateFile(file,
-						userPrincipleObj.getRole(), userPrincipleObj);
+				ValidationResult validationResult = bulkUploadAwardsService.validateFile(file, userPrincipleObj);
 			   if (validationResult.getErrorRows() == 0) {
 				   log.info("Zero errors found, Awards successfully bulk uploaded");
 			   }
