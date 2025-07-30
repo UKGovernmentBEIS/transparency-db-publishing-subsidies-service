@@ -2,6 +2,7 @@ package com.beis.subsidy.award.transperancy.dbpublishingservice.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -11,18 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.UserPrinciple;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.model.*;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.*;
+import com.beis.subsidy.award.transperancy.dbpublishingservice.util.ExcelHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
-
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.Award;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.Beneficiary;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.BulkUploadAwards;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.GrantingAuthority;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SingleAward;
-import com.beis.subsidy.award.transperancy.dbpublishingservice.model.SubsidyMeasure;
 
 public class AwardServiceTest {
 
@@ -42,6 +38,10 @@ public class AwardServiceTest {
 	UserPrinciple userPrinciple;
 
 	SingleAward awardInputRequest;
+
+	Award mockAward;
+
+	GrantingAuthority grantingAuthority;
 
 	@BeforeEach
 	public void setUp() throws Exception {
@@ -95,6 +95,15 @@ public class AwardServiceTest {
 		userPrinciple.setGrantingAuthorityGroupId(1);
 		userPrinciple.setGrantingAuthorityGroupName("TEST GA");
 
+		grantingAuthority = new GrantingAuthority();
+		grantingAuthority.setGrantingAuthorityName("TEST GA");
+		grantingAuthority.setStatus("Active");
+		grantingAuthority.setGaId(26L);
+
+		mockAward = new Award();
+		mockAward.setAwardNumber(123L);
+		mockAward.setGrantingAuthority(grantingAuthority);
+
 		MockitoAnnotations.openMocks(this);
 
 	}
@@ -133,6 +142,7 @@ public class AwardServiceTest {
 	public void testProcessAwards() throws ParseException {
 
 		Beneficiary beneficiary = mock(Beneficiary.class);
+		AuditLogs auditLogs = mock(AuditLogs.class);
 		List<GrantingAuthority> gaList = new ArrayList<GrantingAuthority>();
 		List<SubsidyMeasure> smList = new ArrayList<>();
 		List<BulkUploadAwards> awardList = new ArrayList<>();
@@ -147,18 +157,20 @@ public class AwardServiceTest {
 		gaList.add(ga);
 		Award expectedAward = new Award();
 		Award saveAward = new Award();
+		List<Award> savedAwardsList = new ArrayList<>();
+		savedAwardsList.add(mockAward);
 		beneficiary.setBeneficiaryName("testName");
 		expectedAward.setApprovedBy("test");
 		String role = "Granting Authority Administrator";
 		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
+		when(awardRepository.saveAll(any())).thenReturn(savedAwardsList);
 		when(grepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
 		when(awardServiceMock.createAward(awardInputRequest,role)).thenReturn(expectedAward);
 		when(adminProgramRepository.findById(anyString()).orElse(null)).thenReturn(null);
-		List<Award> awards = awardServiceMock.processBulkAwards(awardList,role, userPrinciple);
+		List<Award> awards = awardServiceMock.processBulkAwards(awardList, role, userPrinciple);
 		assertNotNull(awards);
-
 	}
 
 	@Test
@@ -183,10 +195,13 @@ public class AwardServiceTest {
 		gaList.add(ga);
 		Award expectedAward = new Award();
 		Award saveAward = new Award();
+		List<Award> savedAwardsList = new ArrayList<>();
+		savedAwardsList.add(mockAward);
 		beneficiary.setBeneficiaryName("testName");
 		expectedAward.setApprovedBy("test");
 		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
 		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
+		when(awardRepository.saveAll(any())).thenReturn(savedAwardsList);
 		when(grepo.findAll()).thenReturn(gaList);
 		when(smRepository.findAll()).thenReturn(smList);
 		when(awardServiceMock.createAward(awardInputRequest,role)).thenReturn(expectedAward);
