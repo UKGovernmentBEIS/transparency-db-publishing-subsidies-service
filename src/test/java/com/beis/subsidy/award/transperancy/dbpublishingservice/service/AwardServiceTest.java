@@ -33,6 +33,8 @@ public class AwardServiceTest {
 	private SubsidyMeasureRepository smRepository = mock(SubsidyMeasureRepository.class);
 	private final AdminProgramRepository adminProgramRepository = mock(AdminProgramRepository.class);
 
+	private final AuditLogsRepository auditLogsRepository = mock(AuditLogsRepository.class);
+
 	BulkUploadAwards bulkUploadAward;
 
 	UserPrinciple userPrinciple;
