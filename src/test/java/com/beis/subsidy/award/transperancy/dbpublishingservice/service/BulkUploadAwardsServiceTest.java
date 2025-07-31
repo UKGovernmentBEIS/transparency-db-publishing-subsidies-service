@@ -80,6 +80,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setStandaloneAward("No");
 		bulkUploadAward.setSubsidyDescription("A description");
 		bulkUploadAward.setSpei("Yes");
+		bulkUploadAward.setLegalBasis("legal basis");
 		bulkUploadAward.setSubsidyObjective("Environmental protection");
 		bulkUploadAward.setSubsidyInstrument("Loan");
 		bulkUploadAward.setSubsidyAwardInterest("");
@@ -105,6 +106,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAwardStandalone.setStandaloneAward("Yes");
 		bulkUploadAwardStandalone.setSubsidyDescription("A description");
 		bulkUploadAwardStandalone.setAuthorityURL("test.co.uk");
+		bulkUploadAwardStandalone.setLegalBasis("legal basis");
 		bulkUploadAwardStandalone.setAuthorityURLDescription("test.co.uk description");
 		bulkUploadAwardStandalone.setSubsidyObjective("SME support+J3");
 		bulkUploadAwardStandalone.setSubsidyInstrument("Tax measures (tax credit, or tax/duty exemption)");

@@ -38,5 +38,6 @@ public class SingleAward {
 	private String authorityURLDescription;
 	private String subsidyAwardInterest;
 	private String spei;
+	private String legalBasis;
 
 }

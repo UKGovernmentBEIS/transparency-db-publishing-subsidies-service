@@ -132,7 +132,7 @@ public class AwardService {
 						bulkaward.getAuthorityURL(),
 						bulkaward.getAuthorityURLDescription(),
 						bulkaward.getSubsidyAwardInterest(),
-						bulkaward.getSpei())
+						bulkaward.getSpei(),bulkaward.getLegalBasis())
 					)
 				.collect(Collectors.toList());
 				
@@ -263,12 +263,13 @@ public class AwardService {
 					addPublishedDate(role), award.getSpendingRegion(),
 					((award.getSubsidyInstrument().equalsIgnoreCase("Other")) ? "Other - "+award.getSubsidyInstrumentOther()
 							: award.getSubsidyInstrument()),
-					award.getSpendingSector(), "SYSTEM", "SYSTEM", awardStatus, null, LocalDate.now(), LocalDate.now(), award.getStandaloneAward(), award.getSubsidyAwardDescription(), award.getSpecificPolicyObjective(),
+					award.getSpendingSector(), "SYSTEM", "SYSTEM", awardStatus, null, LocalDate.now(), LocalDate.now(), award.getStandaloneAward(), award.getSubsidyAwardDescription(),
+					award.getSpecificPolicyObjective(),
 					adminProgram,
 					award.getAuthorityURL(),
 					award.getAuthorityURLDescription(),
 					award.getSubsidyAwardInterest(),
-					award.getSpei());
+					award.getSpei(),award.getLegalBasis());
 
 			Award savedAwards = awardRepository.save(saveAward);
 			log.info("{} :: End process Bulk Awards db");
@@ -389,6 +390,9 @@ public class AwardService {
 
 			if(!StringUtils.isEmpty(awardUpdateRequest.getSpei())){
 				award.setSPEI(awardUpdateRequest.getSpei());
+			}
+			if(!StringUtils.isEmpty(awardUpdateRequest.getLegalBasis())){
+				award.setLegalBasis(awardUpdateRequest.getLegalBasis());
 			}
 
 			Award savedAwards = awardRepository.save(award);
