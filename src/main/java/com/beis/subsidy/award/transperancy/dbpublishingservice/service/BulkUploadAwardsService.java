@@ -372,6 +372,16 @@ public class BulkUploadAwardsService {
 					.collect(Collectors.toList()));
 		}
 
+		List<BulkUploadAwards> specificPolicyObjectiveWhenStandaloneAwardErrorRecordsList = bulkUploadAwards.stream()
+				.filter(award -> (Objects.equals(award.getStandaloneAward(), "No") && award.getSpecificPolicyObjective() != null)
+				)
+				.collect(Collectors.toList());
+
+		validationSpecificPolicyObjectiveResultList = specificPolicyObjectiveWhenStandaloneAwardErrorRecordsList.stream()
+				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Specific Policy Objective"),
+						"Specific Policy Objective is only saved and published for standalone awards. If you are submitting an in-scheme award, please include the policy objective in the Subsidy Description field (Field G) instead "))
+				.collect(Collectors.toList());
+
 		return validationSpecificPolicyObjectiveResultList;
 	}
 
