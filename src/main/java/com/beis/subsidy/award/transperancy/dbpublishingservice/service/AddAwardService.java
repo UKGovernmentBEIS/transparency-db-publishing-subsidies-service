@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
+import rx.Single;
 import uk.gov.service.notify.NotificationClientException;
 
 @Slf4j
@@ -154,7 +155,7 @@ public class AddAwardService {
 			 * 
 			 */
 			List<SingleAwardValidationResult> SubsidyInstrumentErrorList = validateSubsidyInstrument(award);
-			
+
 			List<SingleAwardValidationResult> AdminProgramErrorList = validateAdminProgram(award);
 
 			List<SingleAwardValidationResult> subsidyAwardInterestErrorList = validateSubsidyAwardInterest(award);
@@ -162,6 +163,8 @@ public class AddAwardService {
 			List<SingleAwardValidationResult> SpeiErrorList = validateSpei(award);
 
 			List<SingleAwardValidationResult> validateLegalBasisErrorList = validateLegalBasis(award);
+			
+			List<SingleAwardValidationResult> validateStandaloneAwardTitleErrorList = validateStandaloneAwardTitle(award);
 
 
 		// Merge lists of Validation Errors
@@ -173,7 +176,7 @@ public class AddAwardService {
 							grantingAuthorityNameErrorList, grantingAuthorityErrorList, sizeOfOrgErrorList,
 							spendingRegionErrorList, spendingSectorErrorList, goodsOrServiceErrorList,
 							SubsidyInstrumentErrorList,legalGrantingDateErrorList,SubsidyElementFullAmountErrorList,
-							AdminProgramErrorList, subsidyAwardInterestErrorList, SpeiErrorList)
+							AdminProgramErrorList, subsidyAwardInterestErrorList, SpeiErrorList, validateStandaloneAwardTitleErrorList)
 					.flatMap(x -> x.stream()).collect(Collectors.toList());
 
 		
@@ -224,6 +227,20 @@ public class AddAwardService {
 				
 			}
 			return validationResult;
+	}
+
+	private List<SingleAwardValidationResult> validateStandaloneAwardTitle(SingleAward award) {
+		List<SingleAwardValidationResult> errorList = new ArrayList<>();
+		// Only validate input if standalone award
+		if (award.getStandaloneAward().equalsIgnoreCase("yes")) {
+			if (award.getStandaloneAwardTitle() == null || award.getStandaloneAwardTitle().isEmpty()) {
+				errorList.add(new SingleAwardValidationResult("StandaloneAwardTitle", "You must include a standalone award title."));
+			}
+			if(award.getStandaloneAwardTitle() != null && award.getStandaloneAwardTitle().length() > 255){
+				errorList.add(new SingleAwardValidationResult("StandaloneAwardTitle", "The standalone award title must be 255 characters or less."));
+			}
+		}
+		return errorList;
 	}
 
 	private List<SingleAwardValidationResult> validateAdminProgram(SingleAward award) {

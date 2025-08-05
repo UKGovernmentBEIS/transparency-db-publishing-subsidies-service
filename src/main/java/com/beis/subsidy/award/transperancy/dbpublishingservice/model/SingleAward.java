@@ -39,5 +39,5 @@ public class SingleAward {
 	private String subsidyAwardInterest;
 	private String spei;
 	private String legalBasis;
-
+	private String standaloneAwardTitle;
 }
