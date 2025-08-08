@@ -84,13 +84,32 @@ public class ExcelHelper {
 
 						switch (i) {
 							case 0:
-								bulkUploadAwards.setSubsidyControlNumber(currentCell.getStringCellValue().trim());
+								if (currentCell.getCellType() == CellType.STRING) {
+									bulkUploadAwards.setSubsidyControlNumber(currentCell.getStringCellValue().trim());
+								} else if (currentCell.getCellType() == CellType.NUMERIC) {
+									String numericValue = String.valueOf((long) currentCell.getNumericCellValue());
+									bulkUploadAwards.setSubsidyControlNumber(numericValue);
+								} else if (currentCell.getCellType() == CellType.BLANK) {
+									bulkUploadAwards.setSubsidyControlNumber(null);
+								} else {
+									bulkUploadAwards.setSubsidyControlNumber(currentCell.toString().trim());
+								}
 								break;
+
 							case 1:
 								bulkUploadAwards.setSubsidyControlTitle(currentCell.getStringCellValue().trim());
 								break;
 							case 2:
-								bulkUploadAwards.setAdminProgramNumber(currentCell.getStringCellValue().trim());
+								if (currentCell.getCellType() == CellType.STRING) {
+									bulkUploadAwards.setAdminProgramNumber(currentCell.getStringCellValue().trim());
+								} else if (currentCell.getCellType() == CellType.NUMERIC) {
+									String numericValue = String.valueOf((long) currentCell.getNumericCellValue());
+									bulkUploadAwards.setAdminProgramNumber(numericValue);
+								} else if (currentCell.getCellType() == CellType.BLANK) {
+									bulkUploadAwards.setAdminProgramNumber(null);
+								} else {
+									bulkUploadAwards.setAdminProgramNumber(currentCell.toString().trim());
+								}
 								break;
 							case 3:
 								bulkUploadAwards.setStandaloneAward(currentCell.getStringCellValue().trim());
@@ -170,13 +189,13 @@ public class ExcelHelper {
 								break;
 							case 16:
 								if (currentCell.getCellType() == CellType.STRING) {
-									bulkUploadAwards.setSubsidyAmountExact(
-											currentCell.getStringCellValue().isEmpty() ? null : currentCell.getStringCellValue().trim()
-									);
+									String value = currentCell.getStringCellValue().trim();
+									bulkUploadAwards.setSubsidyAmountExact(value.isEmpty() ? null : value);
 								} else if (currentCell.getCellType() == CellType.NUMERIC) {
 									bulkUploadAwards.setSubsidyAmountExact(String.valueOf(currentCell.getNumericCellValue()));
 								}
 								break;
+
 							case 17:
 								if (currentCell.getCellType() == CellType.BLANK) {
 									bulkUploadAwards.setNationalIdType(null);
