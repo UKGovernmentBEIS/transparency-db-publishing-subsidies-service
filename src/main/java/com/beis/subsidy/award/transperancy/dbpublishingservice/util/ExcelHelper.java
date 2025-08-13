@@ -119,12 +119,10 @@ public class ExcelHelper {
 									bulkUploadAwards.setSubsidyAwardInterest(currentCell.getStringCellValue().trim());
 								break;
 							case 5:
-								if(bulkUploadAwards.getStandaloneAward().equalsIgnoreCase("yes")) {
-									if (currentCell.getCellType() == CellType.BLANK) {
-										bulkUploadAwards.setSpecificPolicyObjective(null);
-									} else {
-										bulkUploadAwards.setSpecificPolicyObjective(currentCell.getStringCellValue().trim());
-									}
+								if (currentCell.getCellType() == CellType.BLANK) {
+									bulkUploadAwards.setSpecificPolicyObjective(null);
+								} else {
+									bulkUploadAwards.setSpecificPolicyObjective(currentCell.getStringCellValue().trim());
 								}
 								break;
 							case 6:
