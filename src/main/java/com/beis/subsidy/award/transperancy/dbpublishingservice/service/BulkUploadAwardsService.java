@@ -255,7 +255,7 @@ public class BulkUploadAwardsService {
 
 		// Standalone award title > 255 chars
 		List<BulkUploadAwards> standaloneAwardTitleLengthList = bulkUploadAwards.stream()
-				.filter(award -> ((award.getStandaloneAward() == "Yes") && (award.getStandaloneAwardTitle().length() > 255)))
+				.filter(award -> (award.getStandaloneAward().equalsIgnoreCase("yes") && (award.getStandaloneAwardTitle().length() > 255)))
 				.collect(Collectors.toList());
 
 		errorResults.addAll(standaloneAwardTitleLengthList.stream()
