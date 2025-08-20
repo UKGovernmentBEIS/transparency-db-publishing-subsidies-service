@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.UserPrinciple;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.*;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.AdminProgramRepository;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.util.AccessManagementConstant;
@@ -67,7 +68,7 @@ public class BulkUploadAwardsService {
 	/*
 	 * the below method validate the excel file passed in request.
 	 */
-	public ValidationResult validateFile(MultipartFile file, String role) {
+	public ValidationResult validateFile(MultipartFile file, UserPrinciple userPrinciple) {
 
 		try {
 
@@ -228,7 +229,7 @@ public class BulkUploadAwardsService {
 
 				log.info("No validation error in bulk excel template");
 
-				awardService.processBulkAwards(bulkUploadAwards,role);
+				awardService.processBulkAwards(bulkUploadAwards,userPrinciple.getRole(), userPrinciple);
 			}
 
 			return validationResult;
@@ -376,29 +377,39 @@ public class BulkUploadAwardsService {
 	}
 
 	private List<ValidationErrorResult> validateSpecificPolicyObjective(List<BulkUploadAwards> bulkUploadAwards) {
+		List<ValidationErrorResult> errorList = new ArrayList<>();
 		List<BulkUploadAwards> specificPolicyObjectiveErrorRecordsList = bulkUploadAwards.stream()
 				.filter(award -> (
 						award.getSpecificPolicyObjective() != null && award.getSpecificPolicyObjective().length() > 1500)
 				)
 				.collect(Collectors.toList());
 
-		List<ValidationErrorResult> validationSpecificPolicyObjectiveResultList = new ArrayList<>();
-		validationSpecificPolicyObjectiveResultList = specificPolicyObjectiveErrorRecordsList.stream()
-				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Specific Policy Objective"),
-						"The specific policy objective must be 1500 characters or less."))
-				.collect(Collectors.toList());
+			errorList.addAll(specificPolicyObjectiveErrorRecordsList.stream()
+					.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Specific Policy Objective"),
+							"The specific policy objective must be 1500 characters or less."))
+					.collect(Collectors.toList()));
 
 		List<BulkUploadAwards> validateSpecificPolicyObjectiveMissingErrorList = bulkUploadAwards.stream()
 				.filter(award -> (Objects.equals(award.getStandaloneAward(), "Yes") && award.getSpecificPolicyObjective() == null)).collect(Collectors.toList());
 
-		if (validateSpecificPolicyObjectiveMissingErrorList.size() > 0){
-			validationSpecificPolicyObjectiveResultList.addAll(validateSpecificPolicyObjectiveMissingErrorList.stream()
+
+			errorList.addAll(validateSpecificPolicyObjectiveMissingErrorList.stream()
 					.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Specific Policy Objective"),
 							"You must enter the specific policy objective."))
 					.collect(Collectors.toList()));
-		}
 
-		return validationSpecificPolicyObjectiveResultList;
+
+		List<BulkUploadAwards> specificPolicyObjectiveWhenStandaloneAwardErrorRecordsList = bulkUploadAwards.stream()
+				.filter(award -> (Objects.equals(award.getStandaloneAward(), "No") && award.getSpecificPolicyObjective() != null)
+				)
+				.collect(Collectors.toList());
+
+			errorList.addAll(specificPolicyObjectiveWhenStandaloneAwardErrorRecordsList.stream()
+					.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Specific Policy Objective"),
+							"Specific Policy Objective is only saved and published for standalone awards. If you are submitting an in-scheme award, please include the policy objective in the Subsidy Description field (Field G) instead "))
+					.collect(Collectors.toList()));
+
+		return errorList;
 	}
 
 	private List<ValidationErrorResult> validateLegalBasis(List<BulkUploadAwards> bulkUploadAwards) {

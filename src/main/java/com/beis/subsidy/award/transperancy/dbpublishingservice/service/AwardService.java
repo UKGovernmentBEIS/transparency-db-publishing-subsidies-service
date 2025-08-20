@@ -8,10 +8,12 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.UserPrinciple;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.model.*;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.*;
 import static com.beis.subsidy.award.transperancy.dbpublishingservice.util.AwardUtils.convertToObjectiveJSONString;
 
+import com.beis.subsidy.award.transperancy.dbpublishingservice.util.ExcelHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +29,9 @@ public class AwardService {
 	
 	@Autowired
 	private AwardRepository awardRepository;
+
+	@Autowired
+	AuditLogsRepository auditLogsRepository;
 	
 	@Autowired
 	private BeneficiaryRepository beneficiaryRepository;
@@ -83,7 +88,7 @@ public class AwardService {
 	}
 	
 	@Transactional
-	public List<Award> processBulkAwards(List<BulkUploadAwards> bulkAwards, String role) {
+	public List<Award> processBulkAwards(List<BulkUploadAwards> bulkAwards, String role, UserPrinciple userPrinciple) {
 		try {
 		log.info("{} ::inside process Bulk Awards db",loggingComponentName);
 		List<Beneficiary> beneficiaries = bulkAwards.stream()
@@ -94,7 +99,7 @@ public class AwardService {
 				beneficiary.setNationalId(award.getNationalId());
 				beneficiary.setNationalIdType(award.getNationalIdType());
 				beneficiary.setOrgSize(award.getOrgSize());
-				beneficiary.setCreatedBy("SYSTEM");
+				beneficiary.setCreatedBy(userPrinciple.getUserName());
 				beneficiary.setApprovedBy("SYSTEM");
 				beneficiary.setStatus("DRAFT");
 				beneficiary.setSicCode("14455");
@@ -116,9 +121,9 @@ public class AwardService {
 						convertToDate(bulkaward.getLegalGrantingDate()),
 						addPublishedDate(role),
 						convertCsvToJsonString(bulkaward.getSpendingRegion()),
-						((bulkaward.getSubsidyInstrument().equalsIgnoreCase("Other"))? "Other - "+bulkaward.getSubsidyInstrumentOther():bulkaward.getSubsidyInstrument()),
+						((bulkaward.getSubsidyInstrument().equalsIgnoreCase("Other"))? "Other - " + bulkaward.getSubsidyInstrumentOther():bulkaward.getSubsidyInstrument()),
 						bulkaward.getSpendingSector(),
-						"SYSTEM", 
+						userPrinciple.getUserName(),
 						"SYSTEM",
 						addAwardStatus(role),null,LocalDate.now(), LocalDate.now(),
 						StringUtils.capitalize(StringUtils.lowerCase(bulkaward.getStandaloneAward())),
@@ -134,8 +139,9 @@ public class AwardService {
 				.collect(Collectors.toList());
 				
 		List<Award> savedAwards = awardRepository.saveAll(awards);
+		ExcelHelper.saveBulkUploadAwardsAuditLog(savedAwards, auditLogsRepository);
 		log.info("End process Bulk Awards db");
-				
+
 		return savedAwards;
 		} catch(Exception serviceException) {
 			log.error("serviceException occured::" , serviceException);
@@ -158,7 +164,7 @@ public class AwardService {
 	}
 	
 	@Transactional
-	public List<MFAAward> processBulkMfaAwards(List<BulkUploadMfaAwards> bulkMfaAwards, String role) {
+	public List<MFAAward> processBulkMfaAwards(List<BulkUploadMfaAwards> bulkMfaAwards, String role, UserPrinciple userPrinciple) {
 		try {
 			log.info("{} ::inside process Bulk Awards db",loggingComponentName);
 
@@ -178,7 +184,7 @@ public class AwardService {
 							bulkMfaAward.getOrgIdType(),
 							bulkMfaAward.getIdNumber(),
 							addAwardStatus(role),
-							role,
+							userPrinciple.getUserName(),
 							"SYSTEM",
 							null,
 							LocalDateTime.now(),
@@ -189,6 +195,7 @@ public class AwardService {
 
 			List<MFAAward> savedAwards = mfaAwardRepository.saveAll(mfaAwards);
 			log.info("End process Bulk Awards db");
+			ExcelHelper.saveBulkUploadMfaAwardsAuditLog(savedAwards, auditLogsRepository);
 
 			return savedAwards;
 		} catch(Exception serviceException) {

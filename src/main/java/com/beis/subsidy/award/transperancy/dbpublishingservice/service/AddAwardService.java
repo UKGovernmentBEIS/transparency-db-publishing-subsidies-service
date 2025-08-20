@@ -195,6 +195,7 @@ public class AddAwardService {
 				validationResult.setTotalErrors(0);
 				validationResult
 						.setMessage(savedAward.getAwardNumber()  + " Award saved in Database");
+				validationResult.setAwardNumber(savedAward.getAwardNumber().toString());
 				//notification call START here
 
 				GrantingAuthority gaObj = gaRepository
