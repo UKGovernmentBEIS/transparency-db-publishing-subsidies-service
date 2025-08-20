@@ -480,12 +480,13 @@ public class AddAwardServiceTest {
 		List<SubsidyMeasure> smList = new ArrayList<>();
 		List<BulkUploadAwards> awardList = new ArrayList<>();
 
-		Integer stringLength = 10001;
+		int stringLength = 10001;
 
 		String longString = StringUtils.repeat("a", stringLength);
 
 		awardInputRequest.setStandaloneAward("Yes");
 		awardInputRequest.setSubsidyAwardDescription(longString);
+		awardInputRequest.setStandaloneAwardTitle("Title");
 		awardInputRequest.setSubsidyAwardInterest("Subsidies or Schemes of Interest (SSoI)");
 		awardInputRequest.setSpecificPolicyObjective("test");
 
@@ -527,6 +528,93 @@ public class AddAwardServiceTest {
 		for (int i = 0; i < expectedResult.getTotalErrors(); i++){
 			assertThat(results.getValidationErrorResult().get(i).getColumn()).isEqualTo("subsidyAwardDescription");
 			assertThat(results.getValidationErrorResult().get(i).getMessage()).isEqualTo("The subsidy award description must be 10000 characters or less.");
+		}
+	}
+
+	@Test
+	public void testStandaloneAwardTitleMissingErrors() throws ParseException{
+		Beneficiary beneficiary = mock(Beneficiary.class);
+		UserPrinciple upMock = mock(UserPrinciple.class);
+		List<GrantingAuthority> gaList = new ArrayList<GrantingAuthority>();
+
+		awardInputRequest.setStandaloneAward("Yes");
+		awardInputRequest.setSubsidyAwardDescription("Description");
+		awardInputRequest.setSubsidyAwardInterest("Subsidies or Schemes of Interest (SSoI)");
+		awardInputRequest.setSpecificPolicyObjective("test");
+
+		GrantingAuthority ga = new GrantingAuthority();
+		ga.setGaId(1L);
+		ga.setGrantingAuthorityName("BEIS");
+		ga.setStatus("Active");
+		gaList.add(ga);
+		Award expectedAward = new Award();
+		Award saveAward = new Award();
+		beneficiary.setBeneficiaryName("testName");
+		expectedAward.setApprovedBy("test");
+		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
+		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
+		when(gRepo.findByGrantingAuthorityName(anyString())).thenReturn(ga);
+
+		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
+		expectedResult.setTotalErrors(1);
+		expectedResult.setMessage("validation error");
+		String role = "Granting Authority Administrator";
+
+		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
+
+		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest,upMock,"role");
+
+		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
+		assertThat(results.getMessage()).isEqualTo(expectedResult.getMessage());
+		for (int i = 0; i < expectedResult.getTotalErrors(); i++){
+			assertThat(results.getValidationErrorResult().get(i).getColumn()).isEqualTo("StandaloneAwardTitle");
+			assertThat(results.getValidationErrorResult().get(i).getMessage()).isEqualTo("You must include a standalone award title.");
+		}
+	}
+
+	@Test
+	public void testStandaloneAwardTitleLengthErrors() throws ParseException{
+		Beneficiary beneficiary = mock(Beneficiary.class);
+		UserPrinciple upMock = mock(UserPrinciple.class);
+		List<GrantingAuthority> gaList = new ArrayList<GrantingAuthority>();
+
+		int stringLength = 256;
+
+		String longString = StringUtils.repeat("a", stringLength);
+
+		awardInputRequest.setStandaloneAward("Yes");
+		awardInputRequest.setStandaloneAwardTitle(longString);
+		awardInputRequest.setSubsidyAwardDescription("Description");
+		awardInputRequest.setSubsidyAwardInterest("Subsidies or Schemes of Interest (SSoI)");
+		awardInputRequest.setSpecificPolicyObjective("test");
+
+		GrantingAuthority ga = new GrantingAuthority();
+		ga.setGaId(1L);
+		ga.setGrantingAuthorityName("BEIS");
+		ga.setStatus("Active");
+		gaList.add(ga);
+		Award expectedAward = new Award();
+		Award saveAward = new Award();
+		beneficiary.setBeneficiaryName("testName");
+		expectedAward.setApprovedBy("test");
+		when(beneficiaryRepository.save(beneficiary)).thenReturn(beneficiary);
+		when(awardRepository.save(saveAward)).thenReturn(expectedAward);
+		when(gRepo.findByGrantingAuthorityName(anyString())).thenReturn(ga);
+
+		SingleAwardValidationResults expectedResult = new SingleAwardValidationResults();
+		expectedResult.setTotalErrors(1);
+		expectedResult.setMessage("validation error");
+		String role = "Granting Authority Administrator";
+
+		when(awardServiceMock.getAllGrantingAuthorities()).thenReturn(gaList);
+
+		SingleAwardValidationResults results = addAwardServiceMock.validateAward(awardInputRequest,upMock,"role");
+
+		assertThat(results.getTotalErrors()).isEqualTo(expectedResult.getTotalErrors());
+		assertThat(results.getMessage()).isEqualTo(expectedResult.getMessage());
+		for (int i = 0; i < expectedResult.getTotalErrors(); i++){
+			assertThat(results.getValidationErrorResult().get(i).getColumn()).isEqualTo("StandaloneAwardTitle");
+			assertThat(results.getValidationErrorResult().get(i).getMessage()).isEqualTo("The standalone award title must be 255 characters or less.");
 		}
 	}
 

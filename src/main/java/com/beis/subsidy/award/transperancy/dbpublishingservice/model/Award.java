@@ -120,7 +120,9 @@ public class Award {
 	@Column(name = "SPEI")
 	private String SPEI;
 
-
 	@Column(name = "LEGAL_BASIS")
 	private String legalBasis;
+
+	@Column(name = "STANDALONE_AWARD_TITLE")
+	private String standaloneAwardTitle;
 }
