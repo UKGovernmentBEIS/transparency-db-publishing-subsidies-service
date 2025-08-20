@@ -233,7 +233,7 @@ public class AddAwardService {
 	private List<SingleAwardValidationResult> validateStandaloneAwardTitle(SingleAward award) {
 		List<SingleAwardValidationResult> errorList = new ArrayList<>();
 		// Only validate input if standalone award
-		if (award.getStandaloneAward().equalsIgnoreCase("yes")) {
+		if (award.getStandaloneAward() != null && award.getStandaloneAward().equalsIgnoreCase("yes")) {
 			if (award.getStandaloneAwardTitle() == null || award.getStandaloneAwardTitle().isEmpty()) {
 				errorList.add(new SingleAwardValidationResult("StandaloneAwardTitle", "You must include a standalone award title."));
 			}
