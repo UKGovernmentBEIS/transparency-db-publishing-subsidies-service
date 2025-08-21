@@ -992,6 +992,7 @@ public class BulkUploadAwardsService {
 					));
 				}
 				continue;
+
 			}
 
 			// Case 3: Only SC Number provided — check if it's valid format and known
@@ -1002,8 +1003,9 @@ public class BulkUploadAwardsService {
 							columnMapping.get("SC Number"),
 							"The subsidy control number must start with SC, followed by 5 digits."
 					));
-					continue;
 				}
+				continue;
+
 			}
 			// Case 4: Only Title provided — check if any SC Number maps to it
 			if (hasScTitle && !scNumberToTitleMap.containsValue(scTitle)) {
@@ -1012,8 +1014,27 @@ public class BulkUploadAwardsService {
 						columnMapping.get("SC Number"),
 						"Subsidy scheme title is invalid or not linked to any known SC number."
 				));
+				continue;
 			}
-			continue;
+
+			//Case 5: Multiple schemes found with same title
+			if (hasScTitle) {
+				long count = 0;
+				for (SubsidyMeasure sm : smList) {
+					if (sm.getSubsidyMeasureTitle() != null && sm.getSubsidyMeasureTitle().equalsIgnoreCase(scTitle)) {
+						count++;
+					}
+				}
+
+				if (count > 1) {
+					validationErrorResults.add(new ValidationErrorResult(
+							String.valueOf(award.getRow()),
+							columnMapping.get("SC Number"),
+							"Multiple schemes have the same title. Please enter the subsidy control number."
+					));
+				}
+			}
+
 
 		}
 
