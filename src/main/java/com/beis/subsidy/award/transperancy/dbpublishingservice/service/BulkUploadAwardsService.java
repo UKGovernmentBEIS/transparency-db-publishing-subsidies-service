@@ -108,7 +108,7 @@ public class BulkUploadAwardsService {
 
 			//List<ValidationErrorResult> scNumberStatusList = validateScNumberStatus(bulkUploadAwards,);
 
-			List<ValidationErrorResult> subsidyControlNumberLengthList = validateSubsidyNumberLength(bulkUploadAwards);
+			//List<ValidationErrorResult> subsidyControlNumberLengthList = validateSubsidyNumberLength(bulkUploadAwards);
 
 			List<ValidationErrorResult> subsidyControlNumberMismatchList = validateSubsidyControlNumber(
 					bulkUploadAwards);
@@ -205,8 +205,7 @@ public class BulkUploadAwardsService {
 			// Merge lists of Validation Errors
 			List<ValidationErrorResult> validationErrorResultList = Stream
 					.of(scNumberNameCheckList, subsidyMeasureTitleNameLengthList, subsidyPurposeCheckList,
-							nationalIdTypeMissingList, nationalIdMissingList, beneficiaryNameErrorList,
-							subsidyControlNumberLengthList, subsidyControlNumberMismatchList,
+							nationalIdTypeMissingList, nationalIdMissingList, beneficiaryNameErrorList, subsidyControlNumberMismatchList,
 							grantingAuthorityNameErrorList, grantingAuthorityErrorList, sizeOfOrgErrorList,
 							spendingRegionErrorList, spendingSectorErrorList, goodsOrServiceErrorList,SubsidyInstrumentErrorList,
 							legalGrantingDateErrorList,SubsidyElementFullAmountErrorList, StandaloneAwardErrorList,
@@ -267,72 +266,75 @@ public class BulkUploadAwardsService {
 
 		return validationSubsidyAwardInterestErrorResultList;
 	}
-
 	private List<ValidationErrorResult> validateAdminProgramNumber(List<BulkUploadAwards> bulkUploadAwards) {
 		List<ValidationErrorResult> errorList = new ArrayList<>();
 
-		// AP Length
-		List<BulkUploadAwards> adminProgramLengthErrorList = bulkUploadAwards.stream()
-				.filter(award -> (
-						award.getAdminProgramNumber() != null && award.getAdminProgramNumber().length() > 255)
-				)
+		// ✅ 1. Format validation — Must match AP followed by 5 digits
+		List<BulkUploadAwards> invalidFormatAwards = bulkUploadAwards.stream()
+				.filter(award -> award.getAdminProgramNumber() != null && !award.getAdminProgramNumber().matches("^AP\\d{5}$"))
 				.collect(Collectors.toList());
 
-		errorList.addAll(adminProgramLengthErrorList.stream()
-				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("AP Number"),
-						"The admin program number must be 255 characters or less."))
+		errorList.addAll(invalidFormatAwards.stream()
+				.map(award -> new ValidationErrorResult(
+						String.valueOf(award.getRow()),
+						columnMapping.get("AP Number"),
+						"The admin program number must start with AP, followed by 5 digits."
+				))
 				.collect(Collectors.toList()));
 
-		// AP Exists
-		List<BulkUploadAwards> adminProgramExistsErrorList = bulkUploadAwards.stream()
+		// ✅ Only process valid-format AP numbers for remaining checks
+		List<BulkUploadAwards> validFormatAwards = bulkUploadAwards.stream()
+				.filter(award -> award.getAdminProgramNumber() != null && award.getAdminProgramNumber().matches("^AP\\d{5}$"))
+				.collect(Collectors.toList());
+
+		// ✅ 2. AP Exists
+		List<BulkUploadAwards> adminProgramExistsErrorList = validFormatAwards.stream()
 				.filter(award -> {
-					if(!StringUtils.isEmpty(award.getAdminProgramNumber())) {
-						AdminProgram adminProgram = adminProgramRepository.findById(award.getAdminProgramNumber()).orElse(null);
-						return adminProgram == null;
-					}else{
-						return false;
-					}
+					AdminProgram adminProgram = adminProgramRepository.findById(award.getAdminProgramNumber()).orElse(null);
+					return adminProgram == null;
 				}).collect(Collectors.toList());
 
 		errorList.addAll(adminProgramExistsErrorList.stream()
-				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("AP Number"),
-						"Admin program " + award.getAdminProgramNumber() + " does not exist."))
+				.map(award -> new ValidationErrorResult(
+						String.valueOf(award.getRow()),
+						columnMapping.get("AP Number"),
+						"Admin program " + award.getAdminProgramNumber() + " does not exist."
+				))
 				.collect(Collectors.toList()));
 
-		// AP Active
-		List<BulkUploadAwards> adminProgramActiveErrorList = bulkUploadAwards.stream()
+		// ✅ 3. AP Active
+		List<BulkUploadAwards> adminProgramActiveErrorList = validFormatAwards.stream()
 				.filter(award -> {
-					if(!StringUtils.isEmpty(award.getAdminProgramNumber())) {
-						AdminProgram adminProgram = adminProgramRepository.findById(award.getAdminProgramNumber()).orElse(null);
-							return adminProgram != null && !adminProgram.getStatus().equalsIgnoreCase("active");
-					}else{
-						return false;
-					}
+					AdminProgram adminProgram = adminProgramRepository.findById(award.getAdminProgramNumber()).orElse(null);
+					return adminProgram != null && !"active".equalsIgnoreCase(adminProgram.getStatus());
 				}).collect(Collectors.toList());
 
 		errorList.addAll(adminProgramActiveErrorList.stream()
-				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("AP Number"),
-						"Admin program " + award.getAdminProgramNumber() + " is not active."))
+				.map(award -> new ValidationErrorResult(
+						String.valueOf(award.getRow()),
+						columnMapping.get("AP Number"),
+						"Admin program " + award.getAdminProgramNumber() + " is not active."
+				))
 				.collect(Collectors.toList()));
 
-		// AP SC Match
-		List<BulkUploadAwards> adminProgramSchemeMatchErrorList = bulkUploadAwards.stream()
+		// ✅ 4. AP SC Match
+		List<BulkUploadAwards> adminProgramSchemeMatchErrorList = validFormatAwards.stream()
 				.filter(award -> {
-					if(!StringUtils.isEmpty(award.getAdminProgramNumber())) {
-						AdminProgram adminProgram = adminProgramRepository.findById(award.getAdminProgramNumber()).orElse(null);
-						return adminProgram != null && !adminProgram.getSubsidyMeasure().getScNumber().equalsIgnoreCase(award.getSubsidyControlNumber());
-					}else{
-						return false;
-					}
+					AdminProgram adminProgram = adminProgramRepository.findById(award.getAdminProgramNumber()).orElse(null);
+					return adminProgram != null && !adminProgram.getSubsidyMeasure().getScNumber().equalsIgnoreCase(award.getSubsidyControlNumber());
 				}).collect(Collectors.toList());
 
 		errorList.addAll(adminProgramSchemeMatchErrorList.stream()
-				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("AP Number"),
-						"Admin program " + award.getAdminProgramNumber() + " is not associated to scheme " + award.getSubsidyControlNumber() + "."))
+				.map(award -> new ValidationErrorResult(
+						String.valueOf(award.getRow()),
+						columnMapping.get("AP Number"),
+						"Admin program " + award.getAdminProgramNumber() + " is not associated to scheme " + award.getSubsidyControlNumber() + "."
+				))
 				.collect(Collectors.toList()));
 
 		return errorList;
 	}
+
 
 	private List<ValidationErrorResult> validateSubsidyDescription(List<BulkUploadAwards> bulkUploadAwards) {
 		List<BulkUploadAwards> subsidyDescriptionErrorRecordsList = bulkUploadAwards.stream()
@@ -688,50 +690,46 @@ public class BulkUploadAwardsService {
 	}
 
 
-	/*
-	 *
-	 * the below method validate Subsidy Amount field.
-	 */
 	private List<ValidationErrorResult> validateSubsidyElementFullAmount(List<BulkUploadAwards> bulkUploadAwards) {
 
-		/*
-		 * validation for SubsidyElementFullAmount entered in the input file.
-		 */
-
 		List<BulkUploadAwards> subsidyAmountExactErrorRecordsList = bulkUploadAwards.stream().filter(
-				award -> (((award.getSubsidyInstrument()!=null && !award.getSubsidyInstrument().startsWith("Tax"))&&
-						(award.getSubsidyAmountExact() == null || StringUtils.isEmpty(award.getSubsidyAmountExact())))))
+						award -> (((award.getSubsidyInstrument() != null && !award.getSubsidyInstrument().startsWith("Tax")) &&
+								StringUtils.isBlank(award.getSubsidyAmountExact()))))
 				.collect(Collectors.toList());
 
-		List<ValidationErrorResult> validationSubsidyAmountExactErrorResultList = new ArrayList<>();
-		validationSubsidyAmountExactErrorResultList = subsidyAmountExactErrorRecordsList.stream()
+		List<ValidationErrorResult> validationSubsidyAmountExactErrorResultList = subsidyAmountExactErrorRecordsList.stream()
 				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Full Exact"),
 						"For non-tax measure subsidies, enter 'N/A' in column " + columnMapping.get("Full Range") + ". You can enter the exact subsidy amount in column " + columnMapping.get("Full Exact") + "."))
 				.collect(Collectors.toList());
+
 		List<BulkUploadAwards> subsidyAmountFormatErrorRecordsList = bulkUploadAwards.stream().filter(
-				award -> (((award.getSubsidyInstrument()!=null && !award.getSubsidyInstrument().startsWith("Tax"))&&
-						(award.getSubsidyAmountExact()!=null && !ExcelHelper.isNumeric(award.getSubsidyAmountExact()) ))))
+						award -> (((award.getSubsidyInstrument() != null && !award.getSubsidyInstrument().startsWith("Tax")) &&
+								award.getSubsidyAmountExact() != null && !ExcelHelper.isNumeric(award.getSubsidyAmountExact()))))
 				.collect(Collectors.toList());
 
-		if(subsidyAmountFormatErrorRecordsList.size()>0) {
+		if (!subsidyAmountFormatErrorRecordsList.isEmpty()) {
 			validationSubsidyAmountExactErrorResultList.addAll(subsidyAmountFormatErrorRecordsList.stream()
 					.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Full Exact"),
 							"Subsidy Element Full Amount should be numeric."))
 					.collect(Collectors.toList()));
-			}
+		}
 
 		List<BulkUploadAwards> SubsidyFullAmountInapplicableErrorList = bulkUploadAwards.stream()
-				.filter(award -> (award.getSubsidyInstrument()!= null && award.getSubsidyInstrument().startsWith("Tax") && !(award.getSubsidyAmountExact() == null || StringUtils.isEmpty(award.getSubsidyAmountExact())))).collect(Collectors.toList());
+				.filter(award -> award.getSubsidyInstrument() != null &&
+						award.getSubsidyInstrument().startsWith("Tax") &&
+						StringUtils.isNotBlank(award.getSubsidyAmountExact()))
+				.collect(Collectors.toList());
 
-		if(!SubsidyFullAmountInapplicableErrorList.isEmpty()) {
-			validationSubsidyAmountExactErrorResultList = SubsidyFullAmountInapplicableErrorList.stream()
+		if (!SubsidyFullAmountInapplicableErrorList.isEmpty()) {
+			validationSubsidyAmountExactErrorResultList.addAll(SubsidyFullAmountInapplicableErrorList.stream()
 					.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("Full Exact"),
 							"Subsidy Element Full Amount field is only applicable to non-tax measure subsidy forms. Remove the amount value or change the subsidy form."))
-					.collect(Collectors.toList());
+					.collect(Collectors.toList()));
 		}
 
 		return validationSubsidyAmountExactErrorResultList;
 	}
+
 
 
 	/*
@@ -950,54 +948,103 @@ public class BulkUploadAwardsService {
 		return validationlegalGrantingDateErrorListResultList;
 	}
 
-
 	private List<ValidationErrorResult> validateSubsidyControlNumber(List<BulkUploadAwards> bulkUploadAwards) {
 
-		log.info("{} :: Inside validateSubsidyControlNumber()");
+		log.info("Inside validateSubsidyControlNumber()");
 
 		List<SubsidyMeasure> smList = awardService.getAllSubsidyMeasures();
 
-		List<String> subsidyControlNumberTitleList = smList.stream().map(sm -> sm.getScNumber())
-				.collect(Collectors.toList());
+		// Build map of SC number to title for quick lookup
+		Map<String, String> scNumberToTitleMap = smList.stream()
+				.collect(Collectors.toMap(SubsidyMeasure::getScNumber, SubsidyMeasure::getSubsidyMeasureTitle));
 
-		log.info("subsidyControlNumber size - String {}:: " , subsidyControlNumberTitleList.size());
+		List<ValidationErrorResult> validationErrorResults = new ArrayList<>();
 
-		List<BulkUploadAwards> subsidyControlNumberErrorRecordsList = bulkUploadAwards.stream()
-				.filter(award -> (award.getSubsidyControlNumber() != null
-						&& !subsidyControlNumberTitleList.contains(award.getSubsidyControlNumber())) && (!award.getStandaloneAward().equalsIgnoreCase("yes")))
-				.collect(Collectors.toList());
+		for (BulkUploadAwards award : bulkUploadAwards) {
+
+			if ("yes".equalsIgnoreCase(award.getStandaloneAward())) {
+				continue; // skip validation for standalone
+			}
+
+			String scNumber = StringUtils.trimToEmpty(award.getSubsidyControlNumber());
+			String scTitle = StringUtils.trimToEmpty(award.getSubsidyControlTitle());
+
+			boolean hasScNumber = !scNumber.isEmpty();
+			boolean hasScTitle = !scTitle.isEmpty();
+
+			// Case 1: Neither SC Number nor SC Title provided
+			if (!hasScNumber && !hasScTitle) {
+				validationErrorResults.add(new ValidationErrorResult(
+						String.valueOf(award.getRow()),
+						columnMapping.get("SC Number"),
+						"You must enter either a subsidy control number or a subsidy scheme title."
+				));
+				continue;
+			}
+
+			// Case 2: Both provided, but mismatch
+			if (hasScNumber && hasScTitle) {
+				String expectedTitle = scNumberToTitleMap.get(scNumber);
+				if (expectedTitle == null || !expectedTitle.equalsIgnoreCase(scTitle)) {
+					validationErrorResults.add(new ValidationErrorResult(
+							String.valueOf(award.getRow()),
+							columnMapping.get("SC Number"),
+							"Subsidy Control number does not match with title."
+					));
+				}
+				continue;
+
+			}
+
+			// Case 3: Only SC Number provided — check if it's valid format and known
+			if (hasScNumber) {
+				if (!scNumber.matches("^SC\\d{5}$")) {
+					validationErrorResults.add(new ValidationErrorResult(
+							String.valueOf(award.getRow()),
+							columnMapping.get("SC Number"),
+							"The subsidy control number must start with SC, followed by 5 digits."
+					));
+				}
+				continue;
+
+			}
+			// Case 4: Only Title provided — check if any SC Number maps to it
+			if (hasScTitle && !scNumberToTitleMap.containsValue(scTitle)) {
+				validationErrorResults.add(new ValidationErrorResult(
+						String.valueOf(award.getRow()),
+						columnMapping.get("SC Number"),
+						"Subsidy scheme title is invalid or not linked to any known SC number."
+				));
+				continue;
+			}
+
+			//Case 5: Multiple schemes found with same title
+			if (hasScTitle) {
+				long count = 0;
+				for (SubsidyMeasure sm : smList) {
+					if (sm.getSubsidyMeasureTitle() != null && sm.getSubsidyMeasureTitle().equalsIgnoreCase(scTitle)) {
+						count++;
+					}
+				}
+
+				if (count > 1) {
+					validationErrorResults.add(new ValidationErrorResult(
+							String.valueOf(award.getRow()),
+							columnMapping.get("SC Number"),
+							"Multiple schemes have the same title. Please enter the subsidy control number."
+					));
+				}
+			}
 
 
-		// validation scnumber with sctitle.
+		}
 
-		List<BulkUploadAwards> subsidyControlNumberExistsList = bulkUploadAwards.stream()
-				.filter(requestAward -> !StringUtils.isEmpty(requestAward.getSubsidyControlNumber())
-						&& !StringUtils.isEmpty(requestAward.getSubsidyControlTitle()))
-				.collect(Collectors.toList());
+		// Optional: Add SC Number Status validations here
+		validationErrorResults.addAll(validateScNumberStatus(smList, bulkUploadAwards));
 
-		List<BulkUploadAwards> scNumberWithNameErrorRecordsList = subsidyControlNumberExistsList.stream()
-				.filter(requestAward -> smList.stream().noneMatch(
-						bulkAward -> ((bulkAward.getScNumber().equals(requestAward.getSubsidyControlNumber()))
-								&& (bulkAward.getSubsidyMeasureTitle().equals(requestAward.getSubsidyControlTitle())))))
-				.collect(Collectors.toList());
-
-
-		List<ValidationErrorResult> validationSubsidyControlNumberResultList = new ArrayList<>();
-		validationSubsidyControlNumberResultList = subsidyControlNumberErrorRecordsList.stream()
-				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("SC Number"),
-						"The subsidy control number must start with SC, followed by 5 digits."))
-				.collect(Collectors.toList());
-		List<ValidationErrorResult> validationScNumberNotMatchWithTitle = new ArrayList<>();
-		validationScNumberNotMatchWithTitle = scNumberWithNameErrorRecordsList.stream()
-				.map(award -> new ValidationErrorResult(String.valueOf(award.getRow()), columnMapping.get("SC Number"),
-						"Subsidy Control number does not match with title."))
-				.collect(Collectors.toList());
-		validationSubsidyControlNumberResultList.addAll(validationScNumberNotMatchWithTitle);
-
-		validationSubsidyControlNumberResultList.addAll(validateScNumberStatus(smList,bulkUploadAwards));
-
-		return validationSubsidyControlNumberResultList;
+		return validationErrorResults;
 	}
+
 
 
 	private List<ValidationErrorResult> validateScNumberStatus(List<SubsidyMeasure> smList,

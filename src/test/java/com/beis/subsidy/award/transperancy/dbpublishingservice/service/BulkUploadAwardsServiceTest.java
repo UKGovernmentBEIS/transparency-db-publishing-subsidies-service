@@ -281,7 +281,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setNationalId("abc123456");
 
 		ValidationResult result = new ValidationResult();
-		result.setErrorRows(4);
+		result.setErrorRows(3); //Changed this from 4 to 3 because the fourth error was "the sc number must start with SC, followed by 5 digits"
 		result.setTotalRows(2);
 		String role = "Granting Authority Administrator";
 		awardList.add(bulkUploadAward);
@@ -321,7 +321,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setNationalId("abc123456");
 		String role = "Granting Authority Administrator";
 		ValidationResult result = new ValidationResult();
-		result.setErrorRows(4);
+		result.setErrorRows(3); // changed from 4 to 3 as only one error message will be displayed for the subsidy control number
 		result.setTotalRows(2);
 
 		awardList.add(bulkUploadAward);
@@ -361,7 +361,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setNationalId("123456");
 		String role = "Granting Authority Administrator";
 		ValidationResult result = new ValidationResult();
-		result.setErrorRows(35);
+		result.setErrorRows(36); //Subsidy Element Full Amount should be numeric error added
 		result.setTotalRows(2);
 
 		awardList.add(bulkUploadAward);
@@ -403,7 +403,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setNationalId("123456");
 
 		ValidationResult result = new ValidationResult();
-		result.setErrorRows(35);
+		result.setErrorRows(36); //set to 36 errors - new error: Subsidy Element Full Amount should be numeric.
 		result.setTotalRows(2);
 
 		awardList.add(bulkUploadAward);
@@ -446,7 +446,7 @@ public class BulkUploadAwardsServiceTest {
 		bulkUploadAward.setNationalId("123456");
 
 		ValidationResult result = new ValidationResult();
-		result.setErrorRows(35);
+		result.setErrorRows(36);//Subsidy Element Full Amount should be numeric error added
 		result.setTotalRows(2);
 
 		awardList.add(bulkUploadAward);
