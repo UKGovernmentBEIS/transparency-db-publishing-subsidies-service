@@ -82,11 +82,9 @@ public class BulkUploadAwardsController {
 				   validationResult.setMessage("You are not authorised to bulk upload awards");
 				   return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(validationResult);
 			   }
-				ValidationResult validationResult = bulkUploadAwardsService.validateFile(file,
-						userPrincipleObj.getRole());
+				ValidationResult validationResult = bulkUploadAwardsService.validateFile(file, userPrincipleObj);
 			   if (validationResult.getErrorRows() == 0) {
-				   ExcelHelper.saveAuditLog(userPrincipleObj, "Bulk upload Awards", userPrincipleObj.getRole(),
-						   auditLogsRepository);
+				   log.info("Zero errors found, Awards successfully bulk uploaded");
 			   }
 				return ResponseEntity.status(HttpStatus.OK).body(validationResult);
 			
@@ -137,10 +135,9 @@ public class BulkUploadAwardsController {
 					return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(validationResult);
 				}
 				ValidationResult validationResult = bulkUploadAwardsMfaService.validateFile(file,
-						userPrincipleObj.getRole());
+						userPrincipleObj.getRole(), userPrincipleObj);
 				if (validationResult.getErrorRows() == 0) {
-					ExcelHelper.saveAuditLog(userPrincipleObj, "Bulk upload Awards", userPrincipleObj.getRole(),
-							auditLogsRepository);
+					log.info("Zero errors found, MFA Awards successfully bulk uploaded");
 				}
 				return ResponseEntity.status(HttpStatus.OK).body(validationResult);
 

@@ -1,5 +1,6 @@
 package com.beis.subsidy.award.transperancy.dbpublishingservice.service;
 
+import com.beis.subsidy.award.transperancy.dbpublishingservice.controller.response.UserPrinciple;
 import com.beis.subsidy.award.transperancy.dbpublishingservice.repository.GrantingAuthorityRepository;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -56,7 +57,7 @@ public class BulkUploadMfaAwardsService {
     /*
      * the below method validate the excel file passed in request.
      */
-    public ValidationResult validateFile(MultipartFile file, String role) {
+    public ValidationResult validateFile(MultipartFile file, String role, UserPrinciple userPrinciple) {
 
         try {
 
@@ -125,7 +126,7 @@ public class BulkUploadMfaAwardsService {
 
                 log.info("No validation error in bulk excel template");
 
-                awardService.processBulkMfaAwards(bulkUploadMfaAwards, role);
+                awardService.processBulkMfaAwards(bulkUploadMfaAwards, role, userPrinciple);
 
                 log.info("After calling process api - response = ");
                 validationResult

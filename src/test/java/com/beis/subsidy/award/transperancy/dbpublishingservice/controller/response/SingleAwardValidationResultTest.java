@@ -14,9 +14,9 @@ public class SingleAwardValidationResultTest {
 
 		SingleAwardValidationResults singleAwardValidationResultTest = new SingleAwardValidationResults();
 
-		SingleAwardValidationResult singleAwardValidationResult = new SingleAwardValidationResult();
 		singleAwardValidationResultTest.setTotalErrors(0);
 		singleAwardValidationResultTest.setMessage("Award saved in Database");
+		singleAwardValidationResultTest.setAwardNumber("1234");
 		List<SingleAwardValidationResult> validationErrorResult = new ArrayList<>();
 		singleAwardValidationResultTest.setValidationErrorResult(validationErrorResult);
 
@@ -24,19 +24,17 @@ public class SingleAwardValidationResultTest {
 		assertThat(singleAwardValidationResultTest.getMessage()).isNotNull();
 		assertThat(singleAwardValidationResultTest.getValidationErrorResult()).isNotNull();
 		assertThat(singleAwardValidationResultTest.getTotalErrors()).isEqualTo(0);
+		assertThat(singleAwardValidationResultTest.getAwardNumber()).isEqualTo("1234");
 
 	}
 
 	@Test
-	public void testSingleAwardValidationResults() {
+	public void testSingleAwardValidationLineResults() {
 
 		List<SingleAwardValidationResult> validationErrorResult = new ArrayList<>();
 
 		SingleAwardValidationResults singleAwardValidationResultTest = new SingleAwardValidationResults(0,
-				validationErrorResult, "test");
-
-		singleAwardValidationResultTest.setTotalErrors(0);
-		singleAwardValidationResultTest.setMessage("Award saved in Database");
+				validationErrorResult, "test", "1234");
 
 		singleAwardValidationResultTest.setValidationErrorResult(validationErrorResult);
 
@@ -44,6 +42,7 @@ public class SingleAwardValidationResultTest {
 		assertThat(singleAwardValidationResultTest.getMessage()).isNotNull();
 		assertThat(singleAwardValidationResultTest.getValidationErrorResult()).isNotNull();
 		assertThat(singleAwardValidationResultTest.getTotalErrors()).isEqualTo(0);
+		assertThat(singleAwardValidationResultTest.getAwardNumber()).isEqualTo("1234");
 
 	}
 }
