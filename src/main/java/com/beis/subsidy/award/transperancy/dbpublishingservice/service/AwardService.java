@@ -169,13 +169,18 @@ public class AwardService {
 			log.info("{} ::inside process Bulk Awards db",loggingComponentName);
 
 			List<MFAAward> mfaAwards = bulkMfaAwards.stream()
-					.map(bulkMfaAward -> new MFAAward(
+					.map(bulkMfaAward -> {
+						MFAGrouping mfaGrouping = bulkMfaAward.getGroupingId().isEmpty()
+							? null
+							: mfaGroupingRepository.findByMfaGroupingNumber(bulkMfaAward.getGroupingId());
+
+						return new MFAAward(
 							gaRepository.findByGrantingAuthorityName(bulkMfaAward.getPublicAuthority()),
-							mfaGroupingRepository.findByMfaGroupingNumber(bulkMfaAward.getGroupingId()),
+							mfaGrouping,
 							null,
 							bulkMfaAward.getSpeiaAward(),
 							bulkMfaAward.getMfaSpeiaGrouping(),
-							bulkMfaAward.getGroupingId(),
+							bulkMfaAward.getGroupingId().isEmpty() ? null : bulkMfaAward.getGroupingId(),
 							new BigDecimal(bulkMfaAward.getAwardFullAmount()),
 							bulkMfaAward.getConfirmationDate(),
 							LocalDate.now(),
@@ -190,8 +195,8 @@ public class AwardService {
 							LocalDateTime.now(),
 							LocalDateTime.now(),
 							null,
-							null)
-					).collect(Collectors.toList());
+							null);
+					}).collect(Collectors.toList());
 
 			List<MFAAward> savedAwards = mfaAwardRepository.saveAll(mfaAwards);
 			log.info("End process Bulk Awards db");
